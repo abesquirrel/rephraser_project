@@ -476,3 +476,42 @@ Recommendations: Consider requesting a new number or exploring alternative solut
 
 Regards,
 Paul"
+"from the get go, google wearables arent fully compatible it shouldnt have passed our validation, furthermore, roaming with such device may not be possible due to compatibility matters. 
+
+Not all roaming partners will allow weareables. theres not much we can do","Hello,
+
+Observations: From the start, Google wearables are not fully compatible with our service and should not have passed the initial validation. Additionally, roaming with this type of device may not be supported due to compatibility constraints, as not all roaming partners allow wearable devices on their networks.
+
+Actions Taken: None.
+
+Recommendations: Unfortunately, there is limited flexibility in this situation. As wearables are not fully compatible with our system, it's unlikely that we can find a solution to enable roaming. It may be best to explore alternative options or consider using devices that meet our validation criteria for better compatibility.
+
+Regards,
+Paul"
+"so the customer managed to generate the security code at 
+2025-12-28 21:49:50	security_pin_reset_code_generated
+2025-12-28 21:50:26	security_pin_reset_code_validate_failed
+
+but although she reiced the code, she had already exceeded the number of times to retry, this these specific details arent to be shared, but as of now have the customer wait until the security restriction due exeeded times is lifted and kind ask her to generete the code and try once with the code received in her phone. but ask her not to try many times as she will block herself again","Hello,
+
+Observations: From the start, Google wearables are not fully compatible with our service and should not have passed the initial validation. Additionally, roaming with this type of device may not be supported due to compatibility constraints, as not all roaming partners allow wearable devices on their networks.
+
+Actions Taken: NHello,
+
+Observations:
+The customer was able to generate and receive the security code; however, the validation attempt failed because the maximum number of retries had already been exceeded, triggering a temporary security restriction.
+
+Actions Taken:
+None.
+
+Recommendations:
+Please advise the customer to wait until the security restriction is automatically lifted. Once cleared, ask her to generate a new security code and attempt the process only once using the code received on her phone. Kindly remind her not to retry multiple times, as this may trigger the restriction again.
+
+Regards,
+Paul R
+one.
+
+Recommendations: Unfortunately, there is limited flexibility in this situation. As wearables are not fully compatible with our system, it's unlikely that we can find a solution to enable roaming. It may be best to explore alternative options or consider using devices that meet our validation criteria for better compatibility.
+
+Regards,
+Paul"
