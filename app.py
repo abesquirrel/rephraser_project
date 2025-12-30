@@ -166,22 +166,42 @@ def extract_keywords(text):
 
 def perform_web_search(query):
     """Performs a web search using DDGS and returns formatted results."""
-    logging.info(f"Performing web search for: '{query}'")
+    
+    # Keywords and forums for targeted search
+    specific_keywords = "GMS OR cellphone service OR \"US mvno\" OR telecommunications"
+    forums = "site:reddit.com OR site:howardforums.com OR site:xda-developers.com"
+    
+    # Construct the targeted query
+    targeted_query = f"({query}) AND ({specific_keywords}) ({forums})"
+    
+    logging.info(f"Performing targeted web search for: '{targeted_query}'")
+    
+    results = []
     try:
-        # UPDATED: Use the new DDGS context manager
         with DDGS() as ddgs:
-            results = [r for r in ddgs.text(query, max_results=WEB_SEARCH_RESULT_COUNT)]
-        
-        if not results:
-            logging.warning("Web search returned no results.")
-            return "No relevant information found online."
-        
-        formatted_results = "\n\n".join([f"Source: {r.get('href', 'N/A')}\nSnippet: {r.get('body', '')}" for r in results])
-        logging.info("Web search completed successfully.")
-        return formatted_results
-    except Exception as e:
-        logging.error(f"Error during web search: {e}", exc_info=True)
-        return "An error occurred during the web search."
+            results = [r for r in ddgs.text(targeted_query, max_results=WEB_SEARCH_RESULT_COUNT)]
+    except DDGSException as e:
+        logging.warning(f"Targeted search raised DDGSException: {e}. Attempting broader search.")
+        results = [] # Ensure results is empty if an exception occurred
+
+    # If targeted search yields no results (either empty or exception), broaden the search
+    if not results:
+        broader_query = f"{query} ({forums})"
+        logging.info(f"Performing broader web search for: '{broader_query}'")
+        try:
+            with DDGS() as ddgs:
+                results = [r for r in ddgs.text(broader_query, max_results=WEB_SEARCH_RESULT_COUNT)]
+        except DDGSException as e:
+            logging.warning(f"Broader search raised DDGSException: {e}.")
+            results = [] # Ensure results is empty if an exception occurred
+
+    if not results:
+        logging.warning("Web search returned no results, even after broadening.")
+        return "No relevant information found online."
+    
+    formatted_results = "\n\n".join([f"Source: {r.get('href', 'N/A')}\nSnippet: {r.get('body', '')}" for r in results])
+    logging.info("Web search completed successfully.")
+    return formatted_results
 
 # ... (build_structured_prompt and find_similar_examples are unchanged) ...
 def find_similar_examples(text):

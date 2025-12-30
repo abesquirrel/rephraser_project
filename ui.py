@@ -38,17 +38,71 @@ if 'history' not in st.session_state:
     st.session_state.history = []
 if 'thinking_log' not in st.session_state:
     st.session_state.thinking_log = []
+if 'regenerate' not in st.session_state:
+    st.session_state.regenerate = False
 # Initialize values for single entry input fields
 if 'original_text_single_input_value' not in st.session_state:
     st.session_state.original_text_single_input_value = ""
 if 'rephrased_text_single_input_value' not in st.session_state:
     st.session_state.rephrased_text_single_input_value = ""
+if 'generation_complete' not in st.session_state:
+    st.session_state.generation_complete = False
+
+# --- SCRIPT RUN START ---
+# If the last run resulted in a successful generation, clear the input text area.
+# This must be done before the widget is rendered.
+if st.session_state.generation_complete:
+    st.session_state.text_input = ""
+    st.session_state.generation_complete = False
 
 # --- HELPER FUNCTIONS (UI-specific) ---
+
+def run_generation(text_input, signature_input, enable_web_search, show_thinking):
+    """Triggers the backend to generate a response and handles the streaming display."""
+    st.session_state.thinking_log = []
+    thinking_placeholder = st.empty()
+    
+    try:
+        payload = {'text': text_input, 'signature': signature_input, 'enable_web_search': enable_web_search}
+        with requests.post(FLASK_API_URL_REPHRASE, json=payload, stream=True) as response:
+            response.raise_for_status()
+            
+            for line in response.iter_lines():
+                if line:
+                    try:
+                        event = json.loads(line.decode('utf-8'))
+                        if "status" in event:
+                            st.session_state.thinking_log.append(f"- {event['status']}")
+                            if show_thinking:
+                                thinking_placeholder.info("\n".join(st.session_state.thinking_log))
+                        elif "data" in event:
+                            final_response = event['data']
+                            st.session_state.history.insert(0, {
+                                'original': text_input,
+                                'rephrased': final_response,
+                                'approved': None
+                            })
+                            st.session_state.thinking_log = []
+                            thinking_placeholder.empty()
+                            # Set flag to clear input on next run
+                            st.session_state.generation_complete = True
+                            st.rerun()
+                        elif "error" in event:
+                            st.error(f"Backend error: {event['error']}")
+                            break
+                    except json.JSONDecodeError:
+                        st.warning("Received an invalid message from the backend.")
+                        continue
+                        
+    except requests.exceptions.RequestException as e:
+        st.error(f"Connection to backend failed. Is it running? Error: {e}")
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
 
 def handle_regenerate(original_text):
     """Callback to re-trigger the generation for a previous entry."""
     st.session_state.text_input = original_text
+    st.session_state.regenerate = True
 
 def handle_approve(original, rephrased, item_index):
     """Callback to approve a response and save it."""
@@ -122,54 +176,27 @@ with st.container(border=True):
 
         col_checkbox1, col_checkbox2 = st.columns(2)
         with col_checkbox1:
-            show_thinking = st.checkbox("Show thinking process", value=True)
+            show_thinking = st.checkbox("Show thinking process", value=True, key="show_thinking")
         with col_checkbox2:
-            enable_web_search = st.checkbox("Enable online research", value=True, help="Allow the AI to search the web for additional context.")
+            enable_web_search = st.checkbox("Enable online research", value=True, help="Allow the AI to search the web for additional context.", key="enable_web_search")
         
         submit_button = st.form_submit_button("✨ Generate Response", use_container_width=True)
 
 # --- RESPONSE LOGIC ---
 # This block needs to be outside the columns, but still before the history card
-if submit_button and text_input.strip():
-    st.session_state.thinking_log = []
-    thinking_placeholder = st.empty()
+if (submit_button or st.session_state.get('regenerate', False)) and st.session_state.text_input.strip():
+    # Reset regenerate flag
+    if st.session_state.get('regenerate', False):
+        st.session_state.regenerate = False
     
-    try:
-        payload = {'text': text_input, 'signature': signature_input, 'enable_web_search': enable_web_search}
-        with requests.post(FLASK_API_URL_REPHRASE, json=payload, stream=True) as response:
-            response.raise_for_status()
-            
-            for line in response.iter_lines():
-                if line:
-                    try:
-                        event = json.loads(line.decode('utf-8'))
-                        if "status" in event:
-                            st.session_state.thinking_log.append(f"- {event['status']}")
-                            if show_thinking:
-                                thinking_placeholder.info("\n".join(st.session_state.thinking_log))
-                        elif "data" in event:
-                            final_response = event['data']
-                            # Prepend new interaction to the top of the history
-                            st.session_state.history.insert(0, {
-                                'original': text_input,
-                                'rephrased': final_response,
-                                'approved': None # None, True, or False
-                            })
-                            st.session_state.thinking_log = []
-                            thinking_placeholder.empty()
-                            # Rerun to clear input and show the new history item
-                            st.rerun()
-                        elif "error" in event:
-                            st.error(f"Backend error: {event['error']}")
-                            break
-                    except json.JSONDecodeError:
-                        st.warning("Received an invalid message from the backend.")
-                        continue # Move to the next line
-                        
-    except requests.exceptions.RequestException as e:
-        st.error(f"Connection to backend failed. Is it running? Error: {e}")
-    except Exception as e:
-        st.error(f"An unexpected error occurred: {e}")
+    # Access checkbox and signature values from session state, which are now keyed
+    show_thinking_val = st.session_state.get('show_thinking', True)
+    enable_web_search_val = st.session_state.get('enable_web_search', True)
+    signature_val = st.session_state.get('signature_input', 'Paul')
+    text_input_val = st.session_state.text_input
+
+    run_generation(text_input_val, signature_val, enable_web_search_val, show_thinking_val)
+
 
 st.markdown("---") # Separator between sections
 
