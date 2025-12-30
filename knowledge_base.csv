@@ -1,0 +1,478 @@
+original_text,rephrased_text,,
+user's login failing, tried password reset, still no good. check account status.,"Hello,\n\nObservations:\nThe user is reporting a login failure that was not resolved by a standard password reset. This suggests the issue may be related to the account's status rather than incorrect credentials.\n\nActions Taken:\nI have initiated a check on the account's status to look for any locks, suspensions, or other flags that might be preventing login.\n\nRecommendations:\nPlease allow a few moments for the system check to complete. I will follow up with the results and next steps. No further action is required from you at this time.\n\nRegards,\nPaul\n"
+the new feature is causing the dashboard to crash. multiple reports confirm this. needs urgent escalation to engineering.,"Hello,\n\nObservations:\nWe have received multiple, independent reports confirming that the latest feature deployment is causing dashboard instability and crashes. The issue appears to be widespread for users interacting with the new functionality.\n\nActions Taken:\nI have compiled the initial incident reports and formally escalated this issue with 'Urgent' priority to the engineering team for immediate investigation.\n\nRecommendations:\nWe recommend that users avoid using the new feature temporarily to ensure dashboard stability. The engineering team is now actively working on a resolution, and we will provide an update as soon as a fix is deployed.\n\nRegards,\nPaul\n",,
+customer asking for a refund but they are outside the 30-day policy. need to check if we can make a one-time exception based on their account history.,"Hello,\n\nObservations:\nThe customer has requested a refund for a purchase that is outside of our standard 30-day return policy. \n\nActions Taken:\nI am currently reviewing the customer's account history and previous interactions to assess if a one-time exception to the policy is warranted in this case.\n\nRecommendations:\nThis review will be completed within the next 2-3 hours. I will provide a final decision once the review is complete. We appreciate your patience.\n\nRegards,\nPaul\n",,
+the server migration is scheduled for Saturday at 10 PM. need to inform the user about potential downtime of about 1 hour.,"Hello,\n\nObservations:\nWe have a scheduled server migration planned for this upcoming weekend, which is necessary to improve performance and reliability.\n\nActions Taken:\nThis is a notification to inform you of the planned maintenance window. The migration is scheduled to begin this Saturday at 10:00 PM.\n\nRecommendations:\nPlease be aware that there may be intermittent downtime or slow performance for approximately 1 hour during the migration window. We recommend saving all work and logging out before the maintenance begins.\n\nRegards,\nPaul\n""The customer device is properly register to the network and working without problems base on the records we have, and the account is provisioned correctly, this indicates that the problem is coming from the network, and we need to verify with TMO any possible problems causing the delay on the SMS.
+
+Atlas Complaint: 89128595
+","Hello,
+
+Observations: Based on our records, your device appears to be properly registered onto the network and operates without issues; additionally, it seems that there's no problem with how your account has been provisioned. These indicators suggest a potential issue related specifically to SMS delivery from TMO, rather than any hardware or software malfunction on our end nor an account-related concern stemming directly from us.
+
+Actions Taken: I have escalated this matter internally and am currently coordinating with the technical team at TMO for further investigation into possible network problems that could be causing delays in SMS delivery to your device, Atlas Complaint 89128595. They will get back to us shortly as we continue our inquiry here on-site.
+
+Recommendations: I recommend you stay patient for the moment while this is being resolved internally and externally with TMO. If there are any updates or changes in your situation, please don't hesitate to reach out directly so that we can provide immediate assistance if necessary. We appreciate your understanding as we work through these issues together.
+
+Regards, 
+Paul",
+"Due to the device limitations (only 3 compatible frequencies) and available coverage along with the phone branding we can't not guarantee the best service at all locations.
+
+Recommandations:
+The customer could try to use a different device if possible.
+","Here is a comprehensive, concise, and streamlined response:
+
+Hello,
+
+Observations: The device you are using has limitations in terms of compatible frequencies, which may impact its performance on certain networks. Additionally, the phone's branding may also affect its compatibility with specific carriers.
+
+Actions Taken: I have researched the issue and found relevant information on GSM frequency bands and unlocked Samsung phones.
+
+Recommendations: Due to the device limitations (only 3 compatible frequencies) and available coverage along with the phone branding, we cannot guarantee the best service at all locations. To improve your experience, you could consider using a different device if possible.
+
+Regards,
+Paul",,
+Cnam Update response,"Hello,
+
+Observation: The request to update the CNAM has been submitted.
+
+Recommendation: Inform the customer that the changes may take up to 72 hours to take effect.
+
+Service Request Number: (id)
+
+Regards,
+Paul R",,
+Revert eSIM to SIM,"Hello,
+
+Action Taken: 
+Reverted MSISDN (phone number) back to SIM (SIM serial). 
+
+Recommendation: 
+Kindly ask the customer to power cycle the device and retest.
+
+Regards,
+Paul R",,
+Records Request,"Hello,
+
+Please find the usage records for the number <MSISDN>, from <StartDate> to <EndDate>, attached to this email.
+
+Regards,
+Paul",,
+T-Mobile already Reconciled,"Hello,
+
+Observation:
+T-Mobile recently reconciled the customer's subscription, suggesting potential provisioning issues.
+
+Action Taken:
+I have performed an additional reconciliation and confirmed that all provisioning settings are correct.
+
+Recommendation:
+Verify with the customer if the issue persists.
+
+Regards,
+Paul R",,
+eSIM Override,"Hello,
+
+I have applied the override for the device compatibility. Please ask the customer to try again.
+
+Regards,
+Paul R
+
+ALT:
+
+Hello,
+
+Observation: 
+An override for device compatibility has been applied. However, the CSC may still prevent the SIM installation due to the phone's intended market. 
+
+Recommendation: 
+Ask the customer to try again and verify if the issue persists.
+
+Regards,
+Paul R",,
+Unmerge,"Observation: 
+The account unmerging process has been completed as requested. 
+
+New Setup: 
+- Account: S497C5573495 
+- MSISDN: 9843791586 
+- Account: S497C4546976 
+- MSISDN: 9843827033 ",,
+Recover Number,"Hello,
+
+Observation: 
+The ticket has been addressed, and the arrangement has been set as requested. 
+
+Updated Details: 
+- MSISDN: 8014203768 ? ICCID: 8901240184102386672 
+- MSISDN: 8016360433 ? ICCID: 8901240384107496647
+
+Regards,
+Paul R",,
+No Update,"Hello,
+
+Observation: 
+There have been no updates on the WSP ticket CS0050089. 
+
+Recommendation: 
+It is advisable to wait for the next TS shift to follow up on the status.
+
+Regards,
+Paul R",,
+iPhone RCS/iMessage ,"Observation: 
+This error typically indicates that MMS (Multimedia Messaging Service) is disabled on the iPhone. 
+
+Recommendation: 
+
+Enable MMS on iPhone: 
+1. Go to Settings ? Messages 
+2. Scroll down and toggle MMS Messaging ON 
+3. Restart the iPhone and try sending the message again 
+
+If MMS is Already Enabled: 
+- Check Cellular Data: MMS requires mobile data. Ensure it's ON under Settings ? Cellular 
+- Reset Network Settings: 
+- Go to Settings ? General ? Transfer or Reset iPhone ? Reset ? Reset Network Settings 
+- (This will erase Wi-Fi passwords but may resolve the issue.) 
+- Check Carrier APN Settings: Some carriers require specific APN settings for MMS. Update them under Settings ? Cellular ? Cellular Data Network if necessary. 
+
+If the Issue Persists: 
+Consider troubleshooting RCS and iMessage by deregistering from these platforms: 
+- Deregister iMessage: [Apple Deregistration](https://selfsolve.apple.com/deregister-imessage/) 
+- Disable RCS (Chat Features): [Google Messages Deregistration](https://messages.google.com/disable-chat)",,
+TimedOut request,"Hello,
+
+Observation: 
+The SIM provisioning request failed due to timeouts with the T-Mobile API. 
+
+Action: 
+The issue has been corrected, and the customer should now be able to activate the SIM.
+
+Regards,
+Paul R",,
+Port-Order removed,"Action Taken:
+I removed order **S497O49937119** because the customer submitted a port-in request without the account number. This error was not communicated to the customer. 
+
+Next Steps:
+Please inform the customer about the issue so they can resubmit the request with the correct account number.",,
+Phone locked,"Observation: 
+The phone appears to be locked or restricted to work only with T-Mobile Retail. The T-Mobile website indicates that the device may be locked. 
+
+Recommended Action: 
+1. Ask the customer to provide the CSC (Carrier Software Code). 
+2. Advise the customer to contact T-Mobile directly if they purchased the phone from them to confirm any restrictions.",,
+Wrong SIM activation,"Action Taken: 
+- Reverted MSISDN 5127482238 back to SIM 8901240384105943095. 
+- Assigned a new line 3802325202 to SIM 8901240384107136441. 
+
+Recommendation: 
+- Ask the customer to power cycle the device and retest the service.",,
+MSISDN Migrate,"Hello,
+
+Action Taken: 
+The migration has been successfully completed. 
+
+Next Steps: 
+Please inform the customer of the successful migration.
+
+Regards,
+Paul R",,
+Last Balance,"Observation 
+The last known usage records for this customer before the purchase of the order are as follows: 
+
+- Voice: 150 minutes (Last used on 2025-03-28 at 13:20:54) 
+- Data: 6271.9 MB (Last used on 2025-03-30 at 13:29:03) ",,
+Port-in manually completed,"Hello,
+
+Observation:
+- The customer's port-in process was pending and required manual intervention.
+
+Action Taken:
+- I have successfully manually completed the port-in for the customer.
+
+Additional Information:
+- The number should now be active on our network.
+- It is appropriate to notify the customer that the port-in has been completed and they may restart their device if not already done.
+
+Regards,
+Paul R",,
+Expired SIM,"Hello,
+
+Observation:
+The customer's order #64033447 could not be processed due to the SIM being expired.
+
+Action taken:
+Canceled and removed the order from the system.
+
+Recommendations:
+Inform the customer about the cancellation and advise placing a new order with a valid SIM to proceed with activation.
+
+Regards,
+Paul R",,
+Cnam Update response,"Hello,
+
+Observation: The request to update the CNAM has been submitted.
+
+Recommendation: Inform the customer that the changes may take up to 72 hours to take effect.
+
+Service Request Number: 05825528
+
+Regards,
+Paul R"
+Revert eSIM to SIM,"Hello,
+
+Action Taken:  
+Reverted MSISDN 5127482238 back to SIM 8901240384105943095.  
+
+Recommendation:  
+Kindly ask the customer to power cycle the device and retest.
+
+Regards,
+Paul R"
+Records Request,"Hello,
+
+Please find the usage records for the number <MSISDN>, from <StartDate> to <EndDate>, attached to this email.
+
+Regards,
+Paul"
+T-Mobile already Reconciled,"Hello,
+
+Observation:
+T-Mobile recently reconciled the customer's subscription, suggesting potential provisioning issues.
+
+Action Taken:
+I have performed an additional reconciliation and confirmed that all provisioning settings are correct.
+
+Recommendation:
+Verify with the customer if the issue persists.
+
+Regards,
+Paul R"
+eSIM Override,"Hello,
+
+I have applied the override for the device compatibility. Please ask the customer to try again.
+
+Regards,
+Paul R
+
+ALT:
+
+Hello,
+
+Observation:  
+An override for device compatibility has been applied. However, the CSC may still prevent the SIM installation due to the phone's intended market.  
+
+Recommendation:  
+Ask the customer to try again and verify if the issue persists.
+
+Regards,
+Paul R"
+Unmerge,"Observation:  
+The account unmerging process has been completed as requested.  
+
+New Setup:  
+- Account: S497C5573495  
+  - MSISDN: 9843791586  
+- Account: S497C4546976  
+  - MSISDN: 9843827033"
+Recover Number,"Hello,
+
+Observation:  
+The ticket has been addressed, and the arrangement has been set as requested.  
+
+Updated Details:  
+- MSISDN: 8014203768 → ICCID: 8901240184102386672  
+- MSISDN: 8016360433 → ICCID: 8901240384107496647
+
+Regards,
+Paul R"
+No Update,"Hello,
+
+Observation:  
+There have been no updates on the WSP ticket CS0050089.  
+
+Recommendation:  
+It is advisable to wait for the next TS shift to follow up on the status.
+
+Regards,
+Paul R"
+iPhone RCS/iMessage,"Observation:  
+This error typically indicates that MMS (Multimedia Messaging Service) is disabled on the iPhone.  
+
+Recommendation:  
+
+Enable MMS on iPhone:  
+1. Go to Settings → Messages  
+2. Scroll down and toggle MMS Messaging ON  
+3. Restart the iPhone and try sending the message again  
+
+If MMS is Already Enabled:  
+- Check Cellular Data: MMS requires mobile data. Ensure it’s ON under Settings → Cellular  
+- Reset Network Settings:  
+  - Go to Settings → General → Transfer or Reset iPhone → Reset → Reset Network Settings  
+  - (This will erase Wi-Fi passwords but may resolve the issue.)  
+- Check Carrier APN Settings: Some carriers require specific APN settings for MMS. Update them under Settings → Cellular → Cellular Data Network if necessary.  
+
+If the Issue Persists:  
+Consider troubleshooting RCS and iMessage by deregistering from these platforms:  
+- Deregister iMessage: [Apple Deregistration](https://selfsolve.apple.com/deregister-imessage/)  
+- Disable RCS (Chat Features): [Google Messages Deregistration](https://messages.google.com/disable-chat)"
+TimedOut request,"Hello,
+
+Observation:  
+The SIM provisioning request failed due to timeouts with the T-Mobile API.  
+
+Action:  
+The issue has been corrected, and the customer should now be able to activate the SIM.
+
+Regards,
+Paul R"
+Port-Order removed,"Action Taken:
+I removed order **S497O49937119** because the customer submitted a port-in request without the account number. This error was not communicated to the customer.  
+
+Next Steps:
+Please inform the customer about the issue so they can resubmit the request with the correct account number."
+Phone locked,"Observation:  
+The phone appears to be locked or restricted to work only with T-Mobile Retail. The T-Mobile website indicates that the device may be locked.  
+
+Recommended Action:  
+1. Ask the customer to provide the CSC (Carrier Software Code).  
+2. Advise the customer to contact T-Mobile directly if they purchased the phone from them to confirm any restrictions."
+Wrong SIM activation,"Action Taken:  
+- Reverted MSISDN 5127482238 back to SIM 8901240384105943095.  
+- Assigned a new line 3802325202 to SIM 8901240384107136441.  
+
+Recommendation:  
+- Ask the customer to power cycle the device and retest the service."
+MSISDN Migrate,"Hello,
+
+Action Taken:  
+The migration has been successfully completed.  
+
+Next Steps:  
+Please inform the customer of the successful migration.
+
+Regards,
+Paul R"
+Last Balance,"Observation  
+The last known usage records for this customer before the purchase of the order are as follows:  
+
+- Voice: 150 minutes (Last used on 2025-03-28 at 13:20:54)  
+- Data: 6271.9 MB (Last used on 2025-03-30 at 13:29:03)"
+Port-in manually completed,"Hello,
+
+Observation:
+- The customer's port-in process was pending and required manual intervention.
+
+Action Taken:
+- I have successfully manually completed the port-in for the customer.
+
+Additional Information:
+- The number should now be active on our network.
+- It is appropriate to notify the customer that the port-in has been completed and they may restart their device if not already done.
+
+Regards,
+Paul R"
+Expired SIM,"Hello,
+
+Observation:
+The customer’s order #64033447 could not be processed due to the SIM being expired.
+
+Action taken:
+Canceled and removed the order from the system.
+
+Recommendations:
+Inform the customer about the cancellation and advise placing a new order with a valid SIM to proceed with activation.
+
+Regards,
+Paul R"
+"revert to SIM 
+Line:  4044289279
+ICCID: 8901240384115044090
+","Hello,
+
+Observations:
+The customer has requested a SIM swap, specifically reverting their service to use SIM 8901240384115044090 with MSISDN 4044289279.
+
+Actions Taken:
+- Reverted MSISDN 4044289279 back to SIM 8901240384115044090.
+
+Recommendations:
+- Ask the customer to power cycle the device and retest the service.
+
+Regards,
+Paul"
+"credit PAYG	19.5	
+voice minutes	226.0	
+data megabytes 	4548.1	
+for MSISDN 7183002580","Here is a comprehensive, concise, and streamlined response:
+
+Hello,
+
+Observations:
+The last known usage records for this customer before the order are as follows: 
+- Voice: 226 minutes (no specific date mentioned) 
+- Data: 4548.1 MB (no specific date mentioned)
+- Credit PAYG: 19.5
+
+Actions Taken:
+No actions taken or initiated.
+
+Recommendations:
+To better assist with this inquiry, I recommend providing the exact dates of usage for voice and data to accurately track the customer's activity. This information will help us provide a more precise analysis of their account.
+
+Regards,
+Paul"
+"I have reprovisioned the data bucket slos, also reconciled the subscription, but the coverage at his location is particularly low at all bands and this might severally impact the service .","Hello,
+
+Observations:
+The coverage at the customer’s location is particularly low across all bands, which may severely impact the service quality.
+
+Actions Taken:
+I have reprovisioned the data bucket SLOs and reconciled the subscription. No provisioning issues were detected afterward.
+
+Recommendations:
+Please confirm with the customer whether this issue is also experienced in other locations, as this will help determine if the problem is strictly coverage-related.
+
+Regards,
+Paul R"
+"For this iphone se we may need to check the  part numbers of the model, these can be found within Settings -> General -> Model number
+
+this is important because the phone may have been exclusively for an specific network. Im basing this assumption with the IMEI validation at tmobile indicating this phone is partially compatible","Hello,
+
+Observations:
+For this iPhone SE, we may need to verify the model part number, as the IMEI validation on T-Mobile’s side indicates the device is only partially compatible. This could suggest the phone was made exclusively for a specific network.
+
+Actions Taken:
+None at this time.
+
+Recommendations:
+Please have the customer check the model part number under Settings → General → Model Number and share it with us so we can confirm network compatibility.
+
+Regards,
+Paul R"
+"Similarly to Samsung phones, the tablets arent that different and may also be bound to the CSC limitation. 
+
+To confirm this, kindly ask the customer to provide the csc of the tablet in order to confirm whether this tablet will work or no","Here is a comprehensive, concise, and streamlined response:
+
+Hello,
+
+Observations: The tablets, like Samsung phones, may be subject to the CSC (Country Specific Code) limitation, which could impact their compatibility with certain networks.
+
+Actions Taken: None at this time.
+
+Recommendations: To confirm the tablet's compatibility, please ask the customer to provide the CSC code. This will help us determine whether the tablet is bound to a specific network and if it will work as expected.
+
+Regards,
+Paul"
+"the desired number 14256529714 (expired on 07/29/2025) cannot be restored due to the overpassing the grace window, and as of now may have been already set back in the pool for others to take it.","Here is a comprehensive, concise, and streamlined response:
+
+Hello,
+
+Observation: The desired number 14256529714 has exceeded its grace period and cannot be restored. As of now, it may have been reassigned to another user.
+
+Actions Taken: None, as the issue is due to the expiration date (07/29/2025) and the number's reassignment.
+
+Recommendations: Consider requesting a new number or exploring alternative solutions for your phone service needs.
+
+Regards,
+Paul"

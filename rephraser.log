@@ -1,0 +1,419 @@
+2025-12-23 12:55:45,028 - INFO - Loading resources...
+2025-12-23 12:55:45,051 - INFO - Use pytorch device_name: mps
+2025-12-23 12:55:45,051 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-23 12:55:47,866 - INFO - Resources loaded successfully.
+2025-12-23 12:55:47,874 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.0.5.25:5001
+2025-12-23 12:55:47,874 - INFO - [33mPress CTRL+C to quit[0m
+2025-12-23 14:51:44,809 - INFO - Loading resources...
+2025-12-23 14:51:44,834 - INFO - Use pytorch device_name: mps
+2025-12-23 14:51:44,834 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-23 14:51:47,586 - INFO - Resources loaded successfully.
+2025-12-23 14:51:47,603 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.0.5.25:5001
+2025-12-23 14:51:47,603 - INFO - [33mPress CTRL+C to quit[0m
+2025-12-23 14:57:38,775 - INFO - Received rephrase request for text: 'The ticket has return with the following and they ...'
+2025-12-23 15:00:07,444 - INFO - Successfully rephrased text.
+2025-12-23 15:00:07,487 - INFO - 127.0.0.1 - - [23/Dec/2025 15:00:07] "POST /rephrase HTTP/1.1" 200 -
+2025-12-23 15:00:31,953 - INFO - Loading resources...
+2025-12-23 15:00:31,983 - INFO - Use pytorch device_name: mps
+2025-12-23 15:00:31,983 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-23 15:00:36,172 - INFO - Resources loaded successfully.
+2025-12-23 15:00:36,307 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.0.5.25:5001
+2025-12-23 15:00:36,308 - INFO - [33mPress CTRL+C to quit[0m
+2025-12-23 15:00:42,252 - INFO - Received rephrase request for text: 'for more details? is the issue happening on both d...'
+2025-12-23 15:02:08,390 - INFO - Successfully rephrased text.
+2025-12-23 15:02:08,752 - INFO - 127.0.0.1 - - [23/Dec/2025 15:02:08] "POST /rephrase HTTP/1.1" 200 -
+2025-12-23 15:10:14,100 - INFO - Received rephrase request for text: 'the previous sim was recovered on the line...'
+2025-12-23 15:11:04,803 - INFO - Successfully rephrased text.
+2025-12-23 15:11:04,807 - INFO - 127.0.0.1 - - [23/Dec/2025 15:11:04] "POST /rephrase HTTP/1.1" 200 -
+2025-12-23 15:34:08,906 - INFO - Received rephrase request for text: 'i've performed a reset of the Wifi calling feature...'
+2025-12-23 15:34:43,700 - INFO - Successfully rephrased text.
+2025-12-23 15:34:43,739 - INFO - 127.0.0.1 - - [23/Dec/2025 15:34:43] "POST /rephrase HTTP/1.1" 200 -
+2025-12-23 15:46:07,648 - INFO - Received rephrase request for text: 'The port-in issue has been escalated to T-Mobile, ...'
+2025-12-23 15:46:35,604 - INFO - Successfully rephrased text.
+2025-12-23 15:46:35,612 - INFO - 127.0.0.1 - - [23/Dec/2025 15:46:35] "POST /rephrase HTTP/1.1" 200 -
+2025-12-23 15:58:59,648 - INFO - Loading resources...
+2025-12-23 15:58:59,674 - INFO - Use pytorch device_name: mps
+2025-12-23 15:58:59,674 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-23 15:59:02,638 - INFO - Resources loaded successfully.
+2025-12-23 15:59:02,646 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.0.5.25:5001
+2025-12-23 15:59:02,646 - INFO - [33mPress CTRL+C to quit[0m
+2025-12-23 15:59:28,110 - INFO - Received elaboration request for: 'The customer device is properly register to the network and working wi...'
+
+2025-12-23 15:59:28,110 - INFO - Asking LLM to decide on web search...
+2025-12-23 16:00:00,242 - INFO - LLM search decision: 'No web search required as context suggests a known issue related to account provisioning or potential network issues that are already being investigated by Atlas, and no new information is needed from external sources at this point. The focus should be on verifying the status with TMO (Technical Management Office).'
+2025-12-23 16:00:00,247 - INFO - Skipping web search based on LLM decision.
+2025-12-23 16:02:05,002 - INFO - Successfully generated structured response.
+2025-12-23 16:02:05,254 - INFO - 127.0.0.1 - - [23/Dec/2025 16:02:05] "POST /rephrase HTTP/1.1" 200 -
+2025-12-23 16:07:37,652 - INFO - Approved example saved.
+2025-12-23 16:07:37,653 - INFO - 127.0.0.1 - - [23/Dec/2025 16:07:37] "POST /approve HTTP/1.1" 200 -
+2025-12-23 16:31:17,275 - INFO - Received elaboration request for: 'Our customer keeps receiving his text messages like 10/15 minutes late...'
+
+2025-12-23 16:31:17,276 - INFO - Asking LLM to decide on web search...
+2025-12-23 16:31:52,025 - INFO - LLM search decision: 'Yes. The notes suggest there is an ongoing problem with text message delivery timing which has been unresolved despite previous attempts (escalation and resets), indicating potential issues beyond basic troubleshooting steps that may require additional context or information to understand the root cause, possibly involving technical support details from Atlas platform's customer service.'
+2025-12-23 16:31:52,035 - INFO - Performing web search for: 'Our customer keeps receiving his text messages like 10/15 minutes late, the resets did not work and did not improve the issue at all
+Exaplin to him that we have escalated the issue, opening a ticket in Atlas platform
+'
+2025-12-23 16:31:53,473 - INFO - response: https://www.bing.com/search?q=Our+customer+keeps+receiving+his+text+messages+like+10%2F15+minutes+late%2C+the+resets+did+not+work+and+did+not+improve+the+issue+at+all%0AExaplin+to+him+that+we+have+escalated+the+issue%2C+opening+a+ticket+in+Atlas+platform%0A 200
+2025-12-23 16:31:53,934 - WARNING - Web search returned no results.
+2025-12-23 16:33:46,010 - INFO - Successfully generated structured response.
+2025-12-23 16:33:46,048 - INFO - 127.0.0.1 - - [23/Dec/2025 16:33:46] "POST /rephrase HTTP/1.1" 200 -
+2025-12-23 16:43:33,433 - INFO - Loading resources...
+2025-12-23 16:43:33,461 - INFO - Use pytorch device_name: mps
+2025-12-23 16:43:33,462 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-23 16:43:36,059 - INFO - Resources loaded successfully.
+2025-12-23 16:43:36,069 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.0.5.25:5001
+2025-12-23 16:43:36,069 - INFO - [33mPress CTRL+C to quit[0m
+2025-12-23 16:44:14,244 - INFO - 127.0.0.1 - - [23/Dec/2025 16:44:14] "POST /rephrase HTTP/1.1" 200 -
+2025-12-23 16:44:14,244 - INFO - Asking LLM to extract keywords...
+2025-12-23 16:44:38,519 - INFO - Extracted keywords for web search: '"T-Mobile replacement of a specific phone number to another within the same network, syncing process details."'
+2025-12-23 16:44:38,525 - INFO - Performing web search for: '"T-Mobile replacement of a specific phone number to another within the same network, syncing process details."'
+2025-12-23 16:44:39,960 - INFO - response: https://www.bing.com/search?q=%22T-Mobile+replacement+of+a+specific+phone+number+to+another+within+the+same+network%2C+syncing+process+details.%22 200
+2025-12-23 17:10:55,786 - INFO - Loading resources...
+2025-12-23 17:10:55,803 - INFO - Use pytorch device_name: mps
+2025-12-23 17:10:55,803 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-23 17:10:58,568 - INFO - Resources loaded successfully.
+2025-12-23 17:10:58,579 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.0.5.25:5001
+2025-12-23 17:10:58,579 - INFO - [33mPress CTRL+C to quit[0m
+2025-12-23 17:11:40,839 - INFO - 127.0.0.1 - - [23/Dec/2025 17:11:40] "POST /rephrase HTTP/1.1" 200 -
+2025-12-23 17:11:40,839 - INFO - Asking LLM to extract keywords for web search...
+2025-12-23 17:11:47,441 - INFO - Extracted keywords: '"T-Mobile" "phone number replacement" "syncing with platform"'
+2025-12-23 17:11:47,442 - INFO - Performing web search for: '"T-Mobile" "phone number replacement" "syncing with platform"'
+2025-12-23 17:11:48,868 - INFO - response: https://www.bing.com/search?q=%22T-Mobile%22+%22phone+number+replacement%22+%22syncing+with+platform%22 200
+2025-12-23 17:11:49,267 - WARNING - Web search returned no results.
+2025-12-23 17:14:29,651 - INFO - 127.0.0.1 - - [23/Dec/2025 17:14:29] "POST /rephrase HTTP/1.1" 200 -
+2025-12-23 17:14:29,652 - INFO - Asking LLM to extract keywords for web search...
+2025-12-23 17:14:32,302 - INFO - Extracted keywords: '"caller name update ticket ID 09942463"'
+2025-12-23 17:14:32,302 - INFO - Performing web search for: '"caller name update ticket ID 09942463"'
+2025-12-23 17:14:33,571 - INFO - response: https://www.bing.com/search?q=%22caller+name+update+ticket+ID+09942463%22 200
+2025-12-23 17:14:33,902 - WARNING - Web search returned no results.
+2025-12-24 09:59:25,551 - INFO - [APP] - Loading resources...
+2025-12-24 09:59:25,567 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 09:59:25,567 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 09:59:28,466 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 10:22:21,414 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-24 10:22:27,164 - INFO - [APP] - Extracted and sanitized keywords: 'incoming calls data coverage'
+2025-12-24 10:22:27,166 - INFO - [APP] - Performing web search for: 'incoming calls data coverage'
+2025-12-24 10:22:28,210 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=incoming%20calls%20data%20coverage 200
+2025-12-24 10:22:28,380 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=incoming+calls+data+coverage&limit=1 200
+2025-12-24 10:22:29,673 - INFO - [APP] - response: https://www.mojeek.com/search?q=incoming+calls+data+coverage 200
+2025-12-24 10:22:29,726 - INFO - [APP] - Web search completed successfully.
+2025-12-24 10:37:42,221 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-24 10:37:48,332 - INFO - [APP] - Extracted and sanitized keywords: 'esim dubai abroad'
+2025-12-24 10:37:48,333 - INFO - [APP] - Performing web search for: 'esim dubai abroad'
+2025-12-24 10:37:48,725 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=esim%20dubai%20abroad 200
+2025-12-24 10:37:48,921 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=esim+dubai+abroad&limit=1 200
+2025-12-24 10:37:50,235 - INFO - [APP] - response: https://www.mojeek.com/search?q=esim+dubai+abroad 200
+2025-12-24 10:37:50,294 - INFO - [APP] - Web search completed successfully.
+2025-12-24 13:29:51,843 - INFO - [APP] - Loading resources...
+2025-12-24 13:29:51,862 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 13:29:51,862 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 13:29:54,734 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 13:32:53,763 - INFO - [APP] - Loading resources...
+2025-12-24 13:32:53,785 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 13:32:53,785 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 13:32:56,635 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 13:35:00,501 - INFO - [APP] - Loading resources...
+2025-12-24 13:35:00,503 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 13:35:00,503 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 13:35:03,376 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 13:37:22,490 - INFO - [APP] - Loading resources...
+2025-12-24 13:37:22,503 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 13:37:22,503 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 13:37:25,512 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 13:39:19,445 - INFO - [APP] - Loading resources...
+2025-12-24 13:39:19,457 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 13:39:19,458 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 13:39:22,029 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 13:39:37,227 - INFO - [APP] - Loading resources...
+2025-12-24 13:39:37,239 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 13:39:37,239 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 13:39:39,782 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 13:52:13,527 - INFO - [APP] - Loading resources...
+2025-12-24 13:52:13,540 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 13:52:13,540 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 13:52:16,476 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 13:55:45,900 - INFO - [APP] - Loading resources...
+2025-12-24 13:55:45,911 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 13:55:45,911 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 13:55:48,473 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 14:00:05,501 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-24 14:00:11,473 - INFO - [APP] - Extracted and sanitized keywords: 'psim sim card'
+2025-12-24 14:00:11,476 - INFO - [APP] - Performing web search for: 'psim sim card'
+2025-12-24 14:00:12,091 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=psim%20sim%20card 200
+2025-12-24 14:00:12,291 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=psim+sim+card&limit=1 200
+2025-12-24 14:00:13,075 - INFO - [APP] - response: https://yandex.com/search/site/?text=psim+sim+card&web=1&searchid=3331281 200
+2025-12-24 14:00:13,085 - INFO - [APP] - Web search completed successfully.
+2025-12-24 14:05:16,556 - INFO - [APP] - Loading resources...
+2025-12-24 14:05:16,619 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 14:05:16,619 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 14:05:19,474 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 14:06:00,503 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-24 14:06:06,620 - INFO - [APP] - Extracted and sanitized keywords: 'MSISDN pSIM reboot phone'
+2025-12-24 14:06:06,622 - INFO - [APP] - Performing web search for: 'MSISDN pSIM reboot phone'
+2025-12-24 14:06:07,176 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=MSISDN%20pSIM%20reboot%20phone 200
+2025-12-24 14:06:07,302 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=MSISDN+pSIM+reboot+phone&limit=1 200
+2025-12-24 14:06:07,820 - INFO - [APP] - response: https://consent.google.com/ml?continue=https://www.google.com/search%3Fq%3DMSISDN%2BpSIM%2Breboot%2Bphone%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&gl=RO&m=1&pc=srp&uxe=none&cm=2&hl=en&src=1 200
+2025-12-24 14:06:08,570 - INFO - [APP] - response: https://yandex.com/search/site/?text=MSISDN+pSIM+reboot+phone&web=1&searchid=8395364 200
+2025-12-24 14:06:08,581 - INFO - [APP] - Web search completed successfully.
+2025-12-24 14:10:49,793 - INFO - [APP] - Loading resources...
+2025-12-24 14:10:49,822 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 14:10:49,822 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 14:10:52,749 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 14:11:40,883 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-24 14:11:47,096 - INFO - [APP] - Extracted and sanitized keywords: 'MSISDN pSIM powercycle phone'
+2025-12-24 14:11:47,097 - INFO - [APP] - Performing web search for: 'MSISDN pSIM powercycle phone'
+2025-12-24 14:11:47,677 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=MSISDN%20pSIM%20powercycle%20phone 200
+2025-12-24 14:11:47,876 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=MSISDN+pSIM+powercycle+phone&limit=1 200
+2025-12-24 14:11:48,751 - INFO - [APP] - response: https://yandex.com/search/site/?text=MSISDN+pSIM+powercycle+phone&web=1&searchid=3763258 200
+2025-12-24 14:11:48,763 - INFO - [APP] - Web search completed successfully.
+2025-12-24 14:17:35,800 - INFO - [APP] - Loading resources...
+2025-12-24 14:17:35,805 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 14:17:35,805 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 14:17:38,342 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 14:17:46,175 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-24 14:17:52,417 - INFO - [APP] - Extracted and sanitized keywords: 'MSISDN pSIM powercycle phone'
+2025-12-24 14:17:52,418 - INFO - [APP] - Performing web search for: 'MSISDN pSIM powercycle phone'
+2025-12-24 14:17:52,690 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=MSISDN%20pSIM%20powercycle%20phone 200
+2025-12-24 14:17:52,963 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=MSISDN+pSIM+powercycle+phone&limit=1 200
+2025-12-24 14:17:53,852 - INFO - [APP] - HTTP Request: POST https://html.duckduckgo.com/html/ "HTTP/2 200 OK"
+2025-12-24 14:17:53,861 - INFO - [APP] - Web search completed successfully.
+2025-12-24 14:18:58,918 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-24 14:19:00,380 - INFO - [APP] - Extracted and sanitized keywords: 'MSISDN pSIM powercycle phone'
+2025-12-24 14:19:00,380 - INFO - [APP] - Performing web search for: 'MSISDN pSIM powercycle phone'
+2025-12-24 14:19:00,578 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=MSISDN%20pSIM%20powercycle%20phone 200
+2025-12-24 14:19:01,225 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=MSISDN+pSIM+powercycle+phone&limit=1 200
+2025-12-24 14:19:01,943 - INFO - [APP] - response: https://yandex.com/search/site/?text=MSISDN+pSIM+powercycle+phone&web=1&searchid=2545994 200
+2025-12-24 14:19:01,952 - INFO - [APP] - Web search completed successfully.
+2025-12-24 14:34:14,518 - INFO - [APP] - Loading resources...
+2025-12-24 14:34:14,552 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-24 14:34:14,552 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-24 14:34:17,199 - INFO - [APP] - Resources loaded successfully.
+2025-12-24 14:37:20,097 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-24 14:37:26,069 - INFO - [APP] - Extracted and sanitized keywords: 'device limitations compatible frequencies phone branding'
+2025-12-24 14:37:26,070 - INFO - [APP] - Performing web search for: 'device limitations compatible frequencies phone branding'
+2025-12-24 14:37:26,714 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=device%20limitations%20compatible%20frequencies%20phone%20branding 200
+2025-12-24 14:37:26,857 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=device+limitations+compatible+frequencies+phone+branding&limit=1 200
+2025-12-24 14:37:28,261 - INFO - [APP] - response: https://www.mojeek.com/search?q=device+limitations+compatible+frequencies+phone+branding 200
+2025-12-24 14:37:28,315 - INFO - [APP] - Web search completed successfully.
+2025-12-24 14:39:10,541 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-24 14:39:12,122 - INFO - [APP] - Extracted and sanitized keywords: 'device limitations compatible frequencies phone branding'
+2025-12-24 14:39:12,122 - INFO - [APP] - Performing web search for: 'device limitations compatible frequencies phone branding'
+2025-12-24 14:39:12,351 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=device%20limitations%20compatible%20frequencies%20phone%20branding 200
+2025-12-24 14:39:12,673 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=device+limitations+compatible+frequencies+phone+branding&limit=1 200
+2025-12-24 14:39:13,519 - INFO - [APP] - response: https://consent.google.com/ml?continue=https://www.google.com/search%3Fq%3Ddevice%2Blimitations%2Bcompatible%2Bfrequencies%2Bphone%2Bbranding%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&gl=RO&m=1&pc=srp&uxe=none&cm=2&hl=en&src=1 200
+2025-12-24 14:39:14,287 - INFO - [APP] - response: https://yandex.com/search/site/?text=device+limitations+compatible+frequencies+phone+branding&web=1&searchid=8739923 200
+2025-12-24 14:39:14,301 - INFO - [APP] - Web search completed successfully.
+2025-12-24 14:39:36,921 - INFO - [APP] - Approved example saved.
+2025-12-25 13:37:14,844 - INFO - [APP] - Loading resources...
+2025-12-25 13:37:14,860 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-25 13:37:14,860 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-25 13:37:17,473 - INFO - [APP] - Resources loaded successfully.
+2025-12-29 11:16:30,248 - INFO - [APP] - Loading resources...
+2025-12-29 11:16:30,268 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-29 11:16:30,268 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-29 11:16:33,640 - INFO - [APP] - Resources loaded successfully.
+2025-12-30 10:59:12,903 - INFO - [APP] - Loading resources...
+2025-12-30 10:59:12,921 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 10:59:12,921 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 10:59:15,984 - INFO - [APP] - Resources loaded successfully.
+2025-12-30 11:33:18,104 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-30 11:33:27,487 - INFO - [APP] - Extracted and sanitized keywords: 'iccid 8901240384102411419 line 16073520125'
+2025-12-30 11:33:27,490 - INFO - [APP] - Performing web search for: 'iccid 8901240384102411419 line 16073520125'
+2025-12-30 11:33:28,343 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=iccid%208901240384102411419%20line%2016073520125 200
+2025-12-30 11:33:28,366 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=iccid+8901240384102411419+line+16073520125&limit=1 200
+2025-12-30 11:33:29,678 - INFO - [APP] - response: https://www.mojeek.com/search?q=iccid+8901240384102411419+line+16073520125 200
+2025-12-30 11:33:31,000 - INFO - [APP] - response: https://consent.yahoo.com/v2/collectConsent?sessionId=3_cc-session_ad60036f-7294-4364-8be8-c692d0f98b6c 200
+2025-12-30 11:33:31,978 - INFO - [APP] - response: https://search.brave.com/search?q=iccid+8901240384102411419+line+16073520125&source=web 200
+2025-12-30 11:33:31,994 - INFO - [APP] - Web search completed successfully.
+2025-12-30 11:34:09,901 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-30 11:34:11,369 - INFO - [APP] - Extracted and sanitized keywords: 'esim revert sim iccid'
+2025-12-30 11:34:11,371 - INFO - [APP] - Performing web search for: 'esim revert sim iccid'
+2025-12-30 11:34:11,723 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=esim%20revert%20sim%20iccid 200
+2025-12-30 11:34:11,848 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=esim+revert+sim+iccid&limit=1 200
+2025-12-30 11:34:12,703 - INFO - [APP] - HTTP Request: POST https://html.duckduckgo.com/html/ "HTTP/2 200 OK"
+2025-12-30 11:34:12,708 - INFO - [APP] - Web search completed successfully.
+2025-12-30 11:50:02,150 - INFO - [APP] - Loading resources...
+2025-12-30 11:50:02,153 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 11:50:02,153 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 11:50:05,045 - INFO - [APP] - Resources loaded successfully.
+2025-12-30 11:50:40,731 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-30 11:50:47,067 - INFO - [APP] - Extracted and sanitized keywords: 'esim revert sim line iccid'
+2025-12-30 11:50:47,069 - INFO - [APP] - Performing web search for: 'esim revert sim line iccid'
+2025-12-30 11:50:47,466 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=esim%20revert%20sim%20line%20iccid 200
+2025-12-30 11:50:47,604 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=esim+revert+sim+line+iccid&limit=1 200
+2025-12-30 11:50:48,471 - INFO - [APP] - response: https://yandex.com/search/site/?text=esim+revert+sim+line+iccid&web=1&searchid=2292519 200
+2025-12-30 11:50:48,503 - INFO - [APP] - Web search completed successfully.
+2025-12-30 11:51:27,237 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-30 11:51:28,556 - INFO - [APP] - Extracted and sanitized keywords: 'esim revert sim line iccid'
+2025-12-30 11:51:28,556 - INFO - [APP] - Performing web search for: 'esim revert sim line iccid'
+2025-12-30 11:51:28,756 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=esim%20revert%20sim%20line%20iccid 200
+2025-12-30 11:51:28,865 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=esim+revert+sim+line+iccid&limit=1 200
+2025-12-30 11:51:29,580 - INFO - [APP] - response: https://yandex.com/search/site/?text=esim+revert+sim+line+iccid&web=1&searchid=2589693 200
+2025-12-30 11:51:29,588 - INFO - [APP] - Web search completed successfully.
+2025-12-30 11:52:54,127 - INFO - [APP] - Loading resources...
+2025-12-30 11:52:54,160 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 11:52:54,160 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 11:52:57,103 - INFO - [APP] - Resources loaded successfully.
+2025-12-30 12:04:23,900 - INFO - [APP] - Initial loading of resources...
+2025-12-30 12:04:23,901 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 12:04:23,901 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 12:04:26,494 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 12:04:26,497 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 12:04:26,497 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-30 12:08:42,980 - ERROR - [APP] - Error processing uploaded CSV: name 'io' is not defined
+Traceback (most recent call last):
+  File "/Users/paul/rephraser_project/app.py", line 273, in upload_knowledge_base
+    stream = io.StringIO(file.stream.read().decode("utf-8"))
+             ^^
+NameError: name 'io' is not defined. Did you mean: 'id'? Or did you forget to import 'io'?
+2025-12-30 12:10:25,492 - INFO - [APP] - Initial loading of resources...
+2025-12-30 12:10:25,507 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 12:10:25,507 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 12:10:28,134 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 12:10:28,134 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 12:10:28,134 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-30 12:10:38,943 - ERROR - [APP] - Error processing uploaded CSV: name 'io' is not defined
+Traceback (most recent call last):
+  File "/Users/paul/rephraser_project/app.py", line 273, in upload_knowledge_base
+    stream = io.StringIO(file.stream.read().decode("utf-8"))
+             ^^
+NameError: name 'io' is not defined. Did you mean: 'id'? Or did you forget to import 'io'?
+2025-12-30 12:11:34,016 - ERROR - [APP] - Error processing uploaded CSV: name 'io' is not defined
+Traceback (most recent call last):
+  File "/Users/paul/rephraser_project/app.py", line 273, in upload_knowledge_base
+    stream = io.StringIO(file.stream.read().decode("utf-8"))
+             ^^
+NameError: name 'io' is not defined. Did you mean: 'id'? Or did you forget to import 'io'?
+2025-12-30 12:12:46,230 - INFO - [APP] - Initial loading of resources...
+2025-12-30 12:12:46,241 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 12:12:46,242 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 12:12:48,850 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 12:12:48,852 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 12:12:48,852 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-30 12:12:57,024 - INFO - [APP] - Added 17 new entries to knowledge_base.csv.
+2025-12-30 12:12:57,024 - INFO - [APP] - Starting background knowledge base rebuild...
+2025-12-30 12:12:57,026 - INFO - [APP] - Generating embeddings for 39 documents...
+2025-12-30 12:12:58,134 - INFO - [APP] - Successfully created and saved FAISS index with 39 vectors.
+2025-12-30 12:12:58,134 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 12:12:58,135 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 12:12:58,135 - INFO - [APP] - Background knowledge base rebuild and reload complete.
+2025-12-30 12:13:47,609 - INFO - [APP] - Approved example saved.
+2025-12-30 12:15:53,503 - INFO - [APP] - Initial loading of resources...
+2025-12-30 12:15:53,503 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 12:15:53,503 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 12:15:56,254 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 12:15:56,257 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 12:15:56,257 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-30 12:18:22,565 - INFO - [APP] - Initial loading of resources...
+2025-12-30 12:18:22,565 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 12:18:22,565 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 12:18:26,172 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 12:18:26,173 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 12:18:26,173 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-30 12:34:43,626 - INFO - [APP] - Approved example saved.
+2025-12-30 13:27:22,612 - INFO - [APP] - Initial loading of resources...
+2025-12-30 13:27:22,614 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 13:27:22,614 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 13:27:26,737 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 13:27:26,741 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 13:27:26,741 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-30 13:27:57,788 - WARNING - [APP] - No file part in upload_kb request.
+2025-12-30 13:30:28,361 - INFO - [APP] - Initial loading of resources...
+2025-12-30 13:30:28,362 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 13:30:28,362 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 13:30:31,997 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 13:30:31,997 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 13:30:31,997 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-30 13:30:35,164 - WARNING - [APP] - No file part in upload_kb request.
+2025-12-30 13:32:01,769 - INFO - [APP] - Initial loading of resources...
+2025-12-30 13:32:01,797 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 13:32:01,797 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 13:32:05,821 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 13:32:05,822 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 13:32:05,822 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-30 13:32:31,364 - INFO - [APP] - upload_knowledge_base received request. is_json: True
+2025-12-30 13:32:31,366 - INFO - [APP] - Received JSON data: {'original_text': 'I have reprovisioned the data bucket slos, also reconciled the subscription, but the coverage at his location is particularly low at all bands and this might severally impact the service .', 'rephrased_text': 'Hello,\n\nObservations:\nThe coverage at the customer’s location is particularly low across all bands, which may severely impact the service quality.\n\nActions Taken:\nI have reprovisioned the data bucket SLOs and reconciled the subscription. No provisioning issues were detected afterward.\n\nRecommendations:\nPlease confirm with the customer whether this issue is also experienced in other locations, as this will help determine if the problem is strictly coverage-related.\n\nRegards,\nPaul R'}
+2025-12-30 13:32:31,366 - INFO - [APP] - Extracted original: 'I have reprovisioned the data bucket slos, also reconciled the subscription, but the coverage at his location is particularly low at all bands and this might severally impact the service .', rephrased: 'Hello,
+
+Observations:
+The coverage at the customer’s location is particularly low across all bands, which may severely impact the service quality.
+
+Actions Taken:
+I have reprovisioned the data bucket SLOs and reconciled the subscription. No provisioning issues were detected afterward.
+
+Recommendations:
+Please confirm with the customer whether this issue is also experienced in other locations, as this will help determine if the problem is strictly coverage-related.
+
+Regards,
+Paul R'
+2025-12-30 13:32:31,366 - INFO - [APP] - Processing new KB entries: [['I have reprovisioned the data bucket slos, also reconciled the subscription, but the coverage at his location is particularly low at all bands and this might severally impact the service .', 'Hello,\n\nObservations:\nThe coverage at the customer’s location is particularly low across all bands, which may severely impact the service quality.\n\nActions Taken:\nI have reprovisioned the data bucket SLOs and reconciled the subscription. No provisioning issues were detected afterward.\n\nRecommendations:\nPlease confirm with the customer whether this issue is also experienced in other locations, as this will help determine if the problem is strictly coverage-related.\n\nRegards,\nPaul R']]
+2025-12-30 13:32:31,367 - INFO - [APP] - Added 1 new entries to knowledge_base.csv.
+2025-12-30 13:32:31,367 - INFO - [APP] - Starting background knowledge base rebuild...
+2025-12-30 13:32:31,370 - INFO - [APP] - Generating embeddings for 42 documents...
+2025-12-30 13:32:32,181 - INFO - [APP] - Successfully created and saved FAISS index with 42 vectors.
+2025-12-30 13:32:32,181 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 13:32:32,181 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 13:32:32,181 - INFO - [APP] - Background knowledge base rebuild and reload complete.
+2025-12-30 13:40:16,671 - INFO - [APP] - Initial loading of resources...
+2025-12-30 13:40:16,686 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 13:40:16,686 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 13:40:20,439 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 13:40:20,442 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 13:40:20,442 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-30 13:40:37,332 - INFO - [APP] - upload_knowledge_base received request. is_json: True
+2025-12-30 13:40:37,333 - INFO - [APP] - Received JSON data: {'original_text': 'For this iphone se we may need to check the  part numbers of the model, these can be found within Settings -> General -> Model number\n\nthis is important because the phone may have been exclusively for an specific network. Im basing this assumption with the IMEI validation at tmobile indicating this phone is partially compatible', 'rephrased_text': 'Hello,\n\nObservations:\nFor this iPhone SE, we may need to verify the model part number, as the IMEI validation on T-Mobile’s side indicates the device is only partially compatible. This could suggest the phone was made exclusively for a specific network.\n\nActions Taken:\nNone at this time.\n\nRecommendations:\nPlease have the customer check the model part number under Settings → General → Model Number and share it with us so we can confirm network compatibility.\n\nRegards,\nPaul R'}
+2025-12-30 13:40:37,333 - INFO - [APP] - Extracted original: 'For this iphone se we may need to check the  part numbers of the model, these can be found within Settings -> General -> Model number
+
+this is important because the phone may have been exclusively for an specific network. Im basing this assumption with the IMEI validation at tmobile indicating this phone is partially compatible', rephrased: 'Hello,
+
+Observations:
+For this iPhone SE, we may need to verify the model part number, as the IMEI validation on T-Mobile’s side indicates the device is only partially compatible. This could suggest the phone was made exclusively for a specific network.
+
+Actions Taken:
+None at this time.
+
+Recommendations:
+Please have the customer check the model part number under Settings → General → Model Number and share it with us so we can confirm network compatibility.
+
+Regards,
+Paul R'
+2025-12-30 13:40:37,333 - INFO - [APP] - Processing new KB entries: [['For this iphone se we may need to check the  part numbers of the model, these can be found within Settings -> General -> Model number\n\nthis is important because the phone may have been exclusively for an specific network. Im basing this assumption with the IMEI validation at tmobile indicating this phone is partially compatible', 'Hello,\n\nObservations:\nFor this iPhone SE, we may need to verify the model part number, as the IMEI validation on T-Mobile’s side indicates the device is only partially compatible. This could suggest the phone was made exclusively for a specific network.\n\nActions Taken:\nNone at this time.\n\nRecommendations:\nPlease have the customer check the model part number under Settings → General → Model Number and share it with us so we can confirm network compatibility.\n\nRegards,\nPaul R']]
+2025-12-30 13:40:37,334 - INFO - [APP] - Added 1 new entries to knowledge_base.csv.
+2025-12-30 13:40:37,334 - INFO - [APP] - Starting background knowledge base rebuild...
+2025-12-30 13:40:37,337 - INFO - [APP] - Generating embeddings for 43 documents...
+2025-12-30 13:40:38,486 - INFO - [APP] - Successfully created and saved FAISS index with 43 vectors.
+2025-12-30 13:40:38,486 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 13:40:38,486 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 13:40:38,486 - INFO - [APP] - Background knowledge base rebuild and reload complete.
+2025-12-30 13:54:14,063 - INFO - [APP] - Approved example saved.
+2025-12-30 14:09:27,193 - INFO - [APP] - Initial loading of resources...
+2025-12-30 14:09:27,233 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 14:09:27,233 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 14:09:30,179 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 14:09:30,182 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 14:09:30,182 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-30 14:10:13,715 - INFO - [APP] - Initial loading of resources...
+2025-12-30 14:10:13,736 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-30 14:10:13,736 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-30 14:10:16,475 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-30 14:10:16,477 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-30 14:10:16,477 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-30 14:15:47,265 - INFO - [APP] - Approved example saved.
