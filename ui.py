@@ -109,6 +109,7 @@ st.title("📝 Paul's Rephraser")
 st.write("I'll help you structure and clarify your notes into a professional response. I can optionally search the web for extra context, and you can rate my answers to help me improve.")
 
 
+
 # Card: Your Input
 with st.container(border=True):
     st.markdown("### ✍️ Your Input")
@@ -128,6 +129,7 @@ with st.container(border=True):
         submit_button = st.form_submit_button("✨ Generate Response", use_container_width=True)
 
 # --- RESPONSE LOGIC ---
+# This block needs to be outside the columns, but still before the history card
 if submit_button and text_input.strip():
     st.session_state.thinking_log = []
     thinking_placeholder = st.empty()
@@ -169,75 +171,9 @@ if submit_button and text_input.strip():
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")
 
+st.markdown("---") # Separator between sections
 
-# Card: Knowledge Base Management
-st.markdown("---") # Separator between cards
-with st.container(border=True):
-    st.markdown("### 📚 Knowledge Base Management")
-    st.write("Manage your knowledge base by uploading CSV files or adding single entries.")
-
-    st.subheader("Upload Knowledge Base (CSV)")
-    st.write("Upload a CSV file to expand the knowledge base. The CSV should contain two columns: `original_text` and `rephrased_text`.")
-    uploaded_file = st.file_uploader("Choose a CSV file", type="csv", key="kb_uploader")
-    upload_button = st.button("Add CSV to Knowledge Base", key="kb_upload_button")
-
-    if uploaded_file and upload_button:
-        try:
-            # Read the uploaded file content as bytes, then decode
-            file_content = uploaded_file.getvalue().decode("utf-8")
-            
-            # Send to backend
-            response = requests.post(FLASK_API_URL_UPLOAD_KB, files={'file': (uploaded_file.name, file_content, 'text/csv')})
-            response.raise_for_status()
-            
-            result = response.json()
-            if result.get("status") == "success":
-                st.success("✅ Knowledge base updated successfully! The system is now re-indexing. This may take a moment.")
-                st.toast("Knowledge base updated and re-indexing!", icon="📚")
-            else:
-                st.error(f"Error updating knowledge base: {result.get('error', 'Unknown error')}")
-                
-        except requests.exceptions.RequestException as e:
-            st.error(f"Connection to backend failed during upload. Is it running? Error: {e}")
-        except Exception as e:
-            st.error(f"An unexpected error occurred during upload: {e}")
-
-    st.subheader("Add Single Knowledge Entry")
-    st.write("Manually add a single pair of original and rephrased text to the knowledge base.")
-
-    with st.form(key="single_kb_entry_form"):
-        original_text_single = st.text_area("Original Text:", height=75, key="original_text_single", value=st.session_state.original_text_single_input_value, placeholder="e.g., The customer's main concern was a bug in the new feature.")
-        rephrased_text_single = st.text_area("Rephrased Text:", height=75, key="rephrased_text_single", value=st.session_state.rephrased_text_single_input_value, placeholder="e.g., The customer reported a defect impacting the functionality of the recently released feature.")
-        add_single_entry_button = st.form_submit_button("Add Single Entry", use_container_width=True, help="Add this pair to the knowledge base and trigger re-indexing.")
-
-    if add_single_entry_button and (original_text_single != st.session_state.original_text_single_input_value or rephrased_text_single != st.session_state.rephrased_text_single_input_value) and original_text_single.strip() and rephrased_text_single.strip():
-        try:
-            payload = {
-                'original_text': original_text_single.strip(),
-                'rephrased_text': rephrased_text_single.strip()
-            }
-            response = requests.post(FLASK_API_URL_UPLOAD_KB, json=payload)
-            response.raise_for_status()
-            
-            result = response.json()
-            if result.get("status") == "success":
-                st.success("✅ Single entry added! The system is now re-indexing.")
-                st.toast("Entry added and re-indexing!", icon="📚")
-                # Clear input fields after successful submission
-                st.session_state.original_text_single_input_value = ""
-                st.session_state.rephrased_text_single_input_value = ""
-                st.rerun() # Rerun to clear inputs and refresh
-            else:
-                st.error(f"Error adding single entry: {result.get('error', 'Unknown error')}")
-                
-        except requests.exceptions.RequestException as e:
-            st.error(f"Connection to backend failed during single entry upload. Is it running? Error: {e}")
-        except Exception as e:
-            st.error(f"An unexpected error occurred during single entry upload: {e}")
-
-
-# Card: Review Responses
-st.markdown("---") # Separator between cards
+# Card: Review Responses (full width)
 with st.container(border=True):
     st.markdown("### 📋 Review Responses")
     if not st.session_state.history:
@@ -278,3 +214,69 @@ with st.container(border=True):
                 st.markdown(f'</div>', unsafe_allow_html=True)
         else:
             st.warning(f"Skipping malformed history item at index {i}.")
+
+st.markdown("---") # Separator between sections
+# Card: Knowledge Base Management (Collapsible)
+with st.expander("📚 Manage Knowledge Base"):
+    with st.container(border=True):
+        st.markdown("### Knowledge Base Management")
+        st.write("Manage your knowledge base by uploading CSV files or adding single entries.")
+
+        st.subheader("Upload Knowledge Base (CSV)")
+        st.write("Upload a CSV file to expand the knowledge base. The CSV should contain two columns: `original_text` and `rephrased_text`.")
+        uploaded_file = st.file_uploader("Choose a CSV file", type="csv", key="kb_uploader")
+        upload_button = st.button("Add CSV to Knowledge Base", key="kb_upload_button")
+
+        if uploaded_file and upload_button:
+            try:
+                # Read the uploaded file content as bytes, then decode
+                file_content = uploaded_file.getvalue().decode("utf-8")
+                
+                # Send to backend
+                response = requests.post(FLASK_API_URL_UPLOAD_KB, files={'file': (uploaded_file.name, file_content, 'text/csv')})
+                response.raise_for_status()
+                
+                result = response.json()
+                if result.get("status") == "success":
+                    st.success("✅ Knowledge base updated successfully! The system is now re-indexing. This may take a moment.")
+                    st.toast("Knowledge base updated and re-indexing!", icon="📚")
+                else:
+                    st.error(f"Error updating knowledge base: {result.get('error', 'Unknown error')}")
+                    
+            except requests.exceptions.RequestException as e:
+                st.error(f"Connection to backend failed during upload. Is it running? Error: {e}")
+            except Exception as e:
+                st.error(f"An unexpected error occurred during upload: {e}")
+
+        st.subheader("Add Single Knowledge Entry")
+        st.write("Manually add a single pair of original and rephrased text to the knowledge base.")
+
+        with st.form(key="single_kb_entry_form"):
+            original_text_single = st.text_area("Original Text:", height=75, key="original_text_single", value=st.session_state.original_text_single_input_value, placeholder="e.g., The customer's main concern was a bug in the new feature.")
+            rephrased_text_single = st.text_area("Rephrased Text:", height=75, key="rephrased_text_single", value=st.session_state.rephrased_text_single_input_value, placeholder="e.g., The customer reported a defect impacting the functionality of the recently released feature.")
+            add_single_entry_button = st.form_submit_button("Add Single Entry", use_container_width=True, help="Add this pair to the knowledge base and trigger re-indexing.")
+
+        if add_single_entry_button and (original_text_single != st.session_state.original_text_single_input_value or rephrased_text_single != st.session_state.rephrased_text_single_input_value) and original_text_single.strip() and rephrased_text_single.strip():
+            try:
+                payload = {
+                    'original_text': original_text_single.strip(),
+                    'rephrased_text': rephrased_text_single.strip()
+                }
+                response = requests.post(FLASK_API_URL_UPLOAD_KB, json=payload)
+                response.raise_for_status()
+                
+                result = response.json()
+                if result.get("status") == "success":
+                    st.success("✅ Single entry added! The system is now re-indexing.")
+                    st.toast("Entry added and re-indexing!", icon="📚")
+                    # Clear input fields after successful submission
+                    st.session_state.original_text_single_input_value = ""
+                    st.session_state.rephrased_text_single_input_value = ""
+                    st.rerun() # Rerun to clear inputs and refresh
+                else:
+                    st.error(f"Error adding single entry: {result.get('error', 'Unknown error')}")
+                    
+            except requests.exceptions.RequestException as e:
+                st.error(f"Connection to backend failed during single entry upload. Is it running? Error: {e}")
+            except Exception as e:
+                st.error(f"An unexpected error occurred during single entry upload: {e}")
