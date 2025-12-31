@@ -195,6 +195,27 @@ def perform_web_search(query):
     logging.info("Web search completed successfully.")
     return formatted_results
 
+def build_template_prompt(original_text, signature="Paul"):
+    system_prompt = f"""You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is {signature}.
+
+You MUST follow this template EXACTLY:
+Hello,
+
+Observations:
+[Provide a clear, concise summary of the situation based on input notes.]
+
+Actions Taken:
+[List specific, brief actions taken or initiated.]
+
+Recommendations:
+[Offer precise, actionable next steps or advice.]
+
+Regards,
+{signature}
+"""
+    user_prompt = f"Rephrase the following notes into the template provided:\n\nInput Notes: \"{original_text}\""
+    return [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
+
 def build_structured_prompt(original_text, examples, web_context=None, signature="Paul"):
     system_prompt = f"""You are an expert support analyst. Your task is to analyze user notes, synthesize all provided context (including web search results if available), and generate a **comprehensive, clear, and streamlined** response. Your name is {signature}.
 Your goal is to convey the most relevant information concisely and with proper grammar, directly addressing the user's notes within the structured format. Avoid redundancy, overly complex phrasing, or unnecessary details. Get straight to the point in each section.
@@ -231,41 +252,53 @@ def handle_rephrase():
     input_text = data['text']
     signature = data.get('signature', 'Paul')
     enable_web_search = data.get('enable_web_search', True)
-    user_search_keywords = data.get('search_keywords', '').strip() # New: Get user-provided keywords
+    user_search_keywords = data.get('search_keywords', '').strip()
+    template_mode = data.get('template_mode', False)
 
     def thinking_process_stream():
         try:
-            web_context = None
-            if enable_web_search:
-                if user_search_keywords:
-                    keywords_for_search = user_search_keywords
-                    yield stream_event(f"Using user-provided keywords for web search: '{keywords_for_search}'...")
-                else:
-                    yield stream_event("Extracting keywords for smarter search...")
-                    keywords_for_search = extract_keywords(input_text)
-                
-                yield stream_event(f"Searching online for: '{keywords_for_search}'...")
-                web_context = perform_web_search(keywords_for_search)
+            if template_mode:
+                yield stream_event("Using template mode...")
+                messages = build_template_prompt(input_text, signature=signature)
+                logging.info(f"Template mode: Messages sent to LLM: {json.dumps(messages, indent=2)}")
             else:
-                yield stream_event("Online research is disabled. Skipping web search.")
-                
-            yield stream_event("Searching local knowledge base for similar examples...")
-            examples = find_similar_examples(input_text, embedding_model)
-            yield stream_event(f"Found {len(examples)} relevant examples.")
-            yield stream_event("Synthesizing all information to generate the final response...")
-            messages = build_structured_prompt(input_text, examples, web_context, signature=signature)
+                web_context = None
+                if enable_web_search:
+                    if user_search_keywords:
+                        keywords_for_search = user_search_keywords
+                        yield stream_event(f"Using user-provided keywords for web search: '{keywords_for_search}'...")
+                    else:
+                        yield stream_event("Extracting keywords for smarter search...")
+                        keywords_for_search = extract_keywords(input_text)
+                    
+                    yield stream_event(f"Searching online for: '{keywords_for_search}'...")
+                    web_context = perform_web_search(keywords_for_search)
+                else:
+                    yield stream_event("Online research is disabled. Skipping web search.")
+                    
+                yield stream_event("Searching local knowledge base for similar examples...")
+                examples = find_similar_examples(input_text, embedding_model)
+                yield stream_event(f"Found {len(examples)} relevant examples.")
+                yield stream_event("Synthesizing all information to generate the final response...")
+                messages = build_structured_prompt(input_text, examples, web_context, signature=signature)
+
             final_response = call_llm(messages, temperature=0.5, max_tokens=MAX_GENERATION_TOKENS)
+            # Sanitize final_response immediately after receiving from LLM
+            # Keep only printable ASCII and common Unicode characters, replace others with a space
+            # Keep letters (Unicode), numbers, whitespace, and common punctuation
+            final_response = re.sub(r'[^\w\s\.\,\!\?\(\)\-\'\"\;\:\&\@\#\$\%\^\*\[\]\{\}\<\>\/\?\\\|`~\+\=]', ' ', final_response).strip()
+            logging.info(f"Template mode: Raw final_response from LLM (sanitized): '{final_response}'")
             
             # Post-process to ensure "Regards," is always followed by signature on a new line
-            # This handles cases where LLM might output "Regards, Signature" or "Regards, \nSignature"
-            # It explicitly ensures the format "Regards,\nSignature"
             if f"Regards, {signature}" in final_response:
                 final_response = final_response.replace(f"Regards, {signature}", f"Regards,\n{signature}")
-            # Also handle cases where the LLM might have already added a newline but with extra spaces
             final_response = re.sub(r"Regards,\s*\n\s*" + re.escape(signature), f"Regards,\n{signature}", final_response, flags=re.IGNORECASE)
-            final_response = final_response.strip() # Clean up leading/trailing whitespace
+            final_response = final_response.strip()
+            logging.info(f"Template mode: Final response after post-processing: '{final_response}'")
 
-            yield json.dumps({"data": final_response}) + "\n"
+            json_event = json.dumps({"data": final_response}) + "\n"
+            logging.info(f"Template mode: JSON event yielded: '{json_event.strip()}'")
+            yield json_event
         except Exception as e:
             logging.error(f"An error occurred during streaming process: {e}", exc_info=True)
             yield json.dumps({"error": "An internal server error occurred."}) + "\n"

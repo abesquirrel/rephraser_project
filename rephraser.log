@@ -682,3 +682,575 @@ Paul'
 2025-12-31 14:14:16,542 - INFO - [APP] - Reloading FAISS index and rephrased texts...
 2025-12-31 14:14:16,543 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
 2025-12-31 14:14:16,543 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 14:39:33,011 - INFO - [APP] - Initial loading of resources...
+2025-12-31 14:39:33,011 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 14:39:33,013 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 14:39:33,013 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 14:42:15,040 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-31 14:42:15,041 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-31 14:42:19,029 - INFO - [APP] - Initial loading of resources...
+2025-12-31 14:42:19,030 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 14:42:19,031 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 14:42:19,031 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 14:48:45,518 - INFO - [APP] - Initial loading of resources...
+2025-12-31 14:48:45,518 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 14:48:45,519 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 14:48:45,519 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 14:51:46,820 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-31 14:51:46,820 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-31 14:51:50,692 - INFO - [APP] - Initial loading of resources...
+2025-12-31 14:51:50,692 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 14:51:50,693 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 14:51:50,693 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 14:52:43,834 - INFO - [APP] - Initial loading of resources...
+2025-12-31 14:52:43,834 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 14:52:43,835 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 14:52:43,835 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 14:53:15,199 - INFO - [APP] - Template mode: Messages sent to LLM: [
+  {
+    "role": "system",
+    "content": "You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is Paul.\n\nYou MUST follow this template EXACTLY:\nHello,\n\nObservations:\n[Provide a clear, concise summary of the situation based on input notes.]\n\nActions Taken:\n[List specific, brief actions taken or initiated.]\n\nRecommendations:\n[Offer precise, actionable next steps or advice.]\n\nRegards,\nPaul\n"
+  },
+  {
+    "role": "user",
+    "content": "Rephrase the following notes into the template provided:\n\nInput Notes: \"I have corrected the issue the customer has mentioned, but  since the other number 5165401514 had a plan, i deccided no to cancel it, but instead replaced the pSIM 8901240384115087727 with an eSIM in case the customer wants to use that balance, either scan the qr with a compatible phone, or order a pSIM. \n\nas for the desired setup 5164353696 on the pSIM 8901240384115087727 has been made\n\n\""
+  }
+]
+2025-12-31 14:53:27,030 - INFO - [APP] - Template mode: Raw final_response from LLM: 'Here is the rephrased text in the template:
+
+Hello,
+
+Observations: The customer's issue was corrected, and a plan was still active on another number (5165401514). A decision was made not to cancel it, but instead to replace the pSIM 8901240384115087727 with an eSIM for future use.
+
+Actions Taken: The desired setup for 5164353696 has been made on the replaced pSIM 8901240384115087727.
+
+Recommendations: If the customer wants to use the balance on the new eSIM, they can either scan the QR code with a compatible phone or order a physical SIM.
+
+Regards,
+Paul'
+2025-12-31 14:54:46,506 - INFO - [APP] - Initial loading of resources...
+2025-12-31 14:54:46,506 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 14:54:46,509 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 14:54:46,509 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 14:55:00,780 - INFO - [APP] - Template mode: Messages sent to LLM: [
+  {
+    "role": "system",
+    "content": "You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is Paul.\n\nYou MUST follow this template EXACTLY:\nHello,\n\nObservations:\n[Provide a clear, concise summary of the situation based on input notes.]\n\nActions Taken:\n[List specific, brief actions taken or initiated.]\n\nRecommendations:\n[Offer precise, actionable next steps or advice.]\n\nRegards,\nPaul\n"
+  },
+  {
+    "role": "user",
+    "content": "Rephrase the following notes into the template provided:\n\nInput Notes: \"I have corrected the issue the customer has mentioned, but  since the other number 5165401514 had a plan, i deccided no to cancel it, but instead replaced the pSIM 8901240384115087727 with an eSIM in case the customer wants to use that balance, either scan the qr with a compatible phone, or order a pSIM. \n\nas for the desired setup 5164353696 on the pSIM 8901240384115087727 has been made\n\""
+  }
+]
+2025-12-31 14:55:13,272 - INFO - [APP] - Template mode: Raw final_response from LLM: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer had reported an issue which was corrected by replacing the physical SIM (pSIM) with an eSIM, allowing for the balance to be retained in case the customer wants to use it. Additionally, the desired setup for number 5164353696 has been made on the replaced pSIM.
+
+Actions Taken: I corrected the issue by replacing the pSIM with an eSIM and set up the desired configuration for number 5164353696 on the new pSIM.
+
+Recommendations: If the customer wishes to use the retained balance, they can either scan the QR code with a compatible phone or order a physical SIM card.'
+2025-12-31 14:55:13,273 - INFO - [APP] - Template mode: Final response after post-processing: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer had reported an issue which was corrected by replacing the physical SIM (pSIM) with an eSIM, allowing for the balance to be retained in case the customer wants to use it. Additionally, the desired setup for number 5164353696 has been made on the replaced pSIM.
+
+Actions Taken: I corrected the issue by replacing the pSIM with an eSIM and set up the desired configuration for number 5164353696 on the new pSIM.
+
+Recommendations: If the customer wishes to use the retained balance, they can either scan the QR code with a compatible phone or order a physical SIM card.'
+2025-12-31 14:55:13,273 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here is the rephrased template:\n\nHello,\n\nObservations: The customer had reported an issue which was corrected by replacing the physical SIM (pSIM) with an eSIM, allowing for the balance to be retained in case the customer wants to use it. Additionally, the desired setup for number 5164353696 has been made on the replaced pSIM.\n\nActions Taken: I corrected the issue by replacing the pSIM with an eSIM and set up the desired configuration for number 5164353696 on the new pSIM.\n\nRecommendations: If the customer wishes to use the retained balance, they can either scan the QR code with a compatible phone or order a physical SIM card."}'
+2025-12-31 14:58:09,531 - INFO - [APP] - Initial loading of resources...
+2025-12-31 14:58:09,531 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 14:58:09,532 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 14:58:09,532 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 14:58:18,661 - INFO - [APP] - Template mode: Messages sent to LLM: [
+  {
+    "role": "system",
+    "content": "You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is Paul.\n\nYou MUST follow this template EXACTLY:\nHello,\n\nObservations:\n[Provide a clear, concise summary of the situation based on input notes.]\n\nActions Taken:\n[List specific, brief actions taken or initiated.]\n\nRecommendations:\n[Offer precise, actionable next steps or advice.]\n\nRegards,\nPaul\n"
+  },
+  {
+    "role": "user",
+    "content": "Rephrase the following notes into the template provided:\n\nInput Notes: \"I have corrected the issue the customer has mentioned, but  since the other number 5165401514 had a plan, i deccided no to cancel it, but instead replaced the pSIM 8901240384115087727 with an eSIM in case the customer wants to use that balance, either scan the qr with a compatible phone, or order a pSIM. \n\nas for the desired setup 5164353696 on the pSIM 8901240384115087727 has been made\n\n\""
+  }
+]
+2025-12-31 14:58:32,342 - INFO - [APP] - Template mode: Raw final_response from LLM: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer had requested an issue correction, which has since been resolved. Additionally, a plan was found for number 5165401514, and instead of canceling it, we replaced the physical SIM (pSIM) with an eSIM on pSIM 8901240384115087727 to provide flexibility in case the customer wants to use the balance.
+
+Actions Taken: The desired setup for number 5164353696 has been made on the pSIM 8901240384115087727.
+
+Recommendations: If the customer wishes to utilize the eSIM, they can either scan the QR code with a compatible phone or order a physical SIM (pSIM) if needed.
+
+Regards,
+Paul'
+2025-12-31 14:58:32,345 - INFO - [APP] - Template mode: Final response after post-processing: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer had requested an issue correction, which has since been resolved. Additionally, a plan was found for number 5165401514, and instead of canceling it, we replaced the physical SIM (pSIM) with an eSIM on pSIM 8901240384115087727 to provide flexibility in case the customer wants to use the balance.
+
+Actions Taken: The desired setup for number 5164353696 has been made on the pSIM 8901240384115087727.
+
+Recommendations: If the customer wishes to utilize the eSIM, they can either scan the QR code with a compatible phone or order a physical SIM (pSIM) if needed.
+
+Regards,
+Paul'
+2025-12-31 14:58:32,346 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here is the rephrased template:\n\nHello,\n\nObservations: The customer had requested an issue correction, which has since been resolved. Additionally, a plan was found for number 5165401514, and instead of canceling it, we replaced the physical SIM (pSIM) with an eSIM on pSIM 8901240384115087727 to provide flexibility in case the customer wants to use the balance.\n\nActions Taken: The desired setup for number 5164353696 has been made on the pSIM 8901240384115087727.\n\nRecommendations: If the customer wishes to utilize the eSIM, they can either scan the QR code with a compatible phone or order a physical SIM (pSIM) if needed.\n\nRegards,\nPaul"}'
+2025-12-31 14:59:27,663 - INFO - [APP] - Initial loading of resources...
+2025-12-31 14:59:27,663 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 14:59:27,664 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 14:59:27,664 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 14:59:38,231 - INFO - [APP] - Template mode: Messages sent to LLM: [
+  {
+    "role": "system",
+    "content": "You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is Paul.\n\nYou MUST follow this template EXACTLY:\nHello,\n\nObservations:\n[Provide a clear, concise summary of the situation based on input notes.]\n\nActions Taken:\n[List specific, brief actions taken or initiated.]\n\nRecommendations:\n[Offer precise, actionable next steps or advice.]\n\nRegards,\nPaul\n"
+  },
+  {
+    "role": "user",
+    "content": "Rephrase the following notes into the template provided:\n\nInput Notes: \"I have corrected the issue the customer has mentioned, but  since the other number 5165401514 had a plan, i deccided no to cancel it, but instead replaced the pSIM 8901240384115087727 with an eSIM in case the customer wants to use that balance, either scan the qr with a compatible phone, or order a pSIM. \n\nas for the desired setup 5164353696 on the pSIM 8901240384115087727 has been made\n\n\""
+  }
+]
+2025-12-31 14:59:48,042 - INFO - [APP] - Template mode: Messages sent to LLM: [
+  {
+    "role": "system",
+    "content": "You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is Paul.\n\nYou MUST follow this template EXACTLY:\nHello,\n\nObservations:\n[Provide a clear, concise summary of the situation based on input notes.]\n\nActions Taken:\n[List specific, brief actions taken or initiated.]\n\nRecommendations:\n[Offer precise, actionable next steps or advice.]\n\nRegards,\nPaul\n"
+  },
+  {
+    "role": "user",
+    "content": "Rephrase the following notes into the template provided:\n\nInput Notes: \"I have corrected the issue the customer has mentioned, but  since the other number 5165401514 had a plan, i deccided no to cancel it, but instead replaced the pSIM 8901240384115087727 with an eSIM in case the customer wants to use that balance, either scan the qr with a compatible phone, or order a pSIM. \n\nas for the desired setup 5164353696 on the pSIM 8901240384115087727 has been made\n\n\""
+  }
+]
+2025-12-31 14:59:49,699 - INFO - [APP] - Template mode: Raw final_response from LLM: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer had an issue that was corrected, and as the new number (5165401514) had a plan, it was decided not to cancel it. Instead, a pSIM was replaced with an eSIM in case the customer wants to use the balance.
+
+Actions Taken: I have made the desired setup for the number 5164353696 on the pSIM 8901240384115087727.
+
+Recommendations: If the customer wishes to use the balance, they can either scan the QR code with a compatible phone or order a physical SIM card.
+
+Regards,
+Paul'
+2025-12-31 14:59:49,700 - INFO - [APP] - Template mode: Final response after post-processing: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer had an issue that was corrected, and as the new number (5165401514) had a plan, it was decided not to cancel it. Instead, a pSIM was replaced with an eSIM in case the customer wants to use the balance.
+
+Actions Taken: I have made the desired setup for the number 5164353696 on the pSIM 8901240384115087727.
+
+Recommendations: If the customer wishes to use the balance, they can either scan the QR code with a compatible phone or order a physical SIM card.
+
+Regards,
+Paul'
+2025-12-31 14:59:49,700 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here is the rephrased template:\n\nHello,\n\nObservations: The customer had an issue that was corrected, and as the new number (5165401514) had a plan, it was decided not to cancel it. Instead, a pSIM was replaced with an eSIM in case the customer wants to use the balance.\n\nActions Taken: I have made the desired setup for the number 5164353696 on the pSIM 8901240384115087727.\n\nRecommendations: If the customer wishes to use the balance, they can either scan the QR code with a compatible phone or order a physical SIM card.\n\nRegards,\nPaul"}'
+2025-12-31 15:00:00,772 - INFO - [APP] - Template mode: Raw final_response from LLM: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer's issue has been resolved by correcting the problem, and an eSIM was installed in place of the physical SIM card (pSIM) with the number 8901240384115087727. Additionally, the desired setup for the number 5164353696 on the same pSIM has been configured.
+
+Actions Taken: I corrected the issue, replaced the pSIM with an eSIM, and set up the desired configuration for the number 5164353696.
+
+Recommendations: The customer can choose to scan the QR code with a compatible phone or order a physical SIM card if they wish to use the balance associated with the number 8901240384115087727.
+
+Regards,
+Paul'
+2025-12-31 15:00:00,775 - INFO - [APP] - Template mode: Final response after post-processing: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer's issue has been resolved by correcting the problem, and an eSIM was installed in place of the physical SIM card (pSIM) with the number 8901240384115087727. Additionally, the desired setup for the number 5164353696 on the same pSIM has been configured.
+
+Actions Taken: I corrected the issue, replaced the pSIM with an eSIM, and set up the desired configuration for the number 5164353696.
+
+Recommendations: The customer can choose to scan the QR code with a compatible phone or order a physical SIM card if they wish to use the balance associated with the number 8901240384115087727.
+
+Regards,
+Paul'
+2025-12-31 15:00:00,775 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here is the rephrased template:\n\nHello,\n\nObservations: The customer's issue has been resolved by correcting the problem, and an eSIM was installed in place of the physical SIM card (pSIM) with the number 8901240384115087727. Additionally, the desired setup for the number 5164353696 on the same pSIM has been configured.\n\nActions Taken: I corrected the issue, replaced the pSIM with an eSIM, and set up the desired configuration for the number 5164353696.\n\nRecommendations: The customer can choose to scan the QR code with a compatible phone or order a physical SIM card if they wish to use the balance associated with the number 8901240384115087727.\n\nRegards,\nPaul"}'
+2025-12-31 15:00:19,601 - INFO - [APP] - Template mode: Messages sent to LLM: [
+  {
+    "role": "system",
+    "content": "You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is Paul.\n\nYou MUST follow this template EXACTLY:\nHello,\n\nObservations:\n[Provide a clear, concise summary of the situation based on input notes.]\n\nActions Taken:\n[List specific, brief actions taken or initiated.]\n\nRecommendations:\n[Offer precise, actionable next steps or advice.]\n\nRegards,\nPaul\n"
+  },
+  {
+    "role": "user",
+    "content": "Rephrase the following notes into the template provided:\n\nInput Notes: \"I have corrected the issue the customer has mentioned, but  since the other number 5165401514 had a plan, i deccided no to cancel it, but instead replaced the pSIM 8901240384115087727 with an eSIM in case the customer wants to use that balance, either scan the qr with a compatible phone, or order a pSIM. \n\nas for the desired setup 5164353696 on the pSIM 8901240384115087727 has been made\""
+  }
+]
+2025-12-31 15:00:29,905 - INFO - [APP] - Template mode: Raw final_response from LLM: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer had an issue that was corrected, and I decided not to cancel the plan associated with number 5165401514. Instead, I replaced the physical SIM (pSIM) 8901240384115087727 with an eSIM for future use.
+
+Actions Taken: I made the desired setup for number 5164353696 on the pSIM 8901240384115087727.
+
+Recommendations: If the customer wants to use the balance associated with this plan, they can either scan the QR code with a compatible phone or order a physical SIM.
+
+Regards,
+Paul'
+2025-12-31 15:00:29,906 - INFO - [APP] - Template mode: Final response after post-processing: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer had an issue that was corrected, and I decided not to cancel the plan associated with number 5165401514. Instead, I replaced the physical SIM (pSIM) 8901240384115087727 with an eSIM for future use.
+
+Actions Taken: I made the desired setup for number 5164353696 on the pSIM 8901240384115087727.
+
+Recommendations: If the customer wants to use the balance associated with this plan, they can either scan the QR code with a compatible phone or order a physical SIM.
+
+Regards,
+Paul'
+2025-12-31 15:00:29,906 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here is the rephrased template:\n\nHello,\n\nObservations: The customer had an issue that was corrected, and I decided not to cancel the plan associated with number 5165401514. Instead, I replaced the physical SIM (pSIM) 8901240384115087727 with an eSIM for future use.\n\nActions Taken: I made the desired setup for number 5164353696 on the pSIM 8901240384115087727.\n\nRecommendations: If the customer wants to use the balance associated with this plan, they can either scan the QR code with a compatible phone or order a physical SIM.\n\nRegards,\nPaul"}'
+2025-12-31 15:00:35,462 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-31 15:00:37,241 - INFO - [APP] - Extracted and sanitized keywords: 'eSIM pSIM QR code phone plan balance'
+2025-12-31 15:00:37,242 - INFO - [APP] - Performing targeted web search for: '(eSIM pSIM QR code phone plan balance) AND (GMS OR cellphone service OR "US mvno" OR telecommunications) (site:reddit.com OR site:howardforums.com OR site:xda-developers.com)'
+2025-12-31 15:00:38,185 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=%28eSIM%20pSIM%20QR%20code%20phone%20plan%20balance%29%20AND%20%28GMS%20OR%20cellphone%20service%20OR%20%22US%20mvno%22%20OR%20telecommunications%29%20%28site%3Areddit.com%20OR%20site%3Ahowardforums.com%20OR%20site%3Axda-developers.com%29 200
+2025-12-31 15:00:38,216 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=%28eSIM+pSIM+QR+code+phone+plan+balance%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&limit=1 200
+2025-12-31 15:00:39,089 - INFO - [APP] - response: https://search.yahoo.com/search;_ylt=xmvFQSCbEEsVy38KoL0r1Udr;_ylu=uKchOVxyxTLKXdIQyA4J5kGOBUT7ajzz_wyr4Ud2uL5TYB8?p=%28eSIM+pSIM+QR+code+phone+plan+balance%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29 200
+2025-12-31 15:00:39,525 - INFO - [APP] - Web search completed successfully.
+2025-12-31 15:00:59,724 - INFO - [APP] - Template mode: Raw final_response from LLM: 'Here is the response:
+
+Hello,
+
+### **Observation:**
+The customer's issue appears to be resolved, but I noticed that the other number (5165401514) had a plan and was replaced with an eSIM. This decision was made in case the customer wants to use the balance associated with this number.
+
+### **Actions Taken:**
+- Corrected the initial issue
+- Replaced pSIM 8901240384115087727 with an eSIM for the number 5165401514
+
+### **Recommendations:**
+- If the customer wishes to utilize the balance associated with the number 5165401514, they can either scan the QR code using a compatible phone or order a pSIM.
+- The desired setup for the number 5164353696 has been made on the pSIM 8901240384115087727.
+
+Regards,
+Paul'
+2025-12-31 15:00:59,725 - INFO - [APP] - Template mode: Final response after post-processing: 'Here is the response:
+
+Hello,
+
+### **Observation:**
+The customer's issue appears to be resolved, but I noticed that the other number (5165401514) had a plan and was replaced with an eSIM. This decision was made in case the customer wants to use the balance associated with this number.
+
+### **Actions Taken:**
+- Corrected the initial issue
+- Replaced pSIM 8901240384115087727 with an eSIM for the number 5165401514
+
+### **Recommendations:**
+- If the customer wishes to utilize the balance associated with the number 5165401514, they can either scan the QR code using a compatible phone or order a pSIM.
+- The desired setup for the number 5164353696 has been made on the pSIM 8901240384115087727.
+
+Regards,
+Paul'
+2025-12-31 15:00:59,725 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here is the response:\n\nHello,\n\n### **Observation:**\nThe customer's issue appears to be resolved, but I noticed that the other number (5165401514) had a plan and was replaced with an eSIM. This decision was made in case the customer wants to use the balance associated with this number.\n\n### **Actions Taken:**\n- Corrected the initial issue\n- Replaced pSIM 8901240384115087727 with an eSIM for the number 5165401514\n\n### **Recommendations:**\n- If the customer wishes to utilize the balance associated with the number 5165401514, they can either scan the QR code using a compatible phone or order a pSIM.\n- The desired setup for the number 5164353696 has been made on the pSIM 8901240384115087727.\n\nRegards,\nPaul"}'
+2025-12-31 15:02:11,667 - INFO - [APP] - Initial loading of resources...
+2025-12-31 15:02:11,667 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 15:02:11,668 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 15:02:11,668 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 15:04:01,100 - INFO - [APP] - Template mode: Messages sent to LLM: [
+  {
+    "role": "system",
+    "content": "You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is Paul.\n\nYou MUST follow this template EXACTLY:\nHello,\n\nObservations:\n[Provide a clear, concise summary of the situation based on input notes.]\n\nActions Taken:\n[List specific, brief actions taken or initiated.]\n\nRecommendations:\n[Offer precise, actionable next steps or advice.]\n\nRegards,\nPaul\n"
+  },
+  {
+    "role": "user",
+    "content": "Rephrase the following notes into the template provided:\n\nInput Notes: \"I have corrected the issue the customer has mentioned, but  since the other number 5165401514 had a plan, i deccided no to cancel it, but instead replaced the pSIM 8901240384115087727 with an eSIM in case the customer wants to use that balance, either scan the qr with a compatible phone, or order a pSIM. \n\nas for the desired setup 5164353696 on the pSIM 8901240384115087727 has been made\n\n\""
+  }
+]
+2025-12-31 15:04:13,759 - ERROR - [APP] - An error occurred during streaming process: bad escape \p at position 17
+Traceback (most recent call last):
+  File "/Users/paul/rephraser_project/app.py", line 288, in thinking_process_stream
+    final_response = re.sub(r'[^\x20-\x7E\s\w\d\p{L}\p{N}\p{P}]', ' ', final_response).strip()
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/re/__init__.py", line 208, in sub
+    return _compile(pattern, flags).sub(repl, string, count)
+           ~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/re/__init__.py", line 350, in _compile
+    p = _compiler.compile(pattern, flags)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/re/_compiler.py", line 762, in compile
+    p = _parser.parse(p, flags)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/re/_parser.py", line 973, in parse
+    p = _parse_sub(source, state, flags & SRE_FLAG_VERBOSE, 0)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/re/_parser.py", line 460, in _parse_sub
+    itemsappend(_parse(source, state, verbose, nested + 1,
+                ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       not nested and not items))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/re/_parser.py", line 573, in _parse
+    code1 = _class_escape(source, this)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/re/_parser.py", line 366, in _class_escape
+    raise source.error('bad escape %s' % escape, len(escape))
+re.PatternError: bad escape \p at position 17
+2025-12-31 15:14:42,092 - INFO - [APP] - Initial loading of resources...
+2025-12-31 15:14:42,092 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 15:14:42,094 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 15:14:42,094 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 15:14:55,638 - INFO - [APP] - Template mode: Messages sent to LLM: [
+  {
+    "role": "system",
+    "content": "You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is Paul.\n\nYou MUST follow this template EXACTLY:\nHello,\n\nObservations:\n[Provide a clear, concise summary of the situation based on input notes.]\n\nActions Taken:\n[List specific, brief actions taken or initiated.]\n\nRecommendations:\n[Offer precise, actionable next steps or advice.]\n\nRegards,\nPaul\n"
+  },
+  {
+    "role": "user",
+    "content": "Rephrase the following notes into the template provided:\n\nInput Notes: \"I have corrected the issue the customer has mentioned, but  since the other number 5165401514 had a plan, i deccided no to cancel it, but instead replaced the pSIM 8901240384115087727 with an eSIM in case the customer wants to use that balance, either scan the qr with a compatible phone, or order a pSIM. \n\nas for the desired setup 5164353696 on the pSIM 8901240384115087727 has been made\n\""
+  }
+]
+2025-12-31 15:15:14,557 - INFO - [APP] - Template mode: Raw final_response from LLM (sanitized): 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer had an issue that was corrected, and I decided not to cancel their plan with number 5165401514. Instead, I replaced the physical SIM card (pSIM) 8901240384115087727 with an eSIM, providing the option for the customer to use the remaining balance by scanning a QR code with a compatible phone or ordering a new pSIM.
+
+Actions Taken: The desired setup for number 5164353696 on the pSIM 8901240384115087727 has been made.
+
+Recommendations: If the customer wishes to use the remaining balance, they can scan the QR code with a compatible phone or order a new pSIM card.
+
+Regards,
+Paul'
+2025-12-31 15:15:14,558 - INFO - [APP] - Template mode: Final response after post-processing: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer had an issue that was corrected, and I decided not to cancel their plan with number 5165401514. Instead, I replaced the physical SIM card (pSIM) 8901240384115087727 with an eSIM, providing the option for the customer to use the remaining balance by scanning a QR code with a compatible phone or ordering a new pSIM.
+
+Actions Taken: The desired setup for number 5164353696 on the pSIM 8901240384115087727 has been made.
+
+Recommendations: If the customer wishes to use the remaining balance, they can scan the QR code with a compatible phone or order a new pSIM card.
+
+Regards,
+Paul'
+2025-12-31 15:15:14,559 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here is the rephrased template:\n\nHello,\n\nObservations: The customer had an issue that was corrected, and I decided not to cancel their plan with number 5165401514. Instead, I replaced the physical SIM card (pSIM) 8901240384115087727 with an eSIM, providing the option for the customer to use the remaining balance by scanning a QR code with a compatible phone or ordering a new pSIM.\n\nActions Taken: The desired setup for number 5164353696 on the pSIM 8901240384115087727 has been made.\n\nRecommendations: If the customer wishes to use the remaining balance, they can scan the QR code with a compatible phone or order a new pSIM card.\n\nRegards,\nPaul"}'
+2025-12-31 15:16:23,536 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2025-12-31 15:16:26,950 - INFO - [APP] - Extracted and sanitized keywords: 'eSIM pSIM QR code phone plan balance'
+2025-12-31 15:16:26,953 - INFO - [APP] - Performing targeted web search for: '(eSIM pSIM QR code phone plan balance) AND (GMS OR cellphone service OR "US mvno" OR telecommunications) (site:reddit.com OR site:howardforums.com OR site:xda-developers.com)'
+2025-12-31 15:16:27,935 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=%28eSIM%20pSIM%20QR%20code%20phone%20plan%20balance%29%20AND%20%28GMS%20OR%20cellphone%20service%20OR%20%22US%20mvno%22%20OR%20telecommunications%29%20%28site%3Areddit.com%20OR%20site%3Ahowardforums.com%20OR%20site%3Axda-developers.com%29 200
+2025-12-31 15:16:28,016 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=%28eSIM+pSIM+QR+code+phone+plan+balance%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&limit=1 200
+2025-12-31 15:16:29,470 - INFO - [APP] - response: https://search.brave.com/search?q=%28eSIM+pSIM+QR+code+phone+plan+balance%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&source=web 200
+2025-12-31 15:16:29,599 - INFO - [APP] - Web search completed successfully.
+2025-12-31 15:16:55,515 - INFO - [APP] - Template mode: Raw final_response from LLM (sanitized): 'Here is a comprehensive, clear, and streamlined response:
+
+Hello,
+
+### **Observation:**
+The customer's issue has been corrected by replacing the pSIM with an eSIM for number 5165401514. However, since this number had an active plan, it was decided not to cancel it but instead leave the pSIM/eSIM configuration in place for future use.
+
+### **Actions Taken:**
+- Corrected the issue by replacing the pSIM with an eSIM.
+- Preserved the existing plan for number 5165401514.
+
+### **Recommendations:**
+- If the customer wants to utilize the remaining balance, they can either scan the QR code using a compatible phone or order a new pSIM.
+- The desired setup for number 5164353696 on pSIM 8901240384115087727 has been confirmed.
+
+Regards,
+Paul'
+2025-12-31 15:16:55,516 - INFO - [APP] - Template mode: Final response after post-processing: 'Here is a comprehensive, clear, and streamlined response:
+
+Hello,
+
+### **Observation:**
+The customer's issue has been corrected by replacing the pSIM with an eSIM for number 5165401514. However, since this number had an active plan, it was decided not to cancel it but instead leave the pSIM/eSIM configuration in place for future use.
+
+### **Actions Taken:**
+- Corrected the issue by replacing the pSIM with an eSIM.
+- Preserved the existing plan for number 5165401514.
+
+### **Recommendations:**
+- If the customer wants to utilize the remaining balance, they can either scan the QR code using a compatible phone or order a new pSIM.
+- The desired setup for number 5164353696 on pSIM 8901240384115087727 has been confirmed.
+
+Regards,
+Paul'
+2025-12-31 15:16:55,516 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here is a comprehensive, clear, and streamlined response:\n\nHello,\n\n### **Observation:**\nThe customer's issue has been corrected by replacing the pSIM with an eSIM for number 5165401514. However, since this number had an active plan, it was decided not to cancel it but instead leave the pSIM/eSIM configuration in place for future use.\n\n### **Actions Taken:**\n- Corrected the issue by replacing the pSIM with an eSIM.\n- Preserved the existing plan for number 5165401514.\n\n### **Recommendations:**\n- If the customer wants to utilize the remaining balance, they can either scan the QR code using a compatible phone or order a new pSIM.\n- The desired setup for number 5164353696 on pSIM 8901240384115087727 has been confirmed.\n\nRegards,\nPaul"}'
+2025-12-31 16:23:27,181 - INFO - [APP] - Initial loading of resources...
+2025-12-31 16:23:27,181 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 16:23:27,183 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 16:23:27,183 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 16:23:50,449 - INFO - [APP] - Template mode: Messages sent to LLM: [
+  {
+    "role": "system",
+    "content": "You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is Paul.\n\nYou MUST follow this template EXACTLY:\nHello,\n\nObservations:\n[Provide a clear, concise summary of the situation based on input notes.]\n\nActions Taken:\n[List specific, brief actions taken or initiated.]\n\nRecommendations:\n[Offer precise, actionable next steps or advice.]\n\nRegards,\nPaul\n"
+  },
+  {
+    "role": "user",
+    "content": "Rephrase the following notes into the template provided:\n\nInput Notes: \"I have corrected the issue the customer has mentioned, but  since the other number 5165401514 had a plan, i deccided no to cancel it, but instead replaced the pSIM 8901240384115087727 with an eSIM in case the customer wants to use that balance, either scan the qr with a compatible phone, or order a pSIM. \n\nas for the desired setup 5164353696 on the pSIM 8901240384115087727 has been made\n\""
+  }
+]
+2025-12-31 16:24:06,550 - INFO - [APP] - Template mode: Raw final_response from LLM (sanitized): 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer's issue was corrected, and it was decided not to cancel the other number (5165401514) with a plan. Instead, the pSIM (8901240384115087727) was replaced with an eSIM for future balance usage.
+
+Actions Taken: The desired setup for number 5164353696 has been made on the new pSIM (8901240384115087727).
+
+Recommendations: If the customer wants to use the balance, they can either scan the QR code with a compatible phone or order a physical SIM card.
+
+Regards,
+Paul'
+2025-12-31 16:24:06,554 - INFO - [APP] - Template mode: Final response after post-processing: 'Here is the rephrased template:
+
+Hello,
+
+Observations: The customer's issue was corrected, and it was decided not to cancel the other number (5165401514) with a plan. Instead, the pSIM (8901240384115087727) was replaced with an eSIM for future balance usage.
+
+Actions Taken: The desired setup for number 5164353696 has been made on the new pSIM (8901240384115087727).
+
+Recommendations: If the customer wants to use the balance, they can either scan the QR code with a compatible phone or order a physical SIM card.
+
+Regards,
+Paul'
+2025-12-31 16:24:06,556 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here is the rephrased template:\n\nHello,\n\nObservations: The customer's issue was corrected, and it was decided not to cancel the other number (5165401514) with a plan. Instead, the pSIM (8901240384115087727) was replaced with an eSIM for future balance usage.\n\nActions Taken: The desired setup for number 5164353696 has been made on the new pSIM (8901240384115087727).\n\nRecommendations: If the customer wants to use the balance, they can either scan the QR code with a compatible phone or order a physical SIM card.\n\nRegards,\nPaul"}'
+2025-12-31 20:47:39,993 - INFO - [APP] - Initial loading of resources...
+2025-12-31 20:47:39,993 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 20:47:39,994 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 20:47:39,994 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 20:49:07,947 - INFO - [APP] - Performing targeted web search for: '(t-mobile, LTE, CSC, Samsung, Compatibility) AND (GMS OR cellphone service OR "US mvno" OR telecommunications) (site:reddit.com OR site:howardforums.com OR site:xda-developers.com)'
+2025-12-31 20:49:08,507 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=%28t-mobile%2C%20LTE%2C%20CSC%2C%20Samsung%2C%20Compatibility%29%20AND%20%28GMS%20OR%20cellphone%20service%20OR%20%22US%20mvno%22%20OR%20telecommunications%29%20%28site%3Areddit.com%20OR%20site%3Ahowardforums.com%20OR%20site%3Axda-developers.com%29 200
+2025-12-31 20:49:08,697 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=%28t-mobile%2C+LTE%2C+CSC%2C+Samsung%2C+Compatibility%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&limit=1 200
+2025-12-31 20:49:09,270 - INFO - [APP] - response: https://yandex.com/search/site/?text=%28t-mobile%2C+LTE%2C+CSC%2C+Samsung%2C+Compatibility%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&web=1&searchid=3402302 200
+2025-12-31 20:49:10,106 - INFO - [APP] - HTTP Request: POST https://html.duckduckgo.com/html/ "HTTP/2 200 OK"
+2025-12-31 20:49:11,230 - INFO - [APP] - response: https://search.brave.com/search?q=%28t-mobile%2C+LTE%2C+CSC%2C+Samsung%2C+Compatibility%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&source=web 200
+2025-12-31 20:49:11,243 - INFO - [APP] - Web search completed successfully.
+2025-12-31 20:49:40,646 - INFO - [APP] - Template mode: Raw final_response from LLM (sanitized): 'Here is a comprehensive, concise, and streamlined response:
+
+Hello,
+
+**Observation:**  
+The issue appears to be caused by the Samsung firmware's CSC (Country Specific Code) settings, which are preventing the device from properly registering on our network. This is likely due to the phone being originally designed for AT&T, which could be causing restrictions.
+
+**Actions Taken:**
+1. Confirmed that the device's hardware is compatible with our network.
+2. Noted that the device is unable to register properly, suggesting CSC-related issues.
+
+**Recommendations:**
+1. Request the customer to provide their current CSC values to assess potential solutions.
+2. Advise them to explore alternative devices or MVNO options, as the current phone's firmware may not be compatible with our network.
+3. Consider using a different carrier, such as T-Mobile, which might have more flexible compatibility requirements.
+
+Regards,
+Paul'
+2025-12-31 20:49:40,648 - INFO - [APP] - Template mode: Final response after post-processing: 'Here is a comprehensive, concise, and streamlined response:
+
+Hello,
+
+**Observation:**  
+The issue appears to be caused by the Samsung firmware's CSC (Country Specific Code) settings, which are preventing the device from properly registering on our network. This is likely due to the phone being originally designed for AT&T, which could be causing restrictions.
+
+**Actions Taken:**
+1. Confirmed that the device's hardware is compatible with our network.
+2. Noted that the device is unable to register properly, suggesting CSC-related issues.
+
+**Recommendations:**
+1. Request the customer to provide their current CSC values to assess potential solutions.
+2. Advise them to explore alternative devices or MVNO options, as the current phone's firmware may not be compatible with our network.
+3. Consider using a different carrier, such as T-Mobile, which might have more flexible compatibility requirements.
+
+Regards,
+Paul'
+2025-12-31 20:49:40,649 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here is a comprehensive, concise, and streamlined response:\n\nHello,\n\n**Observation:**  \nThe issue appears to be caused by the Samsung firmware's CSC (Country Specific Code) settings, which are preventing the device from properly registering on our network. This is likely due to the phone being originally designed for AT&T, which could be causing restrictions.\n\n**Actions Taken:**\n1. Confirmed that the device's hardware is compatible with our network.\n2. Noted that the device is unable to register properly, suggesting CSC-related issues.\n\n**Recommendations:**\n1. Request the customer to provide their current CSC values to assess potential solutions.\n2. Advise them to explore alternative devices or MVNO options, as the current phone's firmware may not be compatible with our network.\n3. Consider using a different carrier, such as T-Mobile, which might have more flexible compatibility requirements.\n\nRegards,\nPaul"}'
+2025-12-31 21:13:26,693 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-31 21:13:26,694 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-31 21:13:29,407 - INFO - [APP] - Initial loading of resources...
+2025-12-31 21:13:29,407 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 21:13:29,408 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 21:13:29,408 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 22:05:43,918 - INFO - [APP] - Use pytorch device_name: mps
+2025-12-31 22:05:43,918 - INFO - [APP] - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-12-31 22:05:46,814 - INFO - [APP] - Initial loading of resources...
+2025-12-31 22:05:46,815 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2025-12-31 22:05:46,816 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2025-12-31 22:05:46,816 - INFO - [APP] - Initial resources loaded successfully.
+2025-12-31 22:05:53,452 - INFO - [APP] - Performing targeted web search for: '(t-mobile, LTE, CSC, Samsung, Compatibility, t-mobile compatible, tello) AND (GMS OR cellphone service OR "US mvno" OR telecommunications) (site:reddit.com OR site:howardforums.com OR site:xda-developers.com)'
+2025-12-31 22:05:53,838 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=%28t-mobile%2C%20LTE%2C%20CSC%2C%20Samsung%2C%20Compatibility%2C%20t-mobile%20compatible%2C%20tello%29%20AND%20%28GMS%20OR%20cellphone%20service%20OR%20%22US%20mvno%22%20OR%20telecommunications%29%20%28site%3Areddit.com%20OR%20site%3Ahowardforums.com%20OR%20site%3Axda-developers.com%29 200
+2025-12-31 22:05:54,054 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=%28t-mobile%2C+LTE%2C+CSC%2C+Samsung%2C+Compatibility%2C+t-mobile+compatible%2C+tello%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&limit=1 200
+2025-12-31 22:05:54,593 - INFO - [APP] - response: https://www.mojeek.com/search?q=%28t-mobile%2C+LTE%2C+CSC%2C+Samsung%2C+Compatibility%2C+t-mobile+compatible%2C+tello%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29 403
+2025-12-31 22:05:54,927 - INFO - [APP] - response: https://consent.google.com/ml?continue=https://www.google.com/search%3Fq%3D%2528t-mobile%252C%2BLTE%252C%2BCSC%252C%2BSamsung%252C%2BCompatibility%252C%2Bt-mobile%2Bcompatible%252C%2Btello%2529%2BAND%2B%2528GMS%2BOR%2Bcellphone%2Bservice%2BOR%2B%2522US%2Bmvno%2522%2BOR%2Btelecommunications%2529%2B%2528site%253Areddit.com%2BOR%2Bsite%253Ahowardforums.com%2BOR%2Bsite%253Axda-developers.com%2529%26filter%3D1%26start%3D0%26hl%3Den-US%26lr%3Dlang_en%26cr%3DcountryUS&gl=RO&m=0&pc=srp&uxe=none&cm=2&hl=en&src=1 200
+2025-12-31 22:05:55,600 - INFO - [APP] - HTTP Request: POST https://html.duckduckgo.com/html/ "HTTP/2 200 OK"
+2025-12-31 22:05:56,828 - INFO - [APP] - response: https://search.brave.com/search?q=%28t-mobile%2C+LTE%2C+CSC%2C+Samsung%2C+Compatibility%2C+t-mobile+compatible%2C+tello%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&source=web 200
+2025-12-31 22:05:56,839 - INFO - [APP] - Web search completed successfully.
+2025-12-31 22:06:21,860 - INFO - [APP] - Template mode: Raw final_response from LLM (sanitized): 'Here's a comprehensive, concise, and streamlined response:
+
+Hello,
+
+**Observation:**  
+The issue appears to be related to the Samsung A5 device's firmware, specifically the CSC (Common Supporter Code) setting by Samsung, which is preventing proper registration on our network. Although the device is hardware compatible, the CSC code may be causing restrictions that prevent full functionality.
+
+**Actions Taken:**
+1. Reviewed web search results to gather relevant information about CDMA and GSM networks.
+2. Noted that T-Mobile's MVNOs, such as Simple Mobile, Straight Talk, and Net10, can access T-Mobile LTE network, which may help in troubleshooting the issue.
+
+**Recommendations:**  
+1. Request the customer to provide their CSC values to determine if the phone is locked or restricted.
+2. Advise them to check if their device is compatible with our network by using a different device, as the current phone's firmware settings might be causing the issue.
+3. If the CSC values are provided, we can assess potential solutions and work towards resolving the registration issue.
+
+Regards,
+Paul'
+2025-12-31 22:06:21,861 - INFO - [APP] - Template mode: Final response after post-processing: 'Here's a comprehensive, concise, and streamlined response:
+
+Hello,
+
+**Observation:**  
+The issue appears to be related to the Samsung A5 device's firmware, specifically the CSC (Common Supporter Code) setting by Samsung, which is preventing proper registration on our network. Although the device is hardware compatible, the CSC code may be causing restrictions that prevent full functionality.
+
+**Actions Taken:**
+1. Reviewed web search results to gather relevant information about CDMA and GSM networks.
+2. Noted that T-Mobile's MVNOs, such as Simple Mobile, Straight Talk, and Net10, can access T-Mobile LTE network, which may help in troubleshooting the issue.
+
+**Recommendations:**  
+1. Request the customer to provide their CSC values to determine if the phone is locked or restricted.
+2. Advise them to check if their device is compatible with our network by using a different device, as the current phone's firmware settings might be causing the issue.
+3. If the CSC values are provided, we can assess potential solutions and work towards resolving the registration issue.
+
+Regards,
+Paul'
+2025-12-31 22:06:21,862 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here's a comprehensive, concise, and streamlined response:\n\nHello,\n\n**Observation:**  \nThe issue appears to be related to the Samsung A5 device's firmware, specifically the CSC (Common Supporter Code) setting by Samsung, which is preventing proper registration on our network. Although the device is hardware compatible, the CSC code may be causing restrictions that prevent full functionality.\n\n**Actions Taken:**\n1. Reviewed web search results to gather relevant information about CDMA and GSM networks.\n2. Noted that T-Mobile's MVNOs, such as Simple Mobile, Straight Talk, and Net10, can access T-Mobile LTE network, which may help in troubleshooting the issue.\n\n**Recommendations:**  \n1. Request the customer to provide their CSC values to determine if the phone is locked or restricted.\n2. Advise them to check if their device is compatible with our network by using a different device, as the current phone's firmware settings might be causing the issue.\n3. If the CSC values are provided, we can assess potential solutions and work towards resolving the registration issue.\n\nRegards,\nPaul"}'
+2025-12-31 22:07:05,839 - INFO - [APP] - Performing targeted web search for: '(t-mobile, LTE, CSC, Samsung, Compatibility, t-mobile compatible, tello) AND (GMS OR cellphone service OR "US mvno" OR telecommunications) (site:reddit.com OR site:howardforums.com OR site:xda-developers.com)'
+2025-12-31 22:07:06,104 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=%28t-mobile%2C%20LTE%2C%20CSC%2C%20Samsung%2C%20Compatibility%2C%20t-mobile%20compatible%2C%20tello%29%20AND%20%28GMS%20OR%20cellphone%20service%20OR%20%22US%20mvno%22%20OR%20telecommunications%29%20%28site%3Areddit.com%20OR%20site%3Ahowardforums.com%20OR%20site%3Axda-developers.com%29 200
+2025-12-31 22:07:06,179 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=%28t-mobile%2C+LTE%2C+CSC%2C+Samsung%2C+Compatibility%2C+t-mobile+compatible%2C+tello%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&limit=1 200
+2025-12-31 22:07:06,599 - INFO - [APP] - response: https://search.brave.com/search?q=%28t-mobile%2C+LTE%2C+CSC%2C+Samsung%2C+Compatibility%2C+t-mobile+compatible%2C+tello%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&source=web 200
+2025-12-31 22:07:06,621 - INFO - [APP] - Web search completed successfully.
+2025-12-31 22:07:21,093 - INFO - [APP] - Template mode: Raw final_response from LLM (sanitized): 'Here is a comprehensive, concise, and streamlined response:
+
+Hello,
+
+**Observation:**  
+The issue appears to be related to the device's firmware settings, specifically the CSC (Common Support Division) values set by Samsung. This may prevent the A5 phone from properly registering on our network due to compatibility issues.
+
+**Actions Taken:**  
+1. Conducted a web search to gather relevant information about CDMA and GSM networks.
+2. Noted that T-Mobile's MVNOs, such as Simple Mobile, Straight Talk, and Net10, can access T-Mobile LTE with compatible devices.
+
+**Recommendations:**
+1. **Check the CSC values**: This will help determine if the phone is locked or restricted, which may be preventing proper registration on our network.
+2. **Consider using a different device**: If the current phone lacks compatibility to register and operate on our network, it may be more effective to use an alternative device.
+
+Regards,
+Paul'
+2025-12-31 22:07:21,094 - INFO - [APP] - Template mode: Final response after post-processing: 'Here is a comprehensive, concise, and streamlined response:
+
+Hello,
+
+**Observation:**  
+The issue appears to be related to the device's firmware settings, specifically the CSC (Common Support Division) values set by Samsung. This may prevent the A5 phone from properly registering on our network due to compatibility issues.
+
+**Actions Taken:**  
+1. Conducted a web search to gather relevant information about CDMA and GSM networks.
+2. Noted that T-Mobile's MVNOs, such as Simple Mobile, Straight Talk, and Net10, can access T-Mobile LTE with compatible devices.
+
+**Recommendations:**
+1. **Check the CSC values**: This will help determine if the phone is locked or restricted, which may be preventing proper registration on our network.
+2. **Consider using a different device**: If the current phone lacks compatibility to register and operate on our network, it may be more effective to use an alternative device.
+
+Regards,
+Paul'
+2025-12-31 22:07:21,095 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Here is a comprehensive, concise, and streamlined response:\n\nHello,\n\n**Observation:**  \nThe issue appears to be related to the device's firmware settings, specifically the CSC (Common Support Division) values set by Samsung. This may prevent the A5 phone from properly registering on our network due to compatibility issues.\n\n**Actions Taken:**  \n1. Conducted a web search to gather relevant information about CDMA and GSM networks.\n2. Noted that T-Mobile's MVNOs, such as Simple Mobile, Straight Talk, and Net10, can access T-Mobile LTE with compatible devices.\n\n**Recommendations:**\n1. **Check the CSC values**: This will help determine if the phone is locked or restricted, which may be preventing proper registration on our network.\n2. **Consider using a different device**: If the current phone lacks compatibility to register and operate on our network, it may be more effective to use an alternative device.\n\nRegards,\nPaul"}'

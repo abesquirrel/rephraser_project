@@ -48,15 +48,11 @@ if 'generation_complete' not in st.session_state:
     st.session_state.generation_complete = False
 
 # --- SCRIPT RUN START ---
-# If the last run resulted in a successful generation, clear the input text area.
-# This must be done before the widget is rendered.
-if st.session_state.generation_complete:
-    st.session_state.text_input = ""
-    st.session_state.generation_complete = False
+# We no longer clear the input text area after generation to allow the user to iterate.
 
 # --- HELPER FUNCTIONS (UI-specific) ---
 
-def run_generation(text_input, signature_input, enable_web_search, show_thinking, search_keywords):
+def run_generation(text_input, signature_input, enable_web_search, show_thinking, search_keywords, template_mode):
     """Triggers the backend to generate a response and handles the streaming display."""
     st.session_state.thinking_log = []
     thinking_placeholder = st.empty()
@@ -66,11 +62,11 @@ def run_generation(text_input, signature_input, enable_web_search, show_thinking
             'text': text_input,
             'signature': signature_input,
             'enable_web_search': enable_web_search,
-            'search_keywords': search_keywords # Add search_keywords to payload
+            'search_keywords': search_keywords,
+            'template_mode': template_mode
         }
         with requests.post(FLASK_API_URL_REPHRASE, json=payload, stream=True) as response:
             response.raise_for_status()
-            
             for line in response.iter_lines():
                 if line:
                     try:
@@ -84,27 +80,26 @@ def run_generation(text_input, signature_input, enable_web_search, show_thinking
                             st.session_state.history.insert(0, {
                                 'original': text_input,
                                 'rephrased': final_response,
-                                'approved': None
+                                'approved': False
                             })
                             st.session_state.thinking_log = []
                             thinking_placeholder.empty()
-                            # Set flag to clear input on next run
-                            st.session_state.generation_complete = True
                             st.rerun()
                         elif "error" in event:
                             st.error(f"Backend error: {event['error']}")
                             break
                     except json.JSONDecodeError:
-                        st.warning("Received an invalid message from the backend.")
                         continue
                         
     except requests.exceptions.RequestException as e:
-        st.error(f"Connection to backend failed. Is it running? Error: {e}")
+        st.error(f"Frontend: Connection to backend failed. Is it running? Error: {e}")
     except Exception as e:
-        st.error(f"An unexpected error occurred: {e}")
+        st.error(f"Frontend: An unexpected error occurred: {e}")
 
 def handle_regenerate(original_text):
     """Callback to re-trigger the generation for a previous entry."""
+    # We update the session state directly. 
+    # This function will be called as a callback before the widget is re-instantiated.
     st.session_state.text_input = original_text
     st.session_state.regenerate = True
 
@@ -163,11 +158,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("📝 Paul's Rephraser")
-st.write("I'll help you structure and clarify your notes into a professional response. I can optionally search the web for extra context, and you can rate my answers to help me improve.")
-
-
-
 # Card: Your Input
 with st.container(border=True):
     st.markdown("### ✍️ Your Input")
@@ -181,15 +171,40 @@ with st.container(border=True):
     with col_checkbox1:
         show_thinking = st.checkbox("Show thinking process", value=True, key="show_thinking")
     with col_checkbox2:
-        enable_web_search = st.checkbox("Enable online research", value=True, help="Allow the AI to search the web for additional context.", key="enable_web_search")
+        # Initialize session state keys if they don't exist
+        if 'template_mode' not in st.session_state:
+            st.session_state.template_mode = False
+        if 'enable_web_search' not in st.session_state:
+            st.session_state.enable_web_search = True # Default to True as before
 
-    if st.session_state.enable_web_search:
+        # Checkboxes for user interaction
+        template_mode_new = st.checkbox("Rephrase with Template", value=st.session_state.template_mode, key="template_mode_checkbox")
+        enable_web_search_new = st.checkbox("Enable online research", value=st.session_state.enable_web_search, help="Allow the AI to search the web for additional context.", key="enable_web_search_checkbox")
+
+        # Mutual exclusivity logic
+        if template_mode_new != st.session_state.template_mode: # If template_mode_checkbox was just changed
+            st.session_state.template_mode = template_mode_new
+            if st.session_state.template_mode:
+                st.rerun()
+        
+        if enable_web_search_new != st.session_state.enable_web_search: # If enable_web_search_checkbox was just changed
+            st.session_state.enable_web_search = enable_web_search_new
+            if st.session_state.enable_web_search:
+                st.session_state.template_mode = False
+                # Force rerun to update the other checkbox immediately
+                st.rerun()
+
+    # Get the final states from session_state for logic downstream
+    template_mode = st.session_state.template_mode
+    enable_web_search = st.session_state.enable_web_search
+
+    search_keywords = "" # Initialize search_keywords
+    if enable_web_search:
         search_keywords = st.text_input("Optional: Specify search keywords (comma-separated)", key="search_keywords_input", placeholder="e.g., cell phone plans, T-Mobile, rural coverage")
     
     submit_button = st.button("✨ Generate Response", use_container_width=True)
 
 # --- RESPONSE LOGIC ---
-# This block needs to be outside the columns, but still before the history card
 if (submit_button or st.session_state.get('regenerate', False)) and st.session_state.text_input.strip():
     # Reset regenerate flag
     if st.session_state.get('regenerate', False):
@@ -197,75 +212,45 @@ if (submit_button or st.session_state.get('regenerate', False)) and st.session_s
     
     # Access checkbox and signature values from session state, which are now keyed
     show_thinking_val = st.session_state.get('show_thinking', True)
-    enable_web_search_val = st.session_state.get('enable_web_search', True)
+    # Use the 'template_mode' and 'enable_web_search' from the updated session state
+    enable_web_search_val = st.session_state.enable_web_search
+    template_mode_val = st.session_state.template_mode
     signature_val = st.session_state.get('signature_input', 'Paul')
     text_input_val = st.session_state.text_input
-    search_keywords_val = st.session_state.get('search_keywords_input', '')
+    
+    # Ensure search_keywords_val is correctly retrieved based on enable_web_search_val
+    search_keywords_val = st.session_state.get('search_keywords_input', '') if enable_web_search_val else ''
 
-    run_generation(text_input_val, signature_val, enable_web_search_val, show_thinking_val, search_keywords_val)
+    run_generation(text_input_val, signature_val, enable_web_search_val, show_thinking_val, search_keywords_val, template_mode_val)
 
-
-st.markdown("---") # Separator between sections
-
-# Card: Review Responses (full width)
-with st.container(border=True):
-    st.markdown("### 📋 Review Responses")
-    if not st.session_state.history:
-        st.info("Your generated responses will appear here.")
-    else:
-        # Display the latest response prominently
-        latest_item = st.session_state.history[0]
-        with st.container():
-            original_text = str(latest_item.get('original') or '')
-            rephrased_text = str(latest_item.get('rephrased') or '')
-
-            st.markdown(f'<div class="response-card">', unsafe_allow_html=True)
-            st.markdown(f"**Original Notes:**")
-            st.markdown(f"> {original_text}")
-            st.markdown(f"**Generated Response:**")
-            st.markdown(rephrased_text)
-
-            # --- ACTION BUTTONS for latest response ---
-            st.write("") # Spacer
-            cols = st.columns([1, 1, 1, 3])
-            cols[0].button("📋 Copy", key=f"copy_latest", on_click=lambda t=rephrased_text: pyperclip.copy(t), use_container_width=True)
-            if latest_item.get('approved') is not True:
-                cols[1].button("👍 Yes", key=f"approve_latest", on_click=handle_approve, args=(original_text, rephrased_text, 0), help="Was this response helpful?", use_container_width=True)
-            else:
-                cols[1].success("Approved!", icon="✅")
-            if latest_item.get('approved') is not True:
-                cols[2].button("👎 No", key=f"regen_latest", on_click=handle_regenerate, args=(original_text,), help="Regenerate the response for these notes.", use_container_width=True)
-            st.markdown(f'</div>', unsafe_allow_html=True)
-
-        # Display older responses in an expander
-        if len(st.session_state.history) > 1:
-            with st.expander("Previous Responses"):
-                for i, item in enumerate(st.session_state.history[1:]): # Iterate from the second item onwards
-                    # Defensive check for history item structure
-                    if isinstance(item, dict) and 'original' in item and 'rephrased' in item:
-                        with st.container():
-                            original_text = str(item.get('original') or '')
-                            rephrased_text = str(item.get('rephrased') or '')
-
-                            st.markdown(f'<div class="response-card">', unsafe_allow_html=True)
-                            st.markdown(f"**Original Notes:**")
-                            st.markdown(f"> {original_text}")
-                            st.markdown(f"**Generated Response:**")
-                            st.markdown(rephrased_text)
-
-                            # --- ACTION BUTTONS ---
-                            st.write("") # Spacer
-                            cols = st.columns([1, 1, 1, 3])
-                            cols[0].button("📋 Copy", key=f"copy_{i+1}", on_click=lambda t=rephrased_text: pyperclip.copy(t), use_container_width=True) # Use i+1 for unique keys
-                            if item.get('approved') is not True:
-                                cols[1].button("👍 Yes", key=f"approve_{i+1}", on_click=handle_approve, args=(original_text, rephrased_text, i+1), help="Was this response helpful?", use_container_width=True)
-                            else:
-                                cols[1].success("Approved!", icon="✅")
-                            if item.get('approved') is not True:
-                                cols[2].button("👎 No", key=f"regen_{i+1}", on_click=handle_regenerate, args=(original_text,), help="Regenerate the response for these notes.", use_container_width=True)
-                            st.markdown(f'</div>', unsafe_allow_html=True)
-                    else:
-                        st.warning(f"Skipping malformed history item at index {i+1}.")
+# --- DISPLAY HISTORY ---
+for i, item in enumerate(st.session_state.history):
+    with st.container(border=True):
+        st.markdown(f"### 📋 Response {len(st.session_state.history) - i}")
+        
+        # Two columns for Original and Rephrased
+        col_orig, col_reph = st.columns(2)
+        with col_orig:
+            st.markdown("**Original Notes:**")
+            st.info(item['original'])
+        with col_reph:
+            st.markdown("**Rephrased Output:**")
+            st.success(item['rephrased'])
+        
+        # Action buttons
+        col_btn1, col_btn2, col_btn3 = st.columns(3)
+        with col_btn1:
+            if st.button("📋 Copy to Clipboard", key=f"copy_{i}", use_container_width=True):
+                pyperclip.copy(item['rephrased'])
+                st.toast("Copied to clipboard!", icon="✅")
+        with col_btn2:
+            st.button("🔄 Regenerate", key=f"regen_{i}", use_container_width=True, on_click=handle_regenerate, args=(item['original'],))
+        with col_btn3:
+            is_approved = bool(item.get('approved', False))
+            btn_label = "✅ Approved" if is_approved else "👍 Approve & Learn"
+            if st.button(btn_label, key=f"approve_{i}", disabled=is_approved, use_container_width=True):
+                handle_approve(item['original'], item['rephrased'], i)
+                st.rerun()
 
 st.markdown("---") # Separator between sections
 # Card: Knowledge Base Management (Collapsible)
