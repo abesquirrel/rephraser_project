@@ -1,38 +1,14 @@
-import faiss
-import numpy as np
-import pickle
 import requests
 import json
 import sys
+from core import find_similar_examples, rephrase_text_cli
+from config import TOP_K_EXAMPLES
+
 from sentence_transformers import SentenceTransformer
 
-# --- CONFIGURATION ---
-# Use the /api/chat endpoint, which is more standard in recent Ollama versions.
-OLLAMA_API_URL = "http://localhost:11434/api/chat"
-OLLAMA_MODEL = "phi3:mini" # Corrected model name
-FAISS_INDEX_PATH = "faiss_index.bin"
-REPHRASED_TEXTS_PATH = "rephrased_texts.pkl"
-TOP_K_EXAMPLES = 3
-
-# --- LOAD RESOURCES ---
-
-try:
-    index = faiss.read_index(FAISS_INDEX_PATH)
-    with open(REPHRASED_TEXTS_PATH, "rb") as f:
-        rephrased_texts = pickle.load(f)
-    embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-except FileNotFoundError as e:
-    print(f"Error: Could not load resource file. {e}")
-    print("Please make sure you have run the 'create_kb.py' script first.")
-    sys.exit(1)
+embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # --- CORE FUNCTIONS ---
-
-def find_similar_examples(text):
-    query_embedding = embedding_model.encode([text]).astype('float32')
-    distances, indices = index.search(query_embedding, TOP_K_EXAMPLES)
-    retrieved_examples = [rephrased_texts[i] for i in indices[0]]
-    return retrieved_examples
 
 def build_chat_messages(original_text, examples):
     """
@@ -62,31 +38,6 @@ Original Message: "{original_text}"
         {"role": "user", "content": user_prompt}
     ]
 
-def rephrase_text(messages):
-    """
-    Sends the chat messages to the Ollama API and returns the rephrased text.
-    """
-    try:
-        payload = {
-            "model": OLLAMA_MODEL,
-            "messages": messages,
-            "stream": False,
-        }
-        
-        print("\nSending request to Ollama via /api/chat...")
-        
-        response = requests.post(OLLAMA_API_URL, json=payload)
-        response.raise_for_status()
-        
-        response_data = response.json()
-        return response_data.get("message", {}).get("content", "Error: No response content from model.").strip()
-        
-    except requests.exceptions.RequestException as e:
-        print(f"\nError connecting to Ollama API at {OLLAMA_API_URL}")
-        print(f"Please ensure Ollama is running and the model '{OLLAMA_MODEL}' is available.")
-        print(f"Details: {e}")
-        return None
-
 # --- MAIN EXECUTION ---
 
 if __name__ == "__main__":
@@ -100,9 +51,9 @@ if __name__ == "__main__":
         print("No input text provided. Exiting.")
         sys.exit(0)
 
-    similar_examples = find_similar_examples(input_text)
+    similar_examples = find_similar_examples(input_text, embedding_model)
     chat_messages = build_chat_messages(input_text, similar_examples)
-    rephrased_output = rephrase_text(chat_messages)
+    rephrased_output = rephrase_text_cli(chat_messages)
     
     if rephrased_output:
         print("\n" + "="*20 + " REPHRASED TEXT " + "="*20)

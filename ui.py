@@ -6,7 +6,6 @@ import json
 import pyperclip
 import socket
 from app import run_app
-from utils import load_and_process_file # Import the helper function
 
 # --- HELPER FUNCTIONS ---
 

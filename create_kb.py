@@ -3,6 +3,7 @@ import faiss
 import numpy as np
 import pickle
 from sentence_transformers import SentenceTransformer
+from config import KNOWLEDGE_BASE_CSV, FAISS_INDEX_PATH, REPHRASED_TEXTS_PATH
 
 # Use the same lightweight, all-purpose model for creating the embeddings.
 embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -16,14 +17,14 @@ def create_and_store_faiss_index():
     rephrased_texts = []
     
     try:
-        with open('knowledge_base.csv', 'r', encoding='utf-8') as f:
+        with open(KNOWLEDGE_BASE_CSV, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 original_texts.append(row['original_text'])
                 rephrased_texts.append(row['rephrased_text'])
 
     except FileNotFoundError:
-        print("Error: 'knowledge_base.csv' not found. Please make sure the file exists.")
+        print(f"Error: '{KNOWLEDGE_BASE_CSV}' not found. Please make sure the file exists.")
         return
 
     if not original_texts:
@@ -46,10 +47,10 @@ def create_and_store_faiss_index():
     index.add(embeddings)
     
     # Save the index to a file.
-    faiss.write_index(index, "faiss_index.bin")
+    faiss.write_index(index, FAISS_INDEX_PATH)
     
     # Save the rephrased texts list to a separate file.
-    with open("rephrased_texts.pkl", "wb") as f:
+    with open(REPHRASED_TEXTS_PATH, "wb") as f:
         pickle.dump(rephrased_texts, f)
         
     print(f"Successfully created and saved FAISS index with {index.ntotal} vectors.")

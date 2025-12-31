@@ -13,20 +13,23 @@ import io # Added to resolve NameError
 from flask import Flask, request, jsonify, Response, stream_with_context
 from sentence_transformers import SentenceTransformer
 from ddgs import DDGS # UPDATED: Use the new ddgs library
+from core import find_similar_examples, call_llm
+from config import (
+    OLLAMA_API_URL,
+    OLLAMA_MODEL,
+    FAISS_INDEX_PATH,
+    REPHRASED_TEXTS_PATH,
+    KNOWLEDGE_BASE_CSV,
+    LOG_FILE,
+    TOP_K_EXAMPLES,
+    WEB_SEARCH_RESULT_COUNT,
+    MAX_GENERATION_TOKENS,
+)
 
 # --- Initialize Flask App ---
 app = Flask(__name__)
 
-# --- CONFIGURATION (Unchanged) ---
-OLLAMA_API_URL = "http://localhost:11434/api/chat"
-OLLAMA_MODEL = "llama3:8b-instruct-q3_K_M"
-FAISS_INDEX_PATH = "faiss_index.bin"
-REPHRASED_TEXTS_PATH = "rephrased_texts.pkl"
-KNOWLEDGE_BASE_CSV = "knowledge_base.csv"
-LOG_FILE = "rephraser.log"
-TOP_K_EXAMPLES = 2
-WEB_SEARCH_RESULT_COUNT = 3
-MAX_GENERATION_TOKENS = 750
+embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # --- SETUP LOGGING ---
 # Disable Werkzeug's default logger to reduce redundant output
@@ -44,12 +47,6 @@ logging.basicConfig(
 csv_lock = threading.Lock()
 kb_rebuild_lock = threading.Lock() # New lock for knowledge base rebuild
 
-# Global variables for the FAISS index and rephrased texts
-index = None
-rephrased_texts = []
-embedding_model = None
-
-# --- KNOWLEDGE BASE MANAGEMENT FUNCTIONS ---
 def rebuild_knowledge_base():
     """
     Reads the knowledge base CSV, generates embeddings, and
@@ -126,26 +123,21 @@ def _reload_kb_resources():
             logging.error(f"Error reloading knowledge base resources: {e}", exc_info=True)
             return False
 
-# --- Initial Load of Resources ---
+# Global variables for the FAISS index and rephrased texts
+index = None
+rephrased_texts = []
+
 try:
     logging.info("Initial loading of resources...")
-    embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
     _reload_kb_resources() # Use the new reload function for initial load
     logging.info("Initial resources loaded successfully.")
 except Exception as e:
     logging.critical(f"Fatal error during initial resource loading: {e}", exc_info=True)
     sys.exit(1)
+index = None
+rephrased_texts = []
 
 # --- HELPER FUNCTIONS (Updated Keyword Extraction) ---
-
-def call_ollama(messages, temperature=0.0, max_tokens=None):
-    # ... (Unchanged) ...
-    options = {"temperature": temperature}
-    if max_tokens: options["num_predict"] = max_tokens
-    payload = {"model": OLLAMA_MODEL, "messages": messages, "stream": False, "options": options}
-    response = requests.post(OLLAMA_API_URL, json=payload)
-    response.raise_for_status()
-    return response.json().get("message", {}).get("content", "").strip()
 
 def stream_event(status_message):
     return json.dumps({"status": status_message}) + "\n"
@@ -156,7 +148,7 @@ def extract_keywords(text):
     # UPDATED: Prompt is more explicit about a clean, quote-free query.
     prompt = f"Extract the most important keywords for a web search from the following notes. Return only a clean, simple, quote-free search query. Do not answer the question or add any extra formatting.\n\nNotes: '{text}'"
     messages = [{"role": "user", "content": prompt}]
-    keywords = call_ollama(messages, temperature=0.0, max_tokens=50)
+    keywords = call_llm(messages, temperature=0.0, max_tokens=50)
     
     # UPDATED: Sanitize the output to remove any leading/trailing quotes or whitespace.
     sanitized_keywords = keywords.strip().strip('"\'')
@@ -202,13 +194,6 @@ def perform_web_search(query):
     formatted_results = "\n\n".join([f"Source: {r.get('href', 'N/A')}\nSnippet: {r.get('body', '')}" for r in results])
     logging.info("Web search completed successfully.")
     return formatted_results
-
-# ... (build_structured_prompt and find_similar_examples are unchanged) ...
-def find_similar_examples(text):
-    query_embedding = embedding_model.encode([text]).astype('float32')
-    distances, indices = index.search(query_embedding, TOP_K_EXAMPLES)
-    safe_indices = [i for i in indices[0] if i < len(rephrased_texts)]
-    return [rephrased_texts[i] for i in safe_indices]
 
 def build_structured_prompt(original_text, examples, web_context=None, signature="Paul"):
     system_prompt = f"""You are an expert support analyst. Your task is to analyze user notes, synthesize all provided context (including web search results if available), and generate a **comprehensive, clear, and streamlined** response. Your name is {signature}.
@@ -259,11 +244,11 @@ def handle_rephrase():
                 yield stream_event("Online research is disabled. Skipping web search.")
                 
             yield stream_event("Searching local knowledge base for similar examples...")
-            examples = find_similar_examples(input_text)
+            examples = find_similar_examples(input_text, embedding_model)
             yield stream_event(f"Found {len(examples)} relevant examples.")
             yield stream_event("Synthesizing all information to generate the final response...")
             messages = build_structured_prompt(input_text, examples, web_context, signature=signature)
-            final_response = call_ollama(messages, temperature=0.5, max_tokens=MAX_GENERATION_TOKENS)
+            final_response = call_llm(messages, temperature=0.5, max_tokens=MAX_GENERATION_TOKENS)
             
             # Post-process to ensure "Regards," is always followed by signature on a new line
             # This handles cases where LLM might output "Regards, Signature" or "Regards, \nSignature"
