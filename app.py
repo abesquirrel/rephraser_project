@@ -229,17 +229,23 @@ def handle_rephrase():
         return Response(json.dumps({"error": "Invalid request."}))
     
     input_text = data['text']
-    signature = data.get('signature', 'Paul') # Get signature, default to 'Paul'
-    enable_web_search = data.get('enable_web_search', True) # Default to True if not provided
+    signature = data.get('signature', 'Paul')
+    enable_web_search = data.get('enable_web_search', True)
+    user_search_keywords = data.get('search_keywords', '').strip() # New: Get user-provided keywords
 
     def thinking_process_stream():
-        try: # Re-added try block
+        try:
             web_context = None
             if enable_web_search:
-                yield stream_event("Extracting keywords for smarter search...")
-                keywords = extract_keywords(input_text)
-                yield stream_event(f"Searching online for: '{keywords}'...")
-                web_context = perform_web_search(keywords)
+                if user_search_keywords:
+                    keywords_for_search = user_search_keywords
+                    yield stream_event(f"Using user-provided keywords for web search: '{keywords_for_search}'...")
+                else:
+                    yield stream_event("Extracting keywords for smarter search...")
+                    keywords_for_search = extract_keywords(input_text)
+                
+                yield stream_event(f"Searching online for: '{keywords_for_search}'...")
+                web_context = perform_web_search(keywords_for_search)
             else:
                 yield stream_event("Online research is disabled. Skipping web search.")
                 

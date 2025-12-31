@@ -56,13 +56,18 @@ if st.session_state.generation_complete:
 
 # --- HELPER FUNCTIONS (UI-specific) ---
 
-def run_generation(text_input, signature_input, enable_web_search, show_thinking):
+def run_generation(text_input, signature_input, enable_web_search, show_thinking, search_keywords):
     """Triggers the backend to generate a response and handles the streaming display."""
     st.session_state.thinking_log = []
     thinking_placeholder = st.empty()
     
     try:
-        payload = {'text': text_input, 'signature': signature_input, 'enable_web_search': enable_web_search}
+        payload = {
+            'text': text_input,
+            'signature': signature_input,
+            'enable_web_search': enable_web_search,
+            'search_keywords': search_keywords # Add search_keywords to payload
+        }
         with requests.post(FLASK_API_URL_REPHRASE, json=payload, stream=True) as response:
             response.raise_for_status()
             
@@ -166,20 +171,22 @@ st.write("I'll help you structure and clarify your notes into a professional res
 # Card: Your Input
 with st.container(border=True):
     st.markdown("### ✍️ Your Input")
-    with st.form(key="rephrase_form"):
-        col1, col2 = st.columns(2)
-        with col1:
-            text_input = st.text_area("Your Notes:", height=150, key="text_input", placeholder="e.g., customer wants refund, product defective, processed via order #123")
-        with col2:
-            signature_input = st.text_input("Signature:", value="Paul", key="signature_input")
+    col1, col2 = st.columns(2)
+    with col1:
+        text_input = st.text_area("Your Notes:", height=150, key="text_input", placeholder="e.g., customer wants refund, product defective, processed via order #123")
+    with col2:
+        signature_input = st.text_input("Signature:", value="Paul", key="signature_input")
 
-        col_checkbox1, col_checkbox2 = st.columns(2)
-        with col_checkbox1:
-            show_thinking = st.checkbox("Show thinking process", value=True, key="show_thinking")
-        with col_checkbox2:
-            enable_web_search = st.checkbox("Enable online research", value=True, help="Allow the AI to search the web for additional context.", key="enable_web_search")
-        
-        submit_button = st.form_submit_button("✨ Generate Response", use_container_width=True)
+    col_checkbox1, col_checkbox2 = st.columns(2)
+    with col_checkbox1:
+        show_thinking = st.checkbox("Show thinking process", value=True, key="show_thinking")
+    with col_checkbox2:
+        enable_web_search = st.checkbox("Enable online research", value=True, help="Allow the AI to search the web for additional context.", key="enable_web_search")
+
+    if st.session_state.enable_web_search:
+        search_keywords = st.text_input("Optional: Specify search keywords (comma-separated)", key="search_keywords_input", placeholder="e.g., cell phone plans, T-Mobile, rural coverage")
+    
+    submit_button = st.button("✨ Generate Response", use_container_width=True)
 
 # --- RESPONSE LOGIC ---
 # This block needs to be outside the columns, but still before the history card
@@ -193,8 +200,9 @@ if (submit_button or st.session_state.get('regenerate', False)) and st.session_s
     enable_web_search_val = st.session_state.get('enable_web_search', True)
     signature_val = st.session_state.get('signature_input', 'Paul')
     text_input_val = st.session_state.text_input
+    search_keywords_val = st.session_state.get('search_keywords_input', '')
 
-    run_generation(text_input_val, signature_val, enable_web_search_val, show_thinking_val)
+    run_generation(text_input_val, signature_val, enable_web_search_val, show_thinking_val, search_keywords_val)
 
 
 st.markdown("---") # Separator between sections
@@ -204,42 +212,60 @@ with st.container(border=True):
     st.markdown("### 📋 Review Responses")
     if not st.session_state.history:
         st.info("Your generated responses will appear here.")
+    else:
+        # Display the latest response prominently
+        latest_item = st.session_state.history[0]
+        with st.container():
+            original_text = str(latest_item.get('original') or '')
+            rephrased_text = str(latest_item.get('rephrased') or '')
 
-    for i, item in enumerate(st.session_state.history):
-        # Defensive check for history item structure
-        if isinstance(item, dict) and 'original' in item and 'rephrased' in item:
-            with st.container():
-                original_text = str(item.get('original') or '')
-                rephrased_text = str(item.get('rephrased') or '')
+            st.markdown(f'<div class="response-card">', unsafe_allow_html=True)
+            st.markdown(f"**Original Notes:**")
+            st.markdown(f"> {original_text}")
+            st.markdown(f"**Generated Response:**")
+            st.markdown(rephrased_text)
 
-                st.markdown(f'<div class="response-card">', unsafe_allow_html=True)
+            # --- ACTION BUTTONS for latest response ---
+            st.write("") # Spacer
+            cols = st.columns([1, 1, 1, 3])
+            cols[0].button("📋 Copy", key=f"copy_latest", on_click=lambda t=rephrased_text: pyperclip.copy(t), use_container_width=True)
+            if latest_item.get('approved') is not True:
+                cols[1].button("👍 Yes", key=f"approve_latest", on_click=handle_approve, args=(original_text, rephrased_text, 0), help="Was this response helpful?", use_container_width=True)
+            else:
+                cols[1].success("Approved!", icon="✅")
+            if latest_item.get('approved') is not True:
+                cols[2].button("👎 No", key=f"regen_latest", on_click=handle_regenerate, args=(original_text,), help="Regenerate the response for these notes.", use_container_width=True)
+            st.markdown(f'</div>', unsafe_allow_html=True)
 
-                st.markdown(f"**Original Notes:**")
-                st.markdown(f"> {original_text}")
+        # Display older responses in an expander
+        if len(st.session_state.history) > 1:
+            with st.expander("Previous Responses"):
+                for i, item in enumerate(st.session_state.history[1:]): # Iterate from the second item onwards
+                    # Defensive check for history item structure
+                    if isinstance(item, dict) and 'original' in item and 'rephrased' in item:
+                        with st.container():
+                            original_text = str(item.get('original') or '')
+                            rephrased_text = str(item.get('rephrased') or '')
 
-                st.markdown(f"**Generated Response:**")
-                st.markdown(rephrased_text)
+                            st.markdown(f'<div class="response-card">', unsafe_allow_html=True)
+                            st.markdown(f"**Original Notes:**")
+                            st.markdown(f"> {original_text}")
+                            st.markdown(f"**Generated Response:**")
+                            st.markdown(rephrased_text)
 
-                # --- ACTION BUTTONS ---
-                st.write("") # Spacer
-                cols = st.columns([1, 1, 1, 3])
-
-                # 1. Copy Button
-                cols[0].button("📋 Copy", key=f"copy_{i}", on_click=lambda t=rephrased_text: pyperclip.copy(t), use_container_width=True)
-
-                # 2. Approve Button
-                if item.get('approved') is not True:
-                    cols[1].button("👍 Yes", key=f"approve_{i}", on_click=handle_approve, args=(original_text, rephrased_text, i), help="Was this response helpful?", use_container_width=True)
-                else:
-                    cols[1].success("Approved!", icon="✅")
-
-                # 3. Regenerate/Disapprove Button
-                if item.get('approved') is not True: # Don't show if already approved
-                    cols[2].button("👎 No", key=f"regen_{i}", on_click=handle_regenerate, args=(original_text,), help="Regenerate the response for these notes.", use_container_width=True)
-
-                st.markdown(f'</div>', unsafe_allow_html=True)
-        else:
-            st.warning(f"Skipping malformed history item at index {i}.")
+                            # --- ACTION BUTTONS ---
+                            st.write("") # Spacer
+                            cols = st.columns([1, 1, 1, 3])
+                            cols[0].button("📋 Copy", key=f"copy_{i+1}", on_click=lambda t=rephrased_text: pyperclip.copy(t), use_container_width=True) # Use i+1 for unique keys
+                            if item.get('approved') is not True:
+                                cols[1].button("👍 Yes", key=f"approve_{i+1}", on_click=handle_approve, args=(original_text, rephrased_text, i+1), help="Was this response helpful?", use_container_width=True)
+                            else:
+                                cols[1].success("Approved!", icon="✅")
+                            if item.get('approved') is not True:
+                                cols[2].button("👎 No", key=f"regen_{i+1}", on_click=handle_regenerate, args=(original_text,), help="Regenerate the response for these notes.", use_container_width=True)
+                            st.markdown(f'</div>', unsafe_allow_html=True)
+                    else:
+                        st.warning(f"Skipping malformed history item at index {i+1}.")
 
 st.markdown("---") # Separator between sections
 # Card: Knowledge Base Management (Collapsible)
