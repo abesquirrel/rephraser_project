@@ -153,14 +153,17 @@ def load_knowledge_base():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT original_text, rephrased_text FROM knowledge_bases")
+        cursor.execute("SELECT original_text, rephrased_text, keywords, is_template FROM knowledge_bases")
         rows = cursor.fetchall()
         cursor.close()
         conn.close()
 
         if rows:
             originals = [r[0] for r in rows]
-            texts = [r[1] for r in rows]
+            # Store full record metadata if needed for sophisticated search, 
+            # for now we'll just keep building the index on originals.
+            # You can also combine keywords into the search space.
+            texts = [{"rephrased": r[1], "keywords": r[2], "is_template": bool(r[3])} for r in rows]
             embeddings = embedding_model.encode(originals)
     except Exception as e:
         logger.error(f"DB Load failed: {e}")

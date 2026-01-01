@@ -18,6 +18,8 @@ function rephraserApp() {
         importing: false,
         manualOrig: '',
         manualReph: '',
+        manualKeywords: '',
+        manualIsTemplate: false,
         adding: false,
 
         init() {
@@ -95,6 +97,8 @@ function rephraserApp() {
                                 this.history.unshift({
                                     original: this.inputText,
                                     rephrased: event.data,
+                                    keywords: this.searchKeywords,
+                                    is_template: this.templateMode,
                                     approved: false,
                                     expanded: true,
                                     timestamp: new Date().toISOString()
@@ -123,6 +127,8 @@ function rephraserApp() {
                              this.history.unshift({
                                 original: this.inputText,
                                 rephrased: event.data,
+                                keywords: this.searchKeywords,
+                                is_template: this.templateMode,
                                 approved: false,
                                 expanded: true,
                                 timestamp: new Date().toISOString()
@@ -150,7 +156,12 @@ function rephraserApp() {
 
         async approveEntry(item, idx) {
             console.log('🔍 Approve button clicked! idx:', idx);
-            console.log('Payload:', { original_text: item.original, rephrased_text: item.rephrased });
+            console.log('Payload:', { 
+                original_text: item.original, 
+                rephrased_text: item.rephrased,
+                keywords: item.keywords,
+                is_template: item.is_template
+            });
             
             if (!item.original || !item.rephrased) {
                 console.error('Missing data for approval!');
@@ -169,7 +180,9 @@ function rephraserApp() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         original_text: item.original,
-                        rephrased_text: item.rephrased
+                        rephrased_text: item.rephrased,
+                        keywords: item.keywords,
+                        is_template: item.is_template
                     })
                 });
                 
@@ -219,13 +232,16 @@ function rephraserApp() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         original_text: this.manualOrig,
-                        rephrased_text: this.manualReph
+                        rephrased_text: this.manualReph,
+                        keywords: this.manualKeywords,
+                        is_template: this.manualIsTemplate
                     })
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
                     this.triggerToast('Entry Learned');
                     this.manualOrig = ''; this.manualReph = '';
+                    this.manualKeywords = ''; this.manualIsTemplate = false;
                 }
             } finally { this.adding = false; }
         }

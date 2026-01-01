@@ -36,20 +36,15 @@ class RephraseController extends Controller
         $validated = $request->validate([
             'original_text' => 'required|string',
             'rephrased_text' => 'required|string',
+            'keywords' => 'nullable|string',
+            'is_template' => 'nullable|boolean',
         ]);
 
         // 1. Save to Database (Source of Truth)
         KnowledgeBase::create($validated);
 
-        // 2. Notify AI Service to rebuild index (or add single entry)
-        // We send the new entry so Python doesn't have to query DB immediately if not needed,
-        // but for full consistency, triggering a rebuild is safer.
-        try {
-            Http::post("{$this->aiServiceUrl}/trigger_rebuild");
-        } catch (\Exception $e) {
-            Log::error("Failed to notify AI service: " . $e->getMessage());
-            // We don't fail the request because DB save succeeded.
-        }
+        // 2. Notify AI Service to rebuild index
+        $this->triggerRebuild();
 
         return response()->json(['status' => 'success']);
     }
@@ -62,7 +57,6 @@ class RephraseController extends Controller
             $header = fgetcsv($file);
             
             // Check if first row is a header or data
-            // If it contains "original_text" it's definitely a header
             $isHeader = false;
             if ($header && (stripos($header[0], 'original') !== false || stripos($header[1], 'rephrased') !== false)) {
                 $isHeader = true;
@@ -92,6 +86,8 @@ class RephraseController extends Controller
         if (count($row) >= 2) {
             $original = trim($row[0]);
             $rephrased = trim($row[1]);
+            $keywords = isset($row[2]) ? trim($row[2]) : null;
+            $isTemplate = isset($row[3]) ? filter_var($row[3], FILTER_VALIDATE_BOOLEAN) : false;
             
             // Skip if it looks like a header row
             if (strtolower($original) === 'original_text' || strtolower($rephrased) === 'rephrased_text') {
@@ -101,7 +97,9 @@ class RephraseController extends Controller
             if ($original && $rephrased) {
                 KnowledgeBase::create([
                     'original_text' => $original,
-                    'rephrased_text' => $rephrased
+                    'rephrased_text' => $rephrased,
+                    'keywords' => $keywords,
+                    'is_template' => $isTemplate
                 ]);
             }
         }

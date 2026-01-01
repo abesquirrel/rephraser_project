@@ -165,6 +165,12 @@
                                             <template x-if="item.approved">
                                                 <span class="approved-badge">Saved</span>
                                             </template>
+                                            <template x-if="item.is_template">
+                                                <span class="info-pill" style="font-size: 0.7rem;">📄 Template</span>
+                                            </template>
+                                            <template x-if="item.keywords">
+                                                <span class="info-pill" style="font-size: 0.7rem; opacity: 0.8;" x-text="'🏷️ ' + item.keywords"></span>
+                                            </template>
                                             <span x-show="!item.expanded" class="info-pill" style="opacity: 0.5; font-size: 0.8rem; font-weight: 400;" x-text="item.rephrased.substring(0, 50) + '...'"></span>
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 1rem;">
@@ -224,6 +230,7 @@
                     <div class="input-grid" style="align-items: end;">
                         <div>
                             <label class="label-text">Bulk Import (CSV)</label>
+                            <p class="label-text" style="font-size: 0.7rem; opacity: 0.6; margin-bottom: 0.5rem;">Format: original, rephrased, keywords, is_template(bool)</p>
                             <input type="file" @change="kbFile = $event.target.files[0]" id="kbFileInput" style="font-size: 0.8rem; padding: 0.5rem; border-dashed: true;">
                         </div>
                         <button class="btn btn-ghost" @click="importKB()" :disabled="!kbFile || importing">
@@ -237,7 +244,14 @@
                             <textarea x-model="manualOrig" placeholder="Input example..." rows="3" style="font-size: 0.9rem;"></textarea>
                             <textarea x-model="manualReph" placeholder="Optimal response..." rows="3" style="font-size: 0.9rem;"></textarea>
                         </div>
-                        <button class="btn btn-ghost" @click="addManual()" :disabled="!manualOrig.trim() || !manualReph.trim() || adding">
+                        <div class="input-grid" style="margin-top: 1rem; align-items: center;">
+                            <input type="text" x-model="manualKeywords" placeholder="Keywords (comma separated)..." style="font-size: 0.9rem;">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" x-model="manualIsTemplate">
+                                <span>Is Template?</span>
+                            </label>
+                        </div>
+                        <button class="btn btn-ghost" style="margin-top: 1.5rem;" @click="addManual()" :disabled="!manualOrig.trim() || !manualReph.trim() || adding">
                             Add Training Pair
                         </button>
                     </div>
