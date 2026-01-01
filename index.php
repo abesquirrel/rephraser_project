@@ -6,7 +6,6 @@
 // This bypasses CORS and browser extension interference.
 
 if ($_SERVER['REQUEST_URI'] === '/api/rephrase' || $_SERVER['REQUEST_URI'] === '/api/approve' || $_SERVER['REQUEST_URI'] === '/api/upload_kb') {
-    file_put_contents('proxy.log', date('Y-m-d H:i:s') . " - Proxy Hit: " . $_SERVER['REQUEST_URI'] . "\n", FILE_APPEND);
     $backend_url = 'http://127.0.0.1:5001' . str_replace('/api', '', $_SERVER['REQUEST_URI']);
     
     // Forward headers

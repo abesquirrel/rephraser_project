@@ -20640,3 +20640,27 @@ Steps to change DNS on iPhone 13:
 
 Regards,
 Paul R"
+"lets approach this wwith the options through the VPN and if this has been already tested unsuccessfully, the n lets also proceed with the Cloudflare or Google DNS. in order tp bypass any issues that could be present at the customer's wify network < include instructions for iphone 13>
+","Hello,
+
+Observations: The issue may be related to restrictions or routing problems on the customer s Wi-Fi network, which could be impacting connectivity and related services.
+
+Actions Taken: No backend changes were required at this stage.
+
+Recommendations:
+1. Ask the customer to test the service using a VPN (preferably with a US IP).
+2. If the VPN has already been tested and did not resolve the issue, proceed with changing the DNS settings on iPhone 13 to Cloudflare or Google DNS.
+To change DNS on iPhone 13:
+- Go to Settings   Wi-Fi.
+- Tap the   icon next to the connected Wi-Fi network.
+- Tap Configure DNS.
+- Select Manual.
+- Remove any existing DNS entries.
+- Add one of the following:
+   Google DNS: 8.8.8.8 and 8.8.4.4
+   Cloudflare DNS: 1.1.1.1 and 1.0.0.1
+- Tap Save, then toggle Wi-Fi off and back on, or reboot the phone.
+- Retest the service.
+
+Regards,
+Paul"
