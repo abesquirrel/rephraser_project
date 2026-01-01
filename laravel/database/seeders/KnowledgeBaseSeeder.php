@@ -17,14 +17,12 @@ class KnowledgeBaseSeeder extends Seeder
             return;
         }
 
-        $data = array_map('str_getcsv', file($csvFile));
-        $header = array_shift($data); // Remove header
+        $file = fopen($csvFile, 'r');
+        $header = fgetcsv($file); // Remove header
 
         $count = 0;
-        foreach ($data as $row) {
+        while (($row = fgetcsv($file)) !== false) {
             if (count($row) >= 2) {
-                // Ensure we handle basic quoting/encoding if needed, but str_getcsv should handle standard CSV
-                // Some rows had trailing empties in the 'head' output, so we take index 0 and 1
                 $original = trim($row[0]);
                 $rephrased = trim($row[1]);
 
@@ -32,13 +30,12 @@ class KnowledgeBaseSeeder extends Seeder
                     KnowledgeBase::create([
                         'original_text' => $original,
                         'rephrased_text' => $rephrased,
-                        'created_at' => now(),
-                        'updated_at' => now(),
                     ]);
                     $count++;
                 }
             }
         }
+        fclose($file);
         $this->command->info("Imported $count entries from CSV.");
     }
 }

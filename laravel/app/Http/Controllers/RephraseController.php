@@ -57,33 +57,62 @@ class RephraseController extends Controller
     public function upload_kb(Request $request)
     {
         if ($request->hasFile('file')) {
-            // Handle CSV Import
             $path = $request->file('file')->getRealPath();
-            $data = array_map('str_getcsv', file($path));
-            $header = array_shift($data); // Assuming header exists? Check logic. 
-            // Actually original app expects no header or specific columns? 
-            // Original app used pandas: pd.read_csv(file, header=None, names=['original', 'rephrased'])
+            $file = fopen($path, 'r');
+            $header = fgetcsv($file);
             
-            // Let's assume standard CSV for now.
-            foreach ($data as $row) {
-                if (count($row) >= 2) {
-                    KnowledgeBase::create([
-                        'original_text' => $row[0],
-                        'rephrased_text' => $row[1]
-                    ]);
-                }
+            // Check if first row is a header or data
+            // If it contains "original_text" it's definitely a header
+            $isHeader = false;
+            if ($header && (stripos($header[0], 'original') !== false || stripos($header[1], 'rephrased') !== false)) {
+                $isHeader = true;
             }
+
+            if (!$isHeader && $header) {
+                // If not header, process it as data
+                $this->storeKnowledgeEntry($header);
+            }
+
+            while (($row = fgetcsv($file)) !== false) {
+                $this->storeKnowledgeEntry($row);
+            }
+            fclose($file);
         } elseif ($request->has('original_text')) {
              KnowledgeBase::create($request->all());
         }
 
         // Notify AI
+        $this->triggerRebuild();
+
+        return response()->json(['status' => 'success']);
+    }
+
+    private function storeKnowledgeEntry($row)
+    {
+        if (count($row) >= 2) {
+            $original = trim($row[0]);
+            $rephrased = trim($row[1]);
+            
+            // Skip if it looks like a header row
+            if (strtolower($original) === 'original_text' || strtolower($rephrased) === 'rephrased_text') {
+                return;
+            }
+
+            if ($original && $rephrased) {
+                KnowledgeBase::create([
+                    'original_text' => $original,
+                    'rephrased_text' => $rephrased
+                ]);
+            }
+        }
+    }
+
+    private function triggerRebuild()
+    {
         try {
             Http::post("{$this->aiServiceUrl}/trigger_rebuild");
         } catch (\Exception $e) {
-             Log::error("Failed to notify AI service: " . $e->getMessage());
+            Log::error("Failed to notify AI service: " . $e->getMessage());
         }
-
-        return response()->json(['status' => 'success']);
     }
 }

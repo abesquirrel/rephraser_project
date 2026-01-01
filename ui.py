@@ -5,7 +5,7 @@ import time
 import json
 import pyperclip
 import socket
-from app import run_app
+# from app import run_app # Removed legacy local backend import
 
 # --- HELPER FUNCTIONS ---
 
@@ -17,20 +17,12 @@ def find_free_port():
 
 # --- CONFIGURATION & BACKEND STARTUP ---
 
-if 'backend_port' not in st.session_state:
-    st.session_state['backend_port'] = find_free_port()
-
-if 'backend_started' not in st.session_state:
-    port = st.session_state['backend_port']
-    threading.Thread(target=run_app, args=(port,), daemon=True).start()
-    st.session_state['backend_started'] = True
-    time.sleep(3) # Give backend a moment to start
-
-# Define API URLs using the dynamic port
-port = st.session_state['backend_port']
-FLASK_API_URL_REPHRASE = f"http://localhost:{port}/rephrase"
-FLASK_API_URL_APPROVE = f"http://localhost:{port}/approve"
-FLASK_API_URL_UPLOAD_KB = f"http://localhost:{port}/upload_kb"
+# --- CONFIGURATION ---
+# AI Service is now handled via Laravel proxy at localhost:8000
+API_BASE_URL = "http://localhost:8000/api"
+FLASK_API_URL_REPHRASE = f"{API_BASE_URL}/rephrase"
+FLASK_API_URL_APPROVE = f"{API_BASE_URL}/approve"
+FLASK_API_URL_UPLOAD_KB = f"{API_BASE_URL}/upload_kb"
 
 # --- SESSION STATE INITIALIZATION ---
 if 'history' not in st.session_state:

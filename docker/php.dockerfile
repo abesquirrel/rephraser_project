@@ -19,6 +19,9 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Configure PHP
+COPY docker/php.ini /usr/local/etc/php/conf.d/uploads.ini
+
 WORKDIR /var/www
 
 # Expose port 9000 and start php-fpm server
