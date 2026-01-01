@@ -11,6 +11,7 @@ import re
 import time
 import io # Added to resolve NameError
 from flask import Flask, request, jsonify, Response, stream_with_context
+from flask_cors import CORS
 from sentence_transformers import SentenceTransformer
 from ddgs import DDGS # UPDATED: Use the new ddgs library
 from core import find_similar_examples, call_llm
@@ -28,6 +29,7 @@ from config import (
 
 # --- Initialize Flask App ---
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}}) # Enable CORS for all routes (No credentials with wildcard)
 
 embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -192,11 +194,28 @@ def perform_web_search(query):
         return "No relevant information found online."
     
     formatted_results = "\n\n".join([f"Source: {r.get('href', 'N/A')}\nSnippet: {r.get('body', '')}" for r in results])
+    # Strip markdown bold from snippets just in case
+    formatted_results = formatted_results.replace('**', '')
     logging.info("Web search completed successfully.")
     return formatted_results
 
+def strip_markdown(text):
+    """Removes bold and italic markdown formatting."""
+    # Remove bold (double asterisk or double underscore)
+    text = re.sub(r'(\*\*|__)', '', text)
+    # Remove italics (single asterisk or single underscore)
+    # Note: We use a lookaround to avoid matching single stars in bullet points if they exist, 
+    # but here we just want to strip them as requested.
+    text = re.sub(r'(\*|_)', '', text)
+    return text
+
 def build_template_prompt(original_text, signature="Paul"):
     system_prompt = f"""You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is {signature}.
+
+CRITICAL RULES:
+1. DO NOT include any introductory text like "Here is the response" or "Based on your notes".
+2. DO NOT use any markdown formatting (NO BOLD, NO ITALICS, NO BOLD-ITALICS). No `**` or `_`.
+3. Provide ONLY the rephrased content within the template.
 
 You MUST follow this template EXACTLY:
 Hello,
@@ -213,12 +232,17 @@ Recommendations:
 Regards,
 {signature}
 """
-    user_prompt = f"Rephrase the following notes into the template provided:\n\nInput Notes: \"{original_text}\""
+    user_prompt = f"Rephrase the following notes into the template provided without any introductory text or formatting:\n\nInput Notes: \"{original_text}\""
     return [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
 
 def build_structured_prompt(original_text, examples, web_context=None, signature="Paul"):
-    system_prompt = f"""You are an expert support analyst. Your task is to analyze user notes, synthesize all provided context (including web search results if available), and generate a **comprehensive, clear, and streamlined** response. Your name is {signature}.
+    system_prompt = f"""You are an expert support analyst. Your task is to analyze user notes, synthesize all provided context (including web search results if available), and generate a comprehensive, clear, and streamlined response. Your name is {signature}.
 Your goal is to convey the most relevant information concisely and with proper grammar, directly addressing the user's notes within the structured format. Avoid redundancy, overly complex phrasing, or unnecessary details. Get straight to the point in each section.
+
+CRITICAL RULES:
+1. DO NOT include any introductory text or closing pleasantries beyond the template. 
+2. NO MARKDOWN FORMATTING. No bold (**), no italics (* or _).
+3. Return ONLY the filled-in template.
 
 You MUST follow this template EXACTLY:
 Hello,
@@ -238,7 +262,7 @@ Regards,
     user_prompt = f"Here are examples of how to generate clear, structured responses:\n"
     for i, ex in enumerate(examples): user_prompt += f"\n--- Example {i+1} ---\n{ex}\n"
     if web_context: user_prompt += f"\n--- Context from Web Search ---\nI have performed a web search and found this information. Synthesize this concisely into your response where appropriate:\n{web_context}\n"
-    user_prompt += f"\n--- YOUR TASK ---\nNow, using all the above information, generate a **comprehensive, concise, and streamlined** response in the required format for the following notes. Focus on clarity and relevance.\n\nInput Notes: \"{original_text}\""
+    user_prompt += f"\n--- YOUR TASK ---\nNow, using all the above information, generate a comprehensive, concise, and streamlined response in the required format for the following notes. DO NOT use bold or italics and DO NOT include introductory text.\n\nInput Notes: \"{original_text}\""
     return [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
 
 
@@ -283,18 +307,43 @@ def handle_rephrase():
                 messages = build_structured_prompt(input_text, examples, web_context, signature=signature)
 
             final_response = call_llm(messages, temperature=0.5, max_tokens=MAX_GENERATION_TOKENS)
+            
+            # Post-processing: Remove all markdown formatting (bold, italics)
+            final_response = strip_markdown(final_response)
+            
             # Sanitize final_response immediately after receiving from LLM
             # Keep only printable ASCII and common Unicode characters, replace others with a space
-            # Keep letters (Unicode), numbers, whitespace, and common punctuation
             final_response = re.sub(r'[^\w\s\.\,\!\?\(\)\-\'\"\;\:\&\@\#\$\%\^\*\[\]\{\}\<\>\/\?\\\|`~\+\=]', ' ', final_response).strip()
-            logging.info(f"Template mode: Raw final_response from LLM (sanitized): '{final_response}'")
             
-            # Post-process to ensure "Regards," is always followed by signature on a new line
-            if f"Regards, {signature}" in final_response:
-                final_response = final_response.replace(f"Regards, {signature}", f"Regards,\n{signature}")
-            final_response = re.sub(r"Regards,\s*\n\s*" + re.escape(signature), f"Regards,\n{signature}", final_response, flags=re.IGNORECASE)
+            # Remove frequent introductory phrases just in case the LLM ignored the prompt
+            intro_patterns = [
+                r"^Here is a (comprehensive|concise|streamlined) response:?\n*",
+                r"^Here is the rephrased template:?\n*",
+                r"^Based on your notes:?\n*",
+                r"^Certainly! Here is the response:?\n*"
+            ]
+            for pattern in intro_patterns:
+                final_response = re.sub(pattern, "", final_response, flags=re.IGNORECASE | re.MULTILINE)
+            
             final_response = final_response.strip()
-            logging.info(f"Template mode: Final response after post-processing: '{final_response}'")
+            
+            final_response = final_response.strip()
+            
+            # Post-process to ensure "Regards, [Signature]" is always present
+            # If the response doesn't end with the signature, append it.
+            regards_signature = f"Regards,\n{signature}"
+            if not final_response.strip().endswith(signature):
+                if not "Regards," in final_response:
+                    final_response += f"\n\n{regards_signature}"
+                else:
+                    # Replace existing "Regards," block or just append if logic is messy
+                    final_response = re.sub(r"Regards,?\s*.*$", regards_signature, final_response, flags=re.IGNORECASE | re.DOTALL)
+            else:
+                # Ensure correct formatting if it already exists
+                final_response = re.sub(r"Regards,?\s*" + re.escape(signature), regards_signature, final_response, flags=re.IGNORECASE)
+            
+            final_response = final_response.strip()
+            logging.info(f"Final response after post-processing: '{final_response}'")
 
             json_event = json.dumps({"data": final_response}) + "\n"
             logging.info(f"Template mode: JSON event yielded: '{json_event.strip()}'")
@@ -309,8 +358,7 @@ def run_app(port=5001):
     # use_reloader=False is important for running in a thread
     app.run(host='0.0.0.0', port=port, use_reloader=False)
 
-if __name__ == '__main__':
-    run_app()
+
 
 def _process_new_kb_entries(new_entries):
     """
@@ -416,11 +464,16 @@ def handle_approve():
     if not data or 'original_text' not in data or 'rephrased_text' not in data:
         logging.warning("Received invalid approve request.")
         return jsonify({'error': 'Invalid request fields.'}), 400
-    try:
-        with csv_lock:
-            with open(KNOWLEDGE_BASE_CSV, 'a', newline='', encoding='utf-8') as f: writer = csv.writer(f); writer.writerow([data['original_text'], data['rephrased_text']])
-        logging.info("Approved example saved.")
+    
+    # Use the helper to add the entry AND trigger a background rebuild
+    result = _process_new_kb_entries([[data['original_text'], data['rephrased_text']]])
+    
+    if result['status'] == 'success':
+        logging.info("Approved example saved and rebuild triggered.")
         return jsonify({'status': 'success'})
-    except Exception as e:
-        logging.error(f"Error saving example: {e}", exc_info=True)
-        return jsonify({'error': 'Error saving example.'}), 500
+    else:
+        logging.error(f"Error saving example: {result.get('error')}")
+        return jsonify(result), 500
+
+if __name__ == '__main__':
+    run_app()

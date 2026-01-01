@@ -1,0 +1,50 @@
+2026-01-01 17:57:12,036 - INFO - [APP] - Initial loading of resources...
+2026-01-01 17:57:12,036 - INFO - [APP] - Reloading FAISS index and rephrased texts...
+2026-01-01 17:57:12,037 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
+2026-01-01 17:57:12,037 - INFO - [APP] - Initial resources loaded successfully.
+ * Serving Flask app 'app'
+ * Debug mode: off
+2026-01-01 20:42:05,510 - INFO - [APP] - Template mode: Messages sent to LLM: [
+  {
+    "role": "system",
+    "content": "You are an expert support analyst. Your task is to rephrase the user's notes into the following template. Your name is Paul.\n\nCRITICAL RULES:\n1. DO NOT include any introductory text like \"Here is the response\" or \"Based on your notes\".\n2. DO NOT use any markdown formatting (NO BOLD, NO ITALICS, NO BOLD-ITALICS). No `**` or `_`.\n3. Provide ONLY the rephrased content within the template.\n\nYou MUST follow this template EXACTLY:\nHello,\n\nObservations:\n[Provide a clear, concise summary of the situation based on input notes.]\n\nActions Taken:\n[List specific, brief actions taken or initiated.]\n\nRecommendations:\n[Offer precise, actionable next steps or advice.]\n\nRegards,\nPaul\n"
+  },
+  {
+    "role": "user",
+    "content": "Rephrase the following notes into the template provided without any introductory text or formatting:\n\nInput Notes: \"The phone number 5014222650 was replaced by T-Mobile for this number 501422169. I have only Synced t-mobile with our platform.\n\""
+  }
+]
+2026-01-01 20:42:15,048 - INFO - [APP] - Final response after post-processing: 'Hello,
+
+Observations: The phone number 5014222650 has been replaced by T-Mobile for the original number 501422169.
+
+Actions Taken: Only synced T-Mobile with our platform.
+
+Recommendations:
+
+Regards,
+Paul'
+2026-01-01 20:42:15,049 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Hello,\n\nObservations: The phone number 5014222650 has been replaced by T-Mobile for the original number 501422169.\n\nActions Taken: Only synced T-Mobile with our platform.\n\nRecommendations:\n\nRegards,\nPaul"}'
+2026-01-01 20:49:34,624 - INFO - [APP] - Asking LLM to extract keywords for web search...
+2026-01-01 20:49:41,500 - INFO - [APP] - Extracted and sanitized keywords: 'VPN Cloudflare Google DNS'
+2026-01-01 20:49:41,501 - INFO - [APP] - Performing targeted web search for: '(VPN Cloudflare Google DNS) AND (GMS OR cellphone service OR "US mvno" OR telecommunications) (site:reddit.com OR site:howardforums.com OR site:xda-developers.com)'
+2026-01-01 20:49:42,107 - INFO - [APP] - response: https://en.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=%28VPN%20Cloudflare%20Google%20DNS%29%20AND%20%28GMS%20OR%20cellphone%20service%20OR%20%22US%20mvno%22%20OR%20telecommunications%29%20%28site%3Areddit.com%20OR%20site%3Ahowardforums.com%20OR%20site%3Axda-developers.com%29 200
+2026-01-01 20:49:43,024 - INFO - [APP] - response: https://grokipedia.com/api/typeahead?query=%28VPN+Cloudflare+Google+DNS%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&limit=1 200
+2026-01-01 20:49:43,837 - INFO - [APP] - response: https://consent.yahoo.com/v2/collectConsent?sessionId=3_cc-session_0fc70cff-b652-4088-bb97-96042a0bf095 200
+2026-01-01 20:49:44,682 - INFO - [APP] - response: https://yandex.com/search/site/?text=%28VPN+Cloudflare+Google+DNS%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&web=1&searchid=9304785 200
+2026-01-01 20:49:45,603 - INFO - [APP] - response: https://search.brave.com/search?q=%28VPN+Cloudflare+Google+DNS%29+AND+%28GMS+OR+cellphone+service+OR+%22US+mvno%22+OR+telecommunications%29+%28site%3Areddit.com+OR+site%3Ahowardforums.com+OR+site%3Axda-developers.com%29&source=web 200
+2026-01-01 20:49:45,609 - INFO - [APP] - Web search completed successfully.
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  1.84it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  1.84it/s]
+2026-01-01 20:49:58,274 - INFO - [APP] - Final response after post-processing: 'Hello,
+
+Observations: Connectivity issues may be caused by local Wi-Fi network restrictions, potentially due to routing, filtering, or DNS-level limitations.
+
+Actions Taken: None specified.
+
+Recommendations: First, confirm if the customer has already attempted connection using a VPN. If unsuccessful, instruct the customer to switch their DNS settings to Cloudflare or Google DNS to bypass any issues present on the home Wi-Fi network.
+
+Regards,
+Paul'
+2026-01-01 20:49:58,276 - INFO - [APP] - Template mode: JSON event yielded: '{"data": "Hello,\n\nObservations: Connectivity issues may be caused by local Wi-Fi network restrictions, potentially due to routing, filtering, or DNS-level limitations.\n\nActions Taken: None specified.\n\nRecommendations: First, confirm if the customer has already attempted connection using a VPN. If unsuccessful, instruct the customer to switch their DNS settings to Cloudflare or Google DNS to bypass any issues present on the home Wi-Fi network.\n\nRegards,\nPaul"}'
+/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/multiprocessing/resource_tracker.py:396: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/loky-22577-8_umxvn6'}
+  warnings.warn(

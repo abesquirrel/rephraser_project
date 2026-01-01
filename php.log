@@ -1,0 +1,25 @@
+[Thu Jan  1 20:52:58 2026] PHP 8.2.30 Development Server (http://localhost:8000) started
+[Thu Jan  1 20:53:18 2026] [::1]:54672 Accepted
+[Thu Jan  1 20:53:18 2026] [::1]:54673 Accepted
+[Thu Jan  1 20:53:18 2026] [::1]:54672 Closing
+[Thu Jan  1 20:53:18 2026] [::1]:54674 Accepted
+[Thu Jan  1 20:53:18 2026] [::1]:54673 [200]: GET /style.css
+[Thu Jan  1 20:53:18 2026] [::1]:54674 [200]: GET /script.js
+[Thu Jan  1 20:53:18 2026] [::1]:54673 Closing
+[Thu Jan  1 20:53:18 2026] [::1]:54674 Closing
+[Thu Jan  1 20:53:24 2026] [::1]:54720 Accepted
+[Thu Jan  1 20:53:24 2026] [::1]:54720 Closing
+[Thu Jan  1 20:53:52 2026] [::1]:54946 Accepted
+[Thu Jan  1 20:54:11 2026] [::1]:54946 Closing
+[Thu Jan  1 20:55:11 2026] [::1]:55544 Accepted
+[Thu Jan  1 20:55:21 2026] [::1]:55544 Closing
+[Thu Jan  1 20:55:35 2026] [::1]:55736 Accepted
+[Thu Jan  1 20:55:44 2026] [::1]:55736 Closing
+[Thu Jan  1 20:55:58 2026] [::1]:55922 Accepted
+[Thu Jan  1 20:55:58 2026] [::1]:55922 Closing
+[Thu Jan  1 21:07:00 2026] [::1]:61259 Accepted
+[Thu Jan  1 21:07:00 2026] [::1]:61259 Closing
+[Thu Jan  1 21:07:30 2026] [::1]:61490 Accepted
+[Thu Jan  1 21:07:48 2026] [::1]:61490 Closing
+[Thu Jan  1 21:08:13 2026] [::1]:61842 Accepted
+[Thu Jan  1 21:08:27 2026] [::1]:61842 Closing

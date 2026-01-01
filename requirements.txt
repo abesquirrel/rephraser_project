@@ -6,3 +6,4 @@ faiss-cpu
 numpy
 streamlit
 pyperclip
+flask-cors

@@ -20550,3 +20550,93 @@ Recommendations: Unfortunately, there is limited flexibility in this situation. 
 
 Regards,
 Paul"
+"I have corrected the issue the customer has mentioned, but  since the other number 5165401514 had a plan, i deccided no to cancel it, but instead replaced the pSIM 8901240384115087727 with an eSIM in case the customer wants to use that balance, either scan the qr with a compatible phone, or order a pSIM. 
+
+as for the desired setup 5164353696 on the pSIM 8901240384115087727 has been made","Hello,
+
+Observations: The issue mentioned by the customer has been corrected.
+
+Actions Taken: I decided not to cancel the other number (5165401514) and instead replaced the pSIM (8901240384115087727) with an eSIM, allowing the customer to use the balance if desired. Additionally, I set up the desired setup for 5164353696 on the pSIM 8901240384115087727.
+
+Recommendations: The customer can scan the QR code with a compatible phone or order a pSIM to utilize the eSIM.
+
+Regards,
+Paul"
+"I have corrected the issue the customer has mentioned, but  since the other number 5165401514 had a plan, i deccided no to cancel it, but instead replaced the pSIM 8901240384115087727 with an eSIM in case the customer wants to use that balance, either scan the qr with a compatible phone, or order a pSIM. 
+
+as for the desired setup 5164353696 on the pSIM 8901240384115087727 has been made","Hello,
+
+Observations: The issue mentioned by the customer has been corrected.
+
+Actions Taken: I decided not to cancel the other number (5165401514) and instead replaced the pSIM (8901240384115087727) with an eSIM, allowing the customer to use the balance if desired. Additionally, I set up the desired setup for 5164353696 on the pSIM 8901240384115087727.
+
+Recommendations: The customer can scan the QR code with a compatible phone or order a pSIM to utilize the eSIM.
+
+Regards,
+Paul"
+test original,test rephrased
+"A main possible culprit for the customer's issue, could be due to the coverage being limited only to a single frequency.
+
+4g - 700 MHz
+
+
+While at home we will need to recommend the customer using Wi-FI calling while at home. As the provisioning and device compatibility are correct","Hello,
+
+Observations: The main possible culprit for the customer's issue is due to the coverage being limited only to a single frequency, specifically 4G-700 MHz.
+
+Actions Taken:
+
+Recommendations: We will need to recommend the customer use Wi-Fi calling while at home, as provisioning and device compatibility are correct.
+
+Regards,
+Paul"
+"lets approach this wwith the options through the VPN and if this has been already tested unsuccessfully, the n lets also proceed with the Cloudflare or Google DNS. in order tp bypass any issues that could be present at the customer's wify network","Hello,
+
+Observations: Connectivity issues may be caused by local Wi-Fi network restrictions, potentially due to routing, filtering, or DNS-level limitations.
+
+Actions Taken: None specified.
+
+Recommendations: First, confirm if the customer has already attempted connection using a VPN. If unsuccessful, instruct the customer to switch their DNS settings to Cloudflare or Google DNS to bypass any issues present on the home Wi-Fi network.
+
+Regards,
+Paul"
+"The phone number 5014222650 was replaced by T-Mobile for this number 501422169. I have only Synced t-mobile with our platform.
+","Hello,
+
+Observations: The phone number 5014222650 has been replaced by T-Mobile for the original number 501422169.
+
+Actions Taken: Only synced T-Mobile with our platform.
+
+Recommendations:
+
+Regards,
+Paul"
+"lets approach this wwith the options through the VPN and if this has been already tested unsuccessfully, the n lets also proceed with the Cloudflare or Google DNS. in order tp bypass any issues that could be present at the customer's wify network <iphone 13>","Hello,
+
+Observations:
+The issue may be related to restrictions or routing problems on the customer’s Wi-Fi network, which could be impacting connectivity and related services on the iPhone 13.
+
+Actions Taken:
+No backend changes were required at this stage.
+
+Recommendations:
+
+1. Ask the customer to test the service using a VPN (preferably with a US IP).
+2. If the VPN has already been tested and did not resolve the issue, proceed with changing the DNS settings on the iPhone 13 to Cloudflare or Google DNS.
+
+Steps to change DNS on iPhone 13:
+
+- Go to Settings → Wi-Fi.
+- Tap the ⓘ icon next to the connected Wi-Fi network.
+- Tap Configure DNS.
+- Select Manual.
+- Remove any existing DNS entries.
+- Add one of the following:
+  * Google DNS: 8.8.8.8 and 8.8.4.4
+  * Cloudflare DNS: 1.1.1.1 and 1.0.0.1
+
+- Tap Save, then toggle Wi-Fi off and back on, or reboot the phone.
+- Retest the service.
+
+Regards,
+Paul R"
