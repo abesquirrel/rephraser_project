@@ -49,6 +49,8 @@ services:
     restart: unless-stopped
     ports:
       - "5001:5001"
+    volumes:
+      - ./ai-service:/app
     environment:
       - DB_HOST=db
       - DB_USER=rephraser

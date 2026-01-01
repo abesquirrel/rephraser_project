@@ -54,18 +54,28 @@ def strip_markdown(text):
     text = re.sub(r'(\*|_)', '', text)
     return text
 
-def retrieve_examples(query_text, k=3):
+def retrieve_examples(query_text, k=3, prefer_templates=False):
     if faiss_index is None or faiss_index.ntotal == 0:
         return []
     
-    query_vector = embedding_model.encode([query_text]).astype('float32')
-    D, I = faiss_index.search(query_vector, k)
+    # If prioritizing templates, search more candidates to find them
+    search_k = min(20, len(knowledge_texts)) if prefer_templates else k
     
-    results = []
+    query_vector = embedding_model.encode([query_text]).astype('float32')
+    D, I = faiss_index.search(query_vector, search_k)
+    
+    candidates = []
     for idx_val in I[0]:
-        if idx_val < len(knowledge_texts) and idx_val >= 0:
-            results.append(knowledge_texts[idx_val])
-    return results
+        if 0 <= idx_val < len(knowledge_texts):
+            candidates.append(knowledge_texts[idx_val])
+    
+    if prefer_templates:
+        template_count = sum(1 for c in candidates if c.get('is_template'))
+        logger.info(f"Retrieved {len(candidates)} candidates. Found {template_count} templates.")
+        # Sort so is_template: True comes first, preserving similarity order within groups
+        candidates.sort(key=lambda x: x.get('is_template', False), reverse=True)
+        
+    return candidates[:k]
 
 def call_llm(messages, temperature=0.5, max_tokens=600):
     # Mock LLM for the purpose of this refactor (assuming usage of Ollama or similar externally)
@@ -204,11 +214,14 @@ def handle_rephrase():
     def thinking_process_stream():
         yield stream_event("Analyzing Context...")
         
+        web_context = ""
+        examples_list = []
+
         if template_mode:
-            yield stream_event("Using template mode...")
-            messages = build_template_prompt(input_text, signature)
+            yield stream_event("Searching Prioritized Templates...")
+            examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES, prefer_templates=True)
+            yield stream_event(f"Found {len(examples_list)} relevant patterns.")
         else:
-            web_context = ""
             if enable_web_search:
                 if search_keywords:
                     yield stream_event(f"Searching: {search_keywords}...")
@@ -220,11 +233,17 @@ def handle_rephrase():
                     web_context = web_search_tool(kw)
             
             yield stream_event("Checking Knowledge Base...")
-            examples = retrieve_examples(input_text)
-            yield stream_event(f"Found {len(examples)} examples.")
-            
-            yield stream_event("Synthesizing...")
-            messages = build_structured_prompt(input_text, examples, web_context, signature)
+            examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES)
+            yield stream_event(f"Found {len(examples_list)} examples.")
+        
+        # Format examples for prompt
+        formatted_examples = ""
+        for i, ex in enumerate(examples_list):
+            rephrased = ex.get('rephrased', '') if isinstance(ex, dict) else ex
+            formatted_examples += f"Example {i+1}:\n{rephrased}\n\n"
+
+        yield stream_event("Synthesizing...")
+        messages = build_structured_prompt(input_text, formatted_examples, web_context, signature)
 
         response = call_llm(messages)
         response = strip_markdown(response)
