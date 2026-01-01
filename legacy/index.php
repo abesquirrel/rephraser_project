@@ -1,84 +1,3 @@
-<?php
-// index.php - Premium PHP/Alpine.js Frontend for Rephraser
-
-// --- PHP PROXY HANDLER ---
-// Directs /api/* requests to the Python backend at port 5001
-// This bypasses CORS and browser extension interference.
-
-if ($_SERVER['REQUEST_URI'] === '/api/rephrase' || $_SERVER['REQUEST_URI'] === '/api/approve' || $_SERVER['REQUEST_URI'] === '/api/upload_kb') {
-    $backend_url = 'http://127.0.0.1:5001' . str_replace('/api', '', $_SERVER['REQUEST_URI']);
-    
-    // Forward headers
-    $headers = [];
-    foreach (getallheaders() as $name => $value) {
-        if (strtolower($name) !== 'host' && strtolower($name) !== 'content-length') {
-            $headers[] = "$name: $value";
-        }
-    }
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $backend_url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, false); // Pass output directly to client
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    
-    // Forward method (POST)
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        curl_setopt($ch, CURLOPT_POST, true);
-        $input = file_get_contents('php://input');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $input);
-    }
-    
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    
-    // --- PROXY HEADER MANAGEMENT ---
-    // Forward response headers from Backend -> Client
-    curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $header) {
-        $len = strlen($header);
-        $headerParts = explode(':', $header, 2);
-        
-        // Always return length to satisfy cURL
-        if (count($headerParts) < 2) return $len;
-
-        $name = trim($headerParts[0]);
-        // FILTER: Do not forward these headers. 
-        // Let the webserver (Apache/Nginx/PHP) decide how to encode the response to the browser.
-        $blocked = ['Transfer-Encoding', 'Content-Length', 'Connection'];
-        
-        if (in_array($name, $blocked)) {
-            return $len;
-        }
-
-        header($header);
-        return $len;
-    });
-
-    // --- PROXY BODY MANAGEMENT ---
-    // Stream body chunks explicitly and flush immediately.
-    curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($curl, $chunk) {
-        echo $chunk;
-        // Force flush to ensure streaming works
-        if (ob_get_length() > 0) ob_end_flush();
-        flush();
-        return strlen($chunk);
-    });
-
-    // Disable buffering for real-time streaming
-    ini_set('output_buffering', 'off');
-    ini_set('zlib.output_compression', false);
-    
-    // Execute
-    $result = curl_exec($ch);
-    
-    curl_close($ch);
-    exit; // Stop processing
-}
-// -------------------------
-
-// Serve static assets if requested (since this is a router script)
-if (preg_match('/\.(js|css|png|jpg|jpeg|gif|ico|svg)$/', $_SERVER['REQUEST_URI'])) {
-    return false; // Let PHP internal server serve the file
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -98,7 +17,8 @@ if (preg_match('/\.(js|css|png|jpg|jpeg|gif|ico|svg)$/', $_SERVER['REQUEST_URI']
     <script defer src="https://unpkg.com/alpinejs@3.x/dist/cdn.min.js"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body x-data="rephraserApp()">
     <div class="container">
@@ -333,6 +253,6 @@ if (preg_match('/\.(js|css|png|jpg|jpeg|gif|ico|svg)$/', $_SERVER['REQUEST_URI']
     </div>
 
     <!-- Custom Logic -->
-    <script src="script.js"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>

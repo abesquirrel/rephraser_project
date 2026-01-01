@@ -14,3 +14,5 @@
 2026-01-01 21:38:32,537 - INFO - [APP] - Reloading FAISS index and rephrased texts...
 2026-01-01 21:38:32,539 - INFO - [APP] - FAISS index and rephrased texts reloaded successfully.
 2026-01-01 21:38:32,539 - INFO - [APP] - Background knowledge base rebuild and reload complete.
+/opt/homebrew/Cellar/python@3.14/3.14.2/Frameworks/Python.framework/Versions/3.14/lib/python3.14/multiprocessing/resource_tracker.py:396: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/loky-27533-4h2xl15v'}
+  warnings.warn(

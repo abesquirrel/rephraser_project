@@ -1,0 +1,90 @@
+services:
+  # --- Main Application (Laravel) ---
+  app:
+    build:
+      context: .
+      dockerfile: docker/php.dockerfile
+    image: rephraser-app
+    container_name: rephraser-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./laravel:/var/www
+    depends_on:
+      - db
+      - redis
+      - ai
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=rephraser_db
+      - DB_USERNAME=rephraser
+      - DB_PASSWORD=secret
+      - REDIS_HOST=redis
+    networks:
+      - rephraser-network
+
+  # --- Web Server (Nginx) ---
+  web:
+    image: nginx:alpine
+    container_name: rephraser-web
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./laravel:/var/www
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - rephraser-network
+
+  # --- AI Service (Python) ---
+  ai:
+    build: 
+      context: ./ai-service
+    image: rephraser-ai
+    container_name: rephraser-ai
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - DB_HOST=db
+      - DB_USER=rephraser
+      - DB_PASSWORD=secret
+      - DB_NAME=rephraser_db
+    depends_on:
+      - db
+    networks:
+      - rephraser-network
+
+  # --- Database (MySQL) ---
+  db:
+    image: mysql:8.0
+    container_name: rephraser-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: rephraser_db
+      MYSQL_USER: rephraser
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - rephraser-network
+
+  # --- Queue/Cache (Redis) ---
+  redis:
+    image: redis:alpine
+    container_name: rephraser-redis
+    restart: unless-stopped
+    networks:
+      - rephraser-network
+
+networks:
+  rephraser-network:
+    driver: bridge
+
+volumes:
+  db_data:

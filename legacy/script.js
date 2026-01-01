@@ -63,13 +63,17 @@ function rephraserApp() {
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
+                let buffer = '';
 
                 while (true) {
                     const { value, done } = await reader.read();
                     if (done) break;
 
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n');
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    
+                    // Keep the last line in the buffer as it might be incomplete
+                    buffer = lines.pop(); 
 
                     for (const line of lines) {
                         if (!line.trim()) continue;
@@ -77,6 +81,11 @@ function rephraserApp() {
                             const event = JSON.parse(line);
                             if (event.status) {
                                 this.thinkingLines.push(event.status);
+                                // Auto-scroll to bottom of logs
+                                this.$nextTick(() => {
+                                    const container = document.querySelector('.logs-container');
+                                    if (container) container.scrollTop = container.scrollHeight;
+                                });
                             } else if (event.data) {
                                 // Collapse previous items
                                 this.history.forEach((h, i) => {
@@ -99,8 +108,28 @@ function rephraserApp() {
                                 this.triggerToast('Backend Error: ' + event.error);
                                 this.processing = false;
                             }
-                        } catch (e) {}
+                        } catch (e) {
+                            console.warn('JSON Parse error on line:', line, e);
+                        }
                     }
+                }
+                
+                // Process any remaining buffer content
+                if (buffer.trim()) {
+                     try {
+                        const event = JSON.parse(buffer);
+                        if (event.data) { // Handle case where last line was complete but no newline
+                             // Same logic as above, but just for data as status usually comes early
+                             this.history.unshift({
+                                original: this.inputText,
+                                rephrased: event.data,
+                                approved: false,
+                                expanded: true,
+                                timestamp: new Date().toISOString()
+                            });
+                            this.processing = false;
+                        }
+                    } catch(e) {}
                 }
             } catch (e) {
                 this.triggerToast('Network Exception');
