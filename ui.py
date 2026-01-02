@@ -18,8 +18,25 @@ def find_free_port():
 # --- CONFIGURATION & BACKEND STARTUP ---
 
 # --- CONFIGURATION ---
-# AI Service is now handled via Laravel proxy at localhost:8000
-API_BASE_URL = "http://localhost:8000/api"
+# Use the local network IP instead of localhost so remote clients can reach it
+def get_ip():
+    # Priority 1: Environment Variable
+    if os.environ.get("API_HOST"):
+        return os.environ.get("API_HOST")
+    
+    # Priority 2: Dynamic Detection
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except:
+        # Priority 3: Safe Fallback
+        return "localhost"
+
+LOCAL_IP = get_ip()
+API_BASE_URL = f"http://{LOCAL_IP}:8000/api"
 FLASK_API_URL_REPHRASE = f"{API_BASE_URL}/rephrase"
 FLASK_API_URL_APPROVE = f"{API_BASE_URL}/approve"
 FLASK_API_URL_UPLOAD_KB = f"{API_BASE_URL}/upload_kb"
