@@ -197,6 +197,94 @@ def rebuild_worker():
     thread.daemon = True
     thread.start()
 
+@app.route('/swagger.json')
+def swagger_spec():
+    """Generates the OpenAPI specification for the AI service."""
+    return jsonify({
+        "openapi": "3.0.0",
+        "info": {
+            "title": "Rephraser AI Service API",
+            "version": "1.0.0",
+            "description": "Standardized microservice for knowledge-aware text rephrasing."
+        },
+        "paths": {
+            "/rephrase": {
+                "post": {
+                    "summary": "Process text for rephrasing",
+                    "description": "Generates a rephrased response using KB context and optional web search.",
+                    "responses": {
+                        "200": {"description": "Dynamic JSON stream with progress events and final data."}
+                    }
+                }
+            },
+            "/trigger_rebuild": {
+                "post": {
+                    "summary": "Manual KB Rebuild",
+                    "description": "Triggers an asynchronous rebuild of the FAISS index from the database."
+                }
+            },
+            "/health": {
+                "get": {
+                    "summary": "Service Health",
+                    "description": "Returns system status and connection health."
+                }
+            }
+        }
+    })
+
+@app.route('/docs')
+def get_docs():
+    """Serves the interactive Swagger UI."""
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Rephraser AI Docs</title>
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.css" />
+        <style>html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; } *, *:before, *:after { box-sizing: inherit; } body { margin:0; background: #fafafa; }</style>
+    </head>
+    <body style="background: white;">
+        <div id="swagger-ui"></div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.js"></script>
+        <script>
+            window.onload = () => {
+                const ui = SwaggerUIBundle({
+                    url: '/swagger.json',
+                    dom_id: '#swagger-ui',
+                    deepLinking: true,
+                    presets: [SwaggerUIBundle.presets.apis],
+                });
+            };
+        </script>
+    </body>
+    </html>
+    """
+
+@app.route('/')
+def index_redirect():
+    """Redirect root to documentation."""
+    return get_docs()
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Service health check including database connectivity."""
+    db_status = "healthy"
+    try:
+        conn = get_db_connection()
+        conn.ping(reconnect=True)
+        conn.close()
+    except Exception as e:
+        logger.error(f"Health check DB failure: {e}")
+        db_status = "unhealthy"
+    
+    return jsonify({
+        'status': 'healthy' if db_status == "healthy" else "degraded",
+        'database': db_status,
+        'kb_size': len(knowledge_texts),
+        'uptime_records': True # Service is running
+    })
+
 @app.route('/trigger_rebuild', methods=['POST'])
 def trigger_rebuild():
     rebuild_worker()
@@ -213,13 +301,16 @@ def handle_rephrase():
 
     def thinking_process_stream():
         yield stream_event("Analyzing Context...")
+        overall_start = time.time()
         
         web_context = ""
         examples_list = []
 
         if template_mode:
             yield stream_event("Searching Prioritized Templates...")
+            t_start = time.time()
             examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES, prefer_templates=True)
+            logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
             yield stream_event(f"Found {len(examples_list)} relevant patterns.")
         else:
             if enable_web_search:
@@ -233,7 +324,9 @@ def handle_rephrase():
                     web_context = web_search_tool(kw)
             
             yield stream_event("Checking Knowledge Base...")
+            t_start = time.time()
             examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES)
+            logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
             yield stream_event(f"Found {len(examples_list)} examples.")
         
         # Format examples for prompt
@@ -245,11 +338,18 @@ def handle_rephrase():
         yield stream_event("Synthesizing...")
         messages = build_structured_prompt(input_text, formatted_examples, web_context, signature)
 
+        l_start = time.time()
         response = call_llm(messages)
+        logger.info(f"LLM Synthesis took {time.time() - l_start:.3f}s")
         response = strip_markdown(response)
         
-        logging.info(f"Final Response: {response[:100]}...")
-        yield json.dumps({"data": response}) + "\n"
+        total_latency = time.time() - overall_start
+        char_count = len(response)
+        # Rough token estimation (1 token ~ 4 chars)
+        est_tokens = char_count // 4
+        
+        logger.info(f"Final Response ({char_count} chars, ~{est_tokens} tokens). Total Latency: {total_latency:.2f}s")
+        yield json.dumps({"data": response, "meta": {"latency": total_latency, "tokens": est_tokens}}) + "\n"
 
     return Response(stream_with_context(thinking_process_stream()), mimetype='application/json')
 
