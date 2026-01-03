@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\KnowledgeBase;
+use App\Models\AuditLog;
 use Illuminate\Support\Facades\Log;
 
 class RephraseController extends Controller
@@ -38,15 +39,36 @@ class RephraseController extends Controller
             'rephrased_text' => 'required|string',
             'keywords' => 'nullable|string',
             'is_template' => 'nullable|boolean',
+            'category' => 'nullable|string'
         ]);
 
         // 1. Save to Database (Source of Truth)
-        KnowledgeBase::create($validated);
+        $entry = KnowledgeBase::create($validated);
+
+        // Tier 2: Audit Logging
+        AuditLog::create([
+            'action' => 'Approve/Create',
+            'original_content' => $validated['original_text'],
+            'rephrased_content' => $validated['rephrased_text'],
+            'user_name' => 'System' // Can be updated if auth is added later
+        ]);
 
         // 2. Notify AI Service to rebuild index
         $this->triggerRebuild();
 
         return response()->json(['status' => 'success']);
+    }
+
+    public function suggestKeywords(Request $request)
+    {
+        $text = $request->input('text', '');
+        $response = Http::post('http://ai:5001/suggest_keywords', ['text' => $text]);
+        return $response->json();
+    }
+
+    public function getAuditLogs()
+    {
+        return AuditLog::orderBy('created_at', 'desc')->take(50)->get();
     }
 
     public function upload_kb(Request $request)
@@ -88,6 +110,7 @@ class RephraseController extends Controller
             $rephrased = trim($row[1]);
             $keywords = isset($row[2]) ? trim($row[2]) : null;
             $isTemplate = isset($row[3]) ? filter_var($row[3], FILTER_VALIDATE_BOOLEAN) : false;
+            $category = isset($row[4]) ? trim($row[4]) : null;
             
             // Skip if it looks like a header row
             if (strtolower($original) === 'original_text' || strtolower($rephrased) === 'rephrased_text') {
@@ -98,8 +121,15 @@ class RephraseController extends Controller
                 KnowledgeBase::create([
                     'original_text' => $original,
                     'rephrased_text' => $rephrased,
-                    'keywords' => $keywords,
-                    'is_template' => $isTemplate
+                    'keywords'      => $keywords,
+                    'is_template'   => $isTemplate,
+                    'category'      => $category
+                ]);
+
+                AuditLog::create([
+                    'action' => 'Import',
+                    'original_content' => $original,
+                    'rephrased_content' => $rephrased
                 ]);
             }
         }

@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class KnowledgeBase extends Model
 {
-    protected $fillable = ['original_text', 'rephrased_text', 'keywords', 'is_template'];
+    protected $fillable = ['original_text', 'rephrased_text', 'keywords', 'is_template', 'category'];
 }

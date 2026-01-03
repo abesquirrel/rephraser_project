@@ -59,22 +59,50 @@
                             <input type="checkbox" x-model="enableWebSearch" @change="if(enableWebSearch) templateMode = false">
                             <span>Online Research</span>
                         </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" x-model="abMode">
+                            <span>A/B Comparison</span>
+                        </label>
+                    </div>
+
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;" x-show="abMode" x-transition>
+                        <select x-model="modelA" class="form-select">
+                            <option value="llama3:8b-instruct-q3_K_M">Model A: Llama3</option>
+                            <option value="mistral:latest">Model A: Mistral</option>
+                        </select>
+                        <select x-model="modelB" class="form-select">
+                            <option value="mistral:latest">Model B: Mistral</option>
+                            <option value="llama3:8b-instruct-q3_K_M">Model B: Llama3</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <label class="label-text" style="font-size: 0.75rem;">Category Context</label>
+                        <select x-model="currentCategory" class="form-select">
+                            <option value="">No Filter (Full KB)</option>
+                            <template x-for="cat in categories" :key="cat">
+                                <option :value="cat" x-text="cat"></option>
+                            </template>
+                        </select>
                     </div>
 
                     <div x-show="enableWebSearch" x-transition.opacity style="margin-top: 1.5rem;">
-                        <label class="label-text" style="font-size: 0.75rem;">Target Keywords</label>
+                        <label class="label-text" style="font-size: 0.75rem; display: flex; justify-content: space-between;">
+                            Target Keywords
+                            <button @click="predictKeywords()" class="btn-text-only" :disabled="isGenerating">🪄 Predict</button>
+                        </label>
                         <input type="text" x-model="searchKeywords" placeholder="firmware, latency, region...">
                     </div>
                 </div>
             </div>
 
-            <button class="btn btn-primary" @click="generateAction()" :disabled="processing || !inputText.trim()">
-                <span x-show="!processing">✨ Generate Response</span>
-                <span x-show="processing" class="animate-pulse">⏳ Analyzing Intelligence...</span>
+            <button class="btn btn-primary" @click="generateRephrase()" :disabled="isGenerating || !inputText.trim()">
+                <span x-show="!isGenerating">✨ Generate Response</span>
+                <span x-show="isGenerating" class="animate-pulse">⏳ Analyzing Intelligence...</span>
             </button>
 
             <!-- Real-time Thinking Visualizer -->
-            <div class="logs-container" x-show="processing && thinkingLines.length > 0" x-cloak x-transition>
+            <div class="logs-container" x-show="isGenerating && thinkingLines.length > 0" x-cloak x-transition>
                 <template x-for="line in thinkingLines" :key="line">
                     <div class="log-line">
                         <span>›</span>
@@ -101,6 +129,9 @@
                                 <h3 class="section-title" style="margin: 0; font-size: 1.1rem;">
                                     Newest Entry <span x-text="history.length" class="info-pill" style="background: var(--accent-primary); color: #0b0f19;"></span>
                                 </h3>
+                                <template x-if="item.category">
+                                    <span class="info-pill" style="background: #3b82f6; color: white;" x-text="item.category"></span>
+                                </template>
                                 <template x-if="item.approved">
                                     <span class="approved-badge">✅ Saved to KB</span>
                                 </template>
@@ -108,32 +139,34 @@
                             <span class="info-pill" style="opacity: 0.7;" x-text="new Date(item.timestamp).toLocaleTimeString()"></span>
                         </div>
 
-                        <div class="history-grid">
+                        <div class="history-grid" :class="{ 'ab-grid': item.rephrasedB }">
                             <div>
                                 <label class="label-text">Original Input</label>
                                 <div class="bubble bubble-original" x-text="item.original"></div>
                             </div>
                             <div>
-                                <label class="label-text">AI Synthesis</label>
+                                <label class="label-text" x-text="item.rephrasedB ? 'Model A: Llama3' : 'AI Synthesis'"></label>
                                 <div class="bubble bubble-rephrased" x-text="item.rephrased"></div>
+                                <div class="btn-row" style="margin-top: 1rem;">
+                                    <button class="btn btn-ghost" @click="copyText(item.rephrased)">📋 Copy</button>
+                                    <button class="btn" :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'" 
+                                            @click="approveEntry(false)" :disabled="item.approved">
+                                        <span x-text="item.approved ? '✅ Saved' : '👍 Approve A'"></span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="btn-row">
-                            <button class="btn btn-ghost" @click="copyText(item.rephrased)">
-                                📋 Copy Text
-                            </button>
-                            <button class="btn btn-ghost" @click="regenerateFrom(item.original)">
-                                🔄 Regenerate
-                            </button>
-                            <button class="btn" 
-                                    :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'" 
-                                    @click="approveEntry(item, 0)" 
-                                    :disabled="item.approved || item.approving">
-                                <span x-show="!item.approving && !item.approved">👍 Approve & Save</span>
-                                <span x-show="item.approving">Saving...</span>
-                                <span x-show="item.approved">✅ Successfully Saved</span>
-                            </button>
+                            <template x-if="item.rephrasedB">
+                                <div>
+                                    <label class="label-text">Model B: Mistral</label>
+                                    <div class="bubble bubble-rephrased" style="border-color: #3b82f6;" x-text="item.rephrasedB"></div>
+                                    <div class="btn-row" style="margin-top: 1rem;">
+                                        <button class="btn btn-ghost" @click="copyText(item.rephrasedB)">📋 Copy</button>
+                                        <button class="btn btn-ghost" @click="approveEntry(true)" :disabled="item.approved">
+                                            👍 Approve B
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </template>
@@ -245,7 +278,22 @@
                             <textarea x-model="manualReph" placeholder="Optimal response..." rows="3" style="font-size: 0.9rem;"></textarea>
                         </div>
                         <div class="input-grid" style="margin-top: 1rem; align-items: center;">
-                            <input type="text" x-model="manualKeywords" placeholder="Keywords (comma separated)..." style="font-size: 0.9rem;">
+                            <div>
+                                <label class="label-text" style="font-size: 0.75rem; display: flex; justify-content: space-between;">
+                                    Keywords
+                                    <button @click="predictKeywords()" class="btn-text-only">🪄 Predict</button>
+                                </label>
+                                <input type="text" x-model="manualKeywords" placeholder="firmware, latency..." style="font-size: 0.9rem;">
+                            </div>
+                            <div>
+                                <label class="label-text" style="font-size: 0.75rem;">Category</label>
+                                <select x-model="manualCategory" class="form-select" style="font-size: 0.9rem;">
+                                    <option value="">Select Category...</option>
+                                    <template x-for="cat in categories" :key="cat">
+                                        <option :value="cat" x-text="cat"></option>
+                                    </template>
+                                </select>
+                            </div>
                             <label class="custom-checkbox">
                                 <input type="checkbox" x-model="manualIsTemplate">
                                 <span>Is Template?</span>
@@ -254,6 +302,29 @@
                         <button class="btn btn-ghost" style="margin-top: 1.5rem;" @click="addManual()" :disabled="!manualOrig.trim() || !manualReph.trim() || adding">
                             Add Training Pair
                         </button>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--card-border); margin: 2rem 0; padding-top: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <label class="label-text">Audit Trail</label>
+                            <button class="btn btn-ghost" @click="fetchAuditLogs()" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">🔄 Sync Logs</button>
+                        </div>
+                        <div class="logs-container" style="max-height: 300px; overflow-y: auto;">
+                            <template x-if="auditLogs.length === 0">
+                                <p class="label-text" style="text-align: center; opacity: 0.5; padding: 1rem;">No recent approvals logged.</p>
+                            </template>
+                            <template x-for="log in auditLogs" :key="log.id">
+                                <div style="padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem;">
+                                    <div style="display: flex; justify-content: space-between; color: var(--accent-primary);">
+                                        <strong x-text="log.action"></strong>
+                                        <span x-text="new Date(log.created_at).toLocaleString()"></span>
+                                    </div>
+                                    <div style="opacity: 0.6; margin-top: 0.25rem;">
+                                        User: <span x-text="log.user_name"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>
