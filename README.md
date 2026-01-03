@@ -1,73 +1,50 @@
-# Rephraser Application
+# Rephraser AI Project
 
-A premium AI-powered support analyst rephrasing tool with a modern PHP/Alpine.js frontend and Flask backend.
+A professional microservice-based application for knowledge-aware text rephrasing, featuring a Laravel frontend, a Python AI microservice, and a MariaDB database.
+
+## Architecture
+
+- **Web UI (Laravel)**: Modern, responsive interface for rephrasing and KB management.
+- **AI Service (Python/Flask)**: Handles vector search (FAISS), LLM synthesis, and web search integration.
+- **Database (MariaDB 10.11)**: Persistent storage for 3,000+ knowledge base entries.
+- **Redis**: Queue and caching layer.
+- **Nginx**: High-performance reverse proxy.
+
+## Key Features
+
+- **Knowledge-Aware AI**: prioritizes "Template" entries for structured responses.
+- **Hybrid Search**: Combines FAISS vector retrieval with DuckDuckGo web search.
+- **Observability**: Built-in latency tracking and token estimation for all generations.
+- **Health Monitoring**: Automated Docker health checks for all core infrastructure services.
+- **Interactive API Docs**: Swagger/OpenAPI documentation available at `/docs`.
 
 ## Quick Start
 
-Run the entire application with a single command:
+### 1. Requirements
+
+- Docker and Docker Compose
+- Ollama (running on the host) with `llama3:8b-instruct-q3_K_M`
+
+### 2. Startup
 
 ```bash
-./start.sh
+./start_docker.sh
 ```
 
-This will:
+### 3. Access
 
-- Start the Flask backend on `http://localhost:5001`
-- Start the PHP frontend on `http://localhost:8000`
-- Display status messages and logs
-- Stop both servers when you press `Ctrl+C`
+- **Web Interface**: `http://localhost:8000`
+- **Streamlit UI**: `streamlit run ui.py --server.address 0.0.0.0`
+- **API Documentation**: `http://localhost:5001/docs`
 
-## First-Time Setup
+## Management
 
-If you haven't set up the project yet:
+### LAN Access
 
-```bash
-# Create virtual environment
-python3 -m venv venv
+The application is accessible from other devices on your network at `http://<YOUR_IP>:8000`.
 
-# Install dependencies
-./venv/bin/pip install -r requirements.txt
+### Database
 
-# Run the application
-./start.sh
-```
-
-## Manual Startup (Alternative)
-
-If you prefer to run servers separately:
-
-```bash
-# Terminal 1 - Flask Backend
-./venv/bin/python app.py
-
-# Terminal 2 - PHP Frontend
-php -S localhost:8000 index.php
-```
-
-## Features
-
-- **AI-Powered Rephrasing**: Transform support notes into professional responses
-- **Template Mode**: Direct template-based responses with guaranteed signature
-- **Online Research**: Optional web search integration for context
-- **Knowledge Base**: Learn from approved responses
-- **Response History**: Latest response prominently displayed, archive for older items
-- **Visual Feedback**: Clear confirmation when responses are saved
-
-## Project Structure
-
-- `app.py` - Flask backend with LLM integration
-- `index.php` - Premium Alpine.js frontend
-- `start.sh` - Unified startup script
-- `requirements.txt` - Python dependencies
-- `ui.py` - Legacy Streamlit UI (deprecated)
-
-## Logs
-
-When using `start.sh`, logs are saved to:
-
-- `flask.log` - Backend logs
-- `php.log` - Frontend logs
-
-## Stopping the Application
-
-Press `Ctrl+C` in the terminal where `start.sh` is running. Both servers will shut down gracefully.
+- **Host Port**: `3310`
+- **User**: `rephraser`
+- **Pass**: `secret`
