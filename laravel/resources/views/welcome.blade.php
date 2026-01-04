@@ -65,14 +65,14 @@
                         </label>
                     </div>
 
-                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;" x-show="abMode" x-transition>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;" x-transition>
                         <select x-model="modelA" class="form-select">
-                            <option value="">Select Model A...</option>
+                            <option value="">Select Primary Model...</option>
                             <template x-for="m in availableModels" :key="m.id">
                                 <option :value="m.id" x-text="m.name" :selected="m.id === modelA"></option>
                             </template>
                         </select>
-                        <select x-model="modelB" class="form-select">
+                        <select x-model="modelB" class="form-select" x-show="abMode" x-transition>
                             <option value="">Select Model B...</option>
                             <template x-for="m in availableModels" :key="m.id">
                                 <option :value="m.id" x-text="m.name" :selected="m.id === modelB"></option>
