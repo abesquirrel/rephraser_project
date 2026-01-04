@@ -1,4 +1,3 @@
-```javascript
 function rephraserApp() {
     return {
         inputText: '',
@@ -10,6 +9,7 @@ function rephraserApp() {
         templateMode: false,
         searchKeywords: '',
         currentCategory: '', // Tier 2
+        newCategory: '', 
         categories: ['General', 'Technical', 'Billing', 'Sales', 'Feedback'],
         modelA: 'llama3:8b-instruct-q3_K_M',
         modelB: 'mistral:latest',
@@ -145,6 +145,7 @@ function rephraserApp() {
                 // Keep history manageable
                 if (this.history.length > 50) this.history.pop();
                 this.triggerToast('Synthesis Complete');
+                this.history = [...this.history]; // Force reactivity
 
             } catch (error) {
                 this.status = 'Error occurred.';
@@ -247,18 +248,11 @@ function rephraserApp() {
         },
 
         // This is the original approveEntry, modified to handle history items
-        async approveHistoryEntry(item, idx) {
-            console.log('🔍 Approve button clicked! idx:', idx);
-            console.log('Payload:', { 
-                original_text: item.original, 
-                rephrased_text: item.rephrased,
-                keywords: item.keywords,
-                is_template: item.is_template,
-                category: item.category // Added category
-            });
+        async approveHistoryEntry(item, idx, isAlt = false) {
+            const content = isAlt ? item.rephrasedB : item.rephrased;
+            console.log('🔍 Approve history clicked! idx:', idx, 'isAlt:', isAlt);
             
-            if (!item.original || !item.rephrased) {
-                console.error('Missing data for approval!');
+            if (!item.original || !content) {
                 this.triggerToast('❌ Error: Missing Data');
                 return;
             }
@@ -274,10 +268,10 @@ function rephraserApp() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         original_text: item.original,
-                        rephrased_text: item.rephrased,
+                        rephrased_text: content,
                         keywords: item.keywords,
                         is_template: item.is_template,
-                        category: item.category // Added category
+                        category: item.category
                     })
                 });
                 
@@ -312,6 +306,22 @@ function rephraserApp() {
                 this.triggerToast('❌ Failed to load audit logs: ' + e.message);
                 console.error('Error fetching audit logs:', e);
             }
+        },
+
+        deleteHistoryEntry(idx) {
+            this.history.splice(idx, 1);
+            this.history = [...this.history];
+            this.triggerToast('Item Removed');
+        },
+
+        addCategory() {
+            if (!this.newCategory.trim()) return;
+            if (!this.categories.includes(this.newCategory)) {
+                this.categories.push(this.newCategory);
+                this.currentCategory = this.newCategory;
+            }
+            this.newCategory = '';
+            this.triggerToast('Category Added');
         },
 
         async importKB() {
@@ -380,4 +390,3 @@ function rephraserApp() {
         }
     }
 }
-```
