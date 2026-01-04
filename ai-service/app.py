@@ -1,4 +1,3 @@
-```python
 import os
 import sys
 import logging
@@ -157,15 +156,20 @@ def build_template_prompt(original_text, signature="Paul"):
 
 def build_structured_prompt(original_text, examples, web_context=None, signature="Paul", direct_instruction=None):
     # System prompt defining role and default structure
-    system = f"You are {signature}. Support Analyst. Clear, concise. RETURN ONLY THE REPHRASED RESPONSE. NO PREAMBLE. NO MARKDOWN unless part of the email.\n\n"
+    system = f"You are {signature}. Support Analyst. Clear, concise. RETURN ONLY THE REPHRASED RESPONSE.\n\n"
     
+    system += "### MANDATORY DATA REQUIRMENT\n"
+    system += "You MUST extract and repeat all specific numerical identifiers (MSISDN, IMEI, ICCID, Serial Numbers) from the 'Notes' section below. "
+    system += "Place these identifiers literally in the 'Observations' section of your response. DO NOT redact, change, or omit these numbers. "
+    system += "If the notes say 'IMEI 12345', your response MUST say 'IMEI 12345'.\n\n"
+
     if direct_instruction:
-        system += f"CRITICAL INSTRUCTION: {direct_instruction}\n"
-        system += "Prioritize implementing the above instruction while maintaining the professional response format.\n\n"
+        system += f"USER DIRECTIVE: {direct_instruction}\n"
+        system += "Apply this directive while strictly maintaining the mandatory data requirement above.\n\n"
     
-    system += f"Standard Structure:\nHello,\n\nObservations:\n...\nActions Taken:\n...\nRecommendations:\n...\nRegards,\n{signature}"
+    system += f"Format:\nHello,\n\nObservations:\n(List facts and ALL literal identifiers here)\n\nActions Taken:\n...\nRecommendations:\n...\n\nRegards,\n{signature}"
     
-    user = f"Context:\n{web_context}\n\nExamples:\n{examples}\n\nNotes: {original_text}"
+    user = f"Context (General Knowledge):\n{web_context}\n\nExamples (Style Reference):\n{examples}\n\nNotes (SPECIFIC SOURCE DATA - PRESERVE ALL NUMBERS):\n{original_text}"
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
@@ -311,21 +315,34 @@ def suggest_keywords():
     if not text:
         return jsonify({'keywords': ''})
     
-    prompt = f"Given this text, suggest 3-5 relevant comma-separated keywords for indexing. Return ONLY the comma-separated keywords, nothing else.\n\nText: {text}"
-    keywords = call_llm([{"role": "user", "content": prompt}], temperature=0.1, max_tokens=50)
+    prompt = f"List 3-5 keywords for indexing this text. Return ONLY a comma-separated list of clean, relevant tags. NO numbers, NO identifiers (IMEI/MSISDN), NO PREAMBLE, NO EXPLANATION.\n\nText: {text}"
+    keywords = call_llm([{"role": "user", "content": prompt}], temperature=0.1, max_tokens=100)
     
     # Strict list extraction
-    import re
-    # Remove any sentence-like structure before the first comma/list
-    cleaned = re.sub(r'^[^{}\w]*(the\s+)?keywords(\s+are|\s+suggested)?\s*:?\s*', '', keywords, flags=re.IGNORECASE)
-    cleaned = cleaned.strip().strip('"').strip("'").strip(".")
+    # Remove common conversational preambles more aggressively
+    preamble_patterns = [
+        r'^[^{}\w]*(the\s+)?keywords(\s+are|\s+suggested)?\s*:?\s*',
+        r'^Here\s+are\s+.*keywords.*:\s*',
+        r'^Suggested\s+keywords:\s*',
+        r'^Comma-separated\s+keywords:\s*',
+        r'^The\s+relevant\s+keywords\s+are:\s*'
+    ]
+    cleaned = keywords
+    for pattern in preamble_patterns:
+        cleaned = re.sub(pattern, '', cleaned, flags=re.IGNORECASE)
     
-    # If the response contains bullets or numbers, join them with commas
+    cleaned = cleaned.strip().strip('\"').strip("'").strip(".")
+    
+    # Split into list to filter and merge
     if "\n" in cleaned:
         items = [i.strip("- ").strip("123456789. ") for i in cleaned.split("\n") if i.strip()]
-        cleaned = ", ".join(items)
+    else:
+        items = [i.strip() for i in cleaned.split(",") if i.strip()]
+    
+    # Limit to top items
+    final_keywords = ", ".join(items[:5])
         
-    return jsonify({'keywords': cleaned})
+    return jsonify({'keywords': final_keywords})
 
 @app.route('/rephrase', methods=['POST'])
 def handle_rephrase():
