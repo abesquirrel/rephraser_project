@@ -115,7 +115,11 @@ def handle_regenerate(original_text):
 def handle_approve(original, rephrased, item_index):
     """Callback to approve a response and save it."""
     try:
-        payload = {'original_text': original, 'rephrased_text': rephrased}
+        payload = {
+            'original_text': original,
+            'rephrased_text': rephrased,
+            'model_used': 'Streamlit-Manual' # Identifies source
+        }
         response = requests.post(FLASK_API_URL_APPROVE, json=payload)
         response.raise_for_status()
         st.toast("✅ Approved! The AI will learn from this.", icon="👍")

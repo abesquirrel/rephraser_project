@@ -53,6 +53,13 @@ function rephraserApp() {
             setTimeout(() => this.toast.active = false, 3000);
         },
 
+        decodeEntities(text) {
+            if (!text) return '';
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = text;
+            return textarea.value;
+        },
+
         toggleAllHistory() {
             this.allExpanded = !this.allExpanded;
             this.history.forEach(item => item.expanded = this.allExpanded);
@@ -138,15 +145,15 @@ function rephraserApp() {
 
                 this.history.unshift({
                     original: this.inputText,
-                    rephrased: this.rephrasedContent, // Store model A's output as primary
-                    rephrasedB: this.rephrasedContentB, // Store model B's output
+                    rephrased: this.decodeEntities(this.rephrasedContent), // Store model A's output as primary
+                    rephrasedB: this.rephrasedContentB ? this.decodeEntities(this.rephrasedContentB) : null, // Store model B's output
                     keywords: this.searchKeywords,
                     is_template: this.templateMode,
                     category: this.currentCategory,
                     approved: false,
                     expanded: true,
-                    modelA_name: this.modelA,
-                    modelB_name: this.modelB,
+                    modelA_name: this.modelA || 'llama3:8b-instruct-q3_K_M',
+                    modelB_name: this.modelB || 'mistral:latest',
                     isEditing: false, 
                     isEditingB: false,
                     timestamp: new Date().toISOString()
