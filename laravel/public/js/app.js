@@ -16,7 +16,7 @@ function rephraserApp() {
         availableModels: [
             {id: 'llama3:8b-instruct-q3_K_M', name: 'Llama3'},
             {id: 'mistral:latest', name: 'Mistral'},
-            {id: 'qwen2.5-coder:7b', name: 'Qwen 2.5'}
+            {id: 'gemma2:9b', name: 'Gemma2 9B'}
         ],
         abMode: false,
         isGenerating: false,
