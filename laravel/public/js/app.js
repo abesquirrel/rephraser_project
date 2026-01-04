@@ -13,6 +13,11 @@ function rephraserApp() {
         categories: ['General', 'Technical', 'Billing', 'Sales', 'Feedback'],
         modelA: 'llama3:8b-instruct-q3_K_M',
         modelB: 'mistral:latest',
+        availableModels: [
+            {id: 'llama3:8b-instruct-q3_K_M', name: 'Llama3'},
+            {id: 'mistral:latest', name: 'Mistral'},
+            {id: 'qwen2.5-coder:7b', name: 'Qwen 2.5'}
+        ],
         abMode: false,
         isGenerating: false,
         auditLogs: [],
@@ -140,6 +145,10 @@ function rephraserApp() {
                     category: this.currentCategory,
                     approved: false,
                     expanded: true,
+                    modelA_name: this.modelA,
+                    modelB_name: this.modelB,
+                    isEditing: false, 
+                    isEditingB: false,
                     timestamp: new Date().toISOString()
                 });
                 // Keep history manageable
@@ -247,6 +256,12 @@ function rephraserApp() {
             }
         },
 
+        toggleEdit(idx, isAlt = false) {
+            const key = isAlt ? 'isEditingB' : 'isEditing';
+            this.history[idx][key] = !this.history[idx][key];
+            this.history = [...this.history];
+        },
+
         // This is the original approveEntry, modified to handle history items
         async approveHistoryEntry(item, idx, isAlt = false) {
             const content = isAlt ? item.rephrasedB : item.rephrased;
@@ -271,7 +286,8 @@ function rephraserApp() {
                         rephrased_text: content,
                         keywords: item.keywords,
                         is_template: item.is_template,
-                        category: item.category
+                        category: item.category,
+                        model_used: isAlt ? item.modelB_name : item.modelA_name
                     })
                 });
                 

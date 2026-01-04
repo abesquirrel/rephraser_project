@@ -1,3 +1,4 @@
+```python
 import os
 import sys
 import logging
@@ -5,6 +6,7 @@ import json
 import threading
 import time
 import requests
+from datetime import datetime
 import re
 import numpy as np
 import faiss
@@ -102,6 +104,8 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
     
     try:
         r = requests.post(url, json=payload, timeout=60)
+        if r.status_code != 200:
+            logger.error(f"Ollama error {r.status_code}: {r.text}")
         r.raise_for_status()
         return r.json().get('message', {}).get('content', '')
     except Exception as e:
@@ -151,9 +155,16 @@ def build_template_prompt(original_text, signature="Paul"):
     system = f"You are {signature}. Rephrase into template:\nHello,\n\nObservations:\n...\nActions Taken:\n...\nRecommendations:\n...\nRegards,\n{signature}"
     return [{"role": "system", "content": system}, {"role": "user", "content": f"Rephrase: {original_text}"}]
 
-def build_structured_prompt(original_text, examples, web_context=None, signature="Paul"):
-    # (Simplified for brevity, but mimicking structure)
-    system = f"You are {signature}. Support Analyst. Clear, concise. RETURN ONLY THE REPHRASED RESPONSE. NO PREAMBLE. NO 'Here is the response'. NO MARKDOWN unless part of the email. Structure:\nHello,\n\nObservations:\n...\nActions Taken:\n...\nRecommendations:\n...\nRegards,\n{signature}"
+def build_structured_prompt(original_text, examples, web_context=None, signature="Paul", direct_instruction=None):
+    # System prompt defining role and default structure
+    system = f"You are {signature}. Support Analyst. Clear, concise. RETURN ONLY THE REPHRASED RESPONSE. NO PREAMBLE. NO MARKDOWN unless part of the email.\n\n"
+    
+    if direct_instruction:
+        system += f"CRITICAL INSTRUCTION: {direct_instruction}\n"
+        system += "Prioritize implementing the above instruction while maintaining the professional response format.\n\n"
+    
+    system += f"Standard Structure:\nHello,\n\nObservations:\n...\nActions Taken:\n...\nRecommendations:\n...\nRegards,\n{signature}"
+    
     user = f"Context:\n{web_context}\n\nExamples:\n{examples}\n\nNotes: {original_text}"
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
@@ -300,9 +311,21 @@ def suggest_keywords():
     if not text:
         return jsonify({'keywords': ''})
     
-    prompt = f"Given this text, suggest 3-5 relevant comma-separated keywords for indexing. Return ONLY the keywords.\n\nText: {text}"
-    keywords = call_llm([{"role": "user", "content": prompt}], temperature=0.2, max_tokens=50)
-    return jsonify({'keywords': keywords.strip().strip('"')})
+    prompt = f"Given this text, suggest 3-5 relevant comma-separated keywords for indexing. Return ONLY the comma-separated keywords, nothing else.\n\nText: {text}"
+    keywords = call_llm([{"role": "user", "content": prompt}], temperature=0.1, max_tokens=50)
+    
+    # Strict list extraction
+    import re
+    # Remove any sentence-like structure before the first comma/list
+    cleaned = re.sub(r'^[^{}\w]*(the\s+)?keywords(\s+are|\s+suggested)?\s*:?\s*', '', keywords, flags=re.IGNORECASE)
+    cleaned = cleaned.strip().strip('"').strip("'").strip(".")
+    
+    # If the response contains bullets or numbers, join them with commas
+    if "\n" in cleaned:
+        items = [i.strip("- ").strip("123456789. ") for i in cleaned.split("\n") if i.strip()]
+        cleaned = ", ".join(items)
+        
+    return jsonify({'keywords': cleaned})
 
 @app.route('/rephrase', methods=['POST'])
 def handle_rephrase():
@@ -345,6 +368,15 @@ def handle_rephrase():
             logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
             yield stream_event(f"Found {len(examples_list)} examples.")
         
+        # Feature: Support for bracketed instructions <rephrase as formal email>
+        instruction_match = re.search(r'<(.*?)>', input_text)
+        direct_instruction = instruction_match.group(1) if instruction_match else None
+        
+        if direct_instruction:
+            yield stream_event(f"Applying Instruction: {direct_instruction[:30]}...")
+            # Clean instruction from text to avoid redundancy if desired, or keep for context
+            # Let's keep it in the text but flag it specifically
+        
         # Format examples for prompt
         formatted_examples = ""
         for i, ex in enumerate(examples_list):
@@ -353,7 +385,7 @@ def handle_rephrase():
             formatted_examples += f"Example {i+1}{item_cat}:\n{rephrased}\n\n"
 
         yield stream_event("Synthesizing...")
-        messages = build_structured_prompt(input_text, formatted_examples, web_context, signature)
+        messages = build_structured_prompt(input_text, formatted_examples, web_context, signature, direct_instruction)
 
         l_start = time.time()
         response = call_llm(messages, model=target_model)

@@ -68,7 +68,7 @@ body {
 }
 
 .container {
-    max-width: 850px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 
@@ -220,6 +220,8 @@ input[type="text"]:focus {
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid transparent;
+    white-space: nowrap !important;
+    flex-shrink: 0;
 }
 
 .btn-primary {
@@ -316,7 +318,43 @@ input[type="text"]:focus {
 }
 
 .ab-grid {
-    grid-template-columns: 1fr 1fr 1fr !important;
+    grid-template-columns: 0.7fr 1.2fr 1.2fr !important;
+    gap: 1.5rem !important;
+}
+
+.vertical-history-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.variants-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.variant-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 0.75rem;
+    color: #e5e7eb;
+    padding: 1rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.edit-textarea:focus {
+    border-color: var(--accent-primary);
 }
 
 .form-select {

@@ -67,12 +67,16 @@
 
                     <div style="margin-top: 1rem; display: flex; gap: 0.5rem;" x-show="abMode" x-transition>
                         <select x-model="modelA" class="form-select">
-                            <option value="llama3:8b-instruct-q3_K_M">Model A: Llama3</option>
-                            <option value="mistral:latest">Model A: Mistral</option>
+                            <option value="">Select Model A...</option>
+                            <template x-for="m in availableModels" :key="m.id">
+                                <option :value="m.id" x-text="m.name" :selected="m.id === modelA"></option>
+                            </template>
                         </select>
                         <select x-model="modelB" class="form-select">
-                            <option value="mistral:latest">Model B: Mistral</option>
-                            <option value="llama3:8b-instruct-q3_K_M">Model B: Llama3</option>
+                            <option value="">Select Model B...</option>
+                            <template x-for="m in availableModels" :key="m.id">
+                                <option :value="m.id" x-text="m.name" :selected="m.id === modelB"></option>
+                            </template>
                         </select>
                     </div>
 
@@ -151,35 +155,58 @@
                             </div>
                         </div>
 
-                        <div class="history-grid" :class="{ 'ab-grid': item.rephrasedB }">
-                            <div>
+                        <div class="vertical-history-stack">
+                            <div style="margin-bottom: 2rem;">
                                 <label class="label-text">Original Input</label>
                                 <div class="bubble bubble-original" x-text="item.original"></div>
                             </div>
-                            <div>
-                                <label class="label-text" x-text="item.rephrasedB ? 'Model A: Llama3' : 'AI Synthesis'"></label>
-                                <div class="bubble bubble-rephrased" x-text="item.rephrased"></div>
-                                <div class="btn-row" style="margin-top: 1rem;">
-                                    <button class="btn btn-ghost" @click="copyText(item.rephrased)">📋 Copy</button>
-                                    <button class="btn btn-ghost" @click="regenerateFrom(item.original)">🔄 Regenerate</button>
-                                    <button class="btn" :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'" 
-                                            @click="approveHistoryEntry(item, 0, false)" :disabled="item.approved">
-                                        <span x-text="item.approved ? '✅ Saved' : '👍 Approve A'"></span>
-                                    </button>
-                                </div>
-                            </div>
-                            <template x-if="item.rephrasedB">
-                                <div>
-                                    <label class="label-text">Model B: Mistral</label>
-                                    <div class="bubble bubble-rephrased" style="border-color: #3b82f6;" x-text="item.rephrasedB"></div>
+                            
+                            <div class="variants-row">
+                                <div class="variant-col">
+                                    <label class="label-text" x-text="item.rephrasedB ? 'Variant A (' + (item.modelA_name || 'Llama3') + ')' : 'AI Synthesis'"></label>
+                                    
+                                    <div x-show="!item.isEditing">
+                                        <div class="bubble bubble-rephrased" x-text="item.rephrased"></div>
+                                    </div>
+                                    <div x-show="item.isEditing" x-cloak>
+                                        <textarea x-model="item.rephrased" class="edit-textarea" rows="6"></textarea>
+                                    </div>
+
                                     <div class="btn-row" style="margin-top: 1rem;">
-                                        <button class="btn btn-ghost" @click="copyText(item.rephrasedB)">📋 Copy</button>
-                                        <button class="btn btn-ghost" @click="approveHistoryEntry(item, 0, true)" :disabled="item.approved">
-                                            👍 Approve B
+                                        <button class="btn btn-ghost" @click="copyText(item.rephrased)">📋 Copy</button>
+                                        <button class="btn btn-ghost" @click="toggleEdit(0, false)" x-text="item.isEditing ? '💾 Done' : '✏️ Edit'"></button>
+                                        <button class="btn" :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'" 
+                                                @click="approveHistoryEntry(item, 0, false)" :disabled="item.approved">
+                                            <span x-text="item.approved ? '✅ Saved' : '👍 Approve A'"></span>
                                         </button>
                                     </div>
                                 </div>
-                            </template>
+
+                                <template x-if="item.rephrasedB">
+                                    <div class="variant-col">
+                                        <label class="label-text" x-text="'Variant B (' + (item.modelB_name || 'Mistral') + ')'"></label>
+                                        
+                                        <div x-show="!item.isEditingB">
+                                            <div class="bubble bubble-rephrased" style="border-color: #3b82f6;" x-text="item.rephrasedB"></div>
+                                        </div>
+                                        <div x-show="item.isEditingB" x-cloak>
+                                            <textarea x-model="item.rephrasedB" class="edit-textarea" style="border-color: #3b82f6;" rows="6"></textarea>
+                                        </div>
+
+                                        <div class="btn-row" style="margin-top: 1rem;">
+                                            <button class="btn btn-ghost" @click="copyText(item.rephrasedB)">📋 Copy</button>
+                                            <button class="btn btn-ghost" @click="toggleEdit(0, true)" x-text="item.isEditingB ? '💾 Done' : '✏️ Edit'"></button>
+                                            <button class="btn btn-ghost" @click="approveHistoryEntry(item, 0, true)" :disabled="item.approved">
+                                                👍 Approve B
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;">
+                             <button class="btn btn-ghost" @click="regenerateFrom(item.original)">🔄 Regenerate All</button>
                         </div>
                     </div>
                 </template>

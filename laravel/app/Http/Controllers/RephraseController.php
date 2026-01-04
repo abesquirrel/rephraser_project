@@ -39,7 +39,8 @@ class RephraseController extends Controller
             'rephrased_text' => 'required|string',
             'keywords' => 'nullable|string',
             'is_template' => 'nullable|boolean',
-            'category' => 'nullable|string'
+            'category' => 'nullable|string',
+            'model_used' => 'nullable|string'
         ]);
 
         // 1. Save to Database (Source of Truth)
@@ -50,6 +51,7 @@ class RephraseController extends Controller
             'action' => 'Approve/Create',
             'original_content' => $validated['original_text'],
             'rephrased_content' => $validated['rephrased_text'],
+            'model_used' => $validated['model_used'] ?? null,
             'user_name' => 'System' // Can be updated if auth is added later
         ]);
 
@@ -62,7 +64,7 @@ class RephraseController extends Controller
     public function suggestKeywords(Request $request)
     {
         $text = $request->input('text', '');
-        $response = Http::post('http://ai:5001/suggest_keywords', ['text' => $text]);
+        $response = Http::post("{$this->aiServiceUrl}/suggest_keywords", ['text' => $text]);
         return $response->json();
     }
 
