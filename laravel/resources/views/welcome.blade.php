@@ -36,15 +36,15 @@
 
             <div class="input-grid">
                 <div>
-                    <label class="label-text">Your Notes</label>
-                    <textarea x-model="inputText" placeholder="e.g., customer reported high latency in the Midwest region after firmware update..." rows="8"></textarea>
+                    <label class="label-text" for="notes-input">Your Notes</label>
+                    <textarea id="notes-input" x-model="inputText" placeholder="e.g., customer reported high latency in the Midwest region after firmware update..." rows="8"></textarea>
                 </div>
                 <div>
                     <label class="label-text">Configuration</label>
                     <div class="control-panel">
                         <div class="form-group" style="margin-bottom: 1rem;">
-                            <label class="label-text" style="font-size: 0.75rem;">Signature</label>
-                            <input type="text" x-model="signature" placeholder="Paul">
+                            <label class="label-text" for="signature-input" style="font-size: 0.75rem;">Signature</label>
+                            <input id="signature-input" type="text" x-model="signature" placeholder="Paul">
                         </div>
                         
                         <label class="custom-checkbox">
@@ -141,7 +141,11 @@
                 <!-- Archive Section for older items -->
                 <template x-if="history.length > 1">
                     <div x-data="{ openArchive: false }" style="margin-top: 2rem;">
-                        <div class="glass-card" style="padding: 1.25rem; cursor: pointer; border-style: dashed;" @click="openArchive = !openArchive">
+                        <button type="button" class="glass-card"
+                                style="padding: 1.25rem; cursor: pointer; border-style: dashed; width: 100%; text-align: left;"
+                                @click="openArchive = !openArchive"
+                                :aria-expanded="openArchive"
+                                aria-controls="archive-list">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div class="section-title" style="margin: 0; font-size: 1.1rem;">
                                     <span>📦</span> Response Archive
@@ -149,9 +153,9 @@
                                 </div>
                                 <span style="font-size: 1.2rem; transition: transform 0.2s;" :style="openArchive ? 'transform: rotate(180deg)' : ''">▼</span>
                             </div>
-                        </div>
+                        </button>
 
-                        <div x-show="openArchive" x-collapse>
+                        <div id="archive-list" x-show="openArchive" x-collapse>
                             <template x-for="(item, idx) in history.slice(1)" :key="item.timestamp">
                                 <div class="glass-card history-card" 
                                      :class="{ 'collapsed': !item.expanded, 'approved': item.approved }"
@@ -218,14 +222,18 @@
 
         <!-- KB Management (Advanced Section) -->
         <div x-data="{ expanded: false }" class="glass-card animate-fade" style="padding: 1rem; animation-delay: 0.3s; margin-top: 4rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 0.5rem;" @click="expanded = !expanded">
+            <button type="button"
+                    style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 0.5rem; width: 100%; text-align: left; background: transparent; border: none; color: inherit;"
+                    @click="expanded = !expanded"
+                    :aria-expanded="expanded"
+                    aria-controls="kb-settings-panel">
                 <div class="section-title" style="margin: 0;">
                     <span>📚</span> Knowledge Base Settings
                 </div>
                 <span x-text="expanded ? 'Hide' : 'Show'" class="info-pill"></span>
-            </div>
+            </button>
             
-            <div x-show="expanded" x-cloak x-transition.scale.origin.top>
+            <div id="kb-settings-panel" x-show="expanded" x-cloak x-transition.scale.origin.top>
                 <div style="padding: 1.5rem 0.5rem;">
                     <div class="input-grid" style="align-items: end;">
                         <div>
