@@ -1,50 +1,70 @@
 # Rephraser AI Project
 
-A professional microservice-based application for knowledge-aware text rephrasing, featuring a Laravel frontend, a Python AI microservice, and a MariaDB database.
+A professional microservice-based application for knowledge-aware text rephrasing. It uses a Laravel frontend, a Python AI microservice (FAISS + LLM), and MariaDB.
 
-## Architecture
+## 🚀 Quick Start (Deployment from Scratch)
 
-- **Web UI (Laravel)**: Modern, responsive interface for rephrasing and KB management.
-- **AI Service (Python/Flask)**: Handles vector search (FAISS), LLM synthesis, and web search integration.
-- **Database (MariaDB 10.11)**: Persistent storage for 3,000+ knowledge base entries.
-- **Redis**: Queue and caching layer.
-- **Nginx**: High-performance reverse proxy.
+### 1. Prerequisites
 
-## Key Features
-
-- **Knowledge-Aware AI**: prioritizes "Template" entries for structured responses.
-- **Hybrid Search**: Combines FAISS vector retrieval with DuckDuckGo web search.
-- **Observability**: Built-in latency tracking and token estimation for all generations.
-- **Health Monitoring**: Automated Docker health checks for all core infrastructure services.
-- **Interactive API Docs**: Swagger/OpenAPI documentation available at `/docs`.
-
-## Quick Start
-
-### 1. Requirements
-
-- Docker and Docker Compose
-- Ollama (running on the host) with `llama3:8b-instruct-q3_K_M`
+- **Docker & Docker Compose** installed.
+- **Ollama** installed on the host machine.
+- Download required models:
+  ```bash
+  ollama pull gemma2:9b
+  ollama pull mistral
+  ollama pull llama3:8b-instruct-q3_K_M
+  ```
 
 ### 2. Startup
 
-```bash
-./start_docker.sh
-```
+1. Clone the repository and enter the directory.
+2. Initialize environment (optional, script handles most):
+   ```bash
+   cp laravel/.env.example laravel/.env
+   ```
+3. Boot the stack:
+   ```bash
+   chmod +x start_docker.sh
+   ./start_docker.sh
+   ```
 
 ### 3. Access
 
-- **Web Interface**: `http://localhost:8000`
-- **Streamlit UI**: `streamlit run ui.py --server.address 0.0.0.0`
-- **API Documentation**: `http://localhost:5001/docs`
+- **Web UI**: [http://localhost:8000](http://localhost:8000)
+- **API Docs**: [http://localhost:5001/docs](http://localhost:5001/docs)
 
-## Management
+---
 
-### LAN Access
+## 🧠 Knowledge Base Training
 
-The application is accessible from other devices on your network at `http://<YOUR_IP>:8000`.
+The AI is "context-aware" and relies on its Knowledge Base (KB) to provide structured, accurate rephrasing. Following deployment, you **must train its memory**:
 
-### Database
+### Option A: Bulk Import (Recommended)
 
-- **Host Port**: `3310`
-- **User**: `rephraser`
-- **Pass**: `secret`
+1. Go to the **"Learned Corpus"** tab in the UI.
+2. Upload a CSV file containing your past rephrasing examples.
+3. The system will vectorize and index these entries automatically.
+
+### Option B: Interactive Learning
+
+1. Use the **"Generator"** tab to draft responses.
+2. Click **"✨ Generate Response"**.
+3. If the result is good, click **"✅ Approve & Learn"**.
+4. This adds the pair to the KB, making future generations more accurate.
+
+---
+
+## 🛠 Management & Architecture
+
+- **Architecture**:
+  - `laravel/`: PHP/Alpine.js frontend.
+  - `ai-service/`: Python/Flask AI logic (FAISS vector store).
+  - `mariadb`: Persistent storage for audit logs and KB.
+- **Manual KB Entry**: Use the "Learned Corpus" tab to manually add `Original -> Rephrased` pairs with specific categories and keywords.
+- **LAN Access**: Accessible via `http://<YOUR_IP>:8000`.
+
+---
+
+## ⚖️ A/B Comparison
+
+Enable **"A/B Comparison"** to test two models side-by-side (e.g., Gemma2 vs Mistral). The system tracks which model was used for every approved response in the **"Audit Trail"**.
