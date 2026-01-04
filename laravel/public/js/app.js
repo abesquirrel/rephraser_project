@@ -1,12 +1,22 @@
 function rephraserApp() {
     return {
         inputText: '',
-        signature: Alpine.$persist('Paul').as('rephraser_sig'),
-        showThinking: true,
-        templateMode: false,
+        rephrasedContent: '',
+        rephrasedContentB: '', // For A/B testing
+        status: '',
+        signature: Alpine.$persist('Paul').as('rephraser_sig'), // Kept persist for signature
         enableWebSearch: true,
+        templateMode: false,
         searchKeywords: '',
-        processing: false,
+        currentCategory: '', // Tier 2
+        newCategory: '', 
+        categories: ['General', 'Technical', 'Billing', 'Sales', 'Feedback'],
+        modelA: 'llama3:8b-instruct-q3_K_M',
+        modelB: 'mistral:latest',
+        abMode: false,
+        isGenerating: false,
+        auditLogs: [],
+        activeTab: 'generator', // generator, history, audit
         thinkingLines: [],
         history: Alpine.$persist([]).as('rephraser_log_v3'),
         allExpanded: false,
@@ -20,6 +30,7 @@ function rephraserApp() {
         manualReph: '',
         manualKeywords: '',
         manualIsTemplate: false,
+        manualCategory: '', // Added manualCategory
         adding: false,
 
         init() {
@@ -42,25 +53,28 @@ function rephraserApp() {
             this.history.forEach(item => item.expanded = this.allExpanded);
         },
 
-        async generateAction() {
-            if (!this.inputText.trim()) return;
+        async generateRephrase() { // Renamed from generateAction
+            if (!this.inputText) return;
+            this.isGenerating = true;
+            this.rephrasedContent = '';
+            this.rephrasedContentB = '';
+            this.thinkingLines = []; // Reset thinking lines
+            this.status = 'Connecting...';
 
-            this.processing = true;
-            this.thinkingLines = [];
-            
-            const payload = {
-                text: this.inputText,
-                signature: this.signature,
-                enable_web_search: this.enableWebSearch,
-                search_keywords: this.searchKeywords,
-                template_mode: this.templateMode
-            };
-
-            try {
+            // Function to handle a single stream
+            const runStream = async (model, targetKey) => {
                 const response = await fetch('/api/rephrase', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        text: this.inputText,
+                        signature: this.signature,
+                        enable_web_search: this.enableWebSearch,
+                        search_keywords: this.searchKeywords,
+                        template_mode: this.templateMode,
+                        category: this.currentCategory,
+                        model: model
+                    })
                 });
 
                 const reader = response.body.getReader();
@@ -68,78 +82,100 @@ function rephraserApp() {
                 let buffer = '';
 
                 while (true) {
-                    const { value, done } = await reader.read();
+                    const { done, value } = await reader.read();
                     if (done) break;
-
                     buffer += decoder.decode(value, { stream: true });
                     const lines = buffer.split('\n');
-                    
-                    // Keep the last line in the buffer as it might be incomplete
-                    buffer = lines.pop(); 
+                    buffer = lines.pop(); // Keep the last line in the buffer as it might be incomplete
 
                     for (const line of lines) {
                         if (!line.trim()) continue;
                         try {
-                            const event = JSON.parse(line);
-                            if (event.status) {
-                                this.thinkingLines.push(event.status);
+                            const parsed = JSON.parse(line);
+                            if (parsed.status) {
+                                this.thinkingLines.push(parsed.status);
                                 // Auto-scroll to bottom of logs
                                 this.$nextTick(() => {
                                     const container = document.querySelector('.logs-container');
                                     if (container) container.scrollTop = container.scrollHeight;
                                 });
-                            } else if (event.data) {
-                                // Collapse previous items
-                                this.history.forEach((h, i) => {
-                                    if (i !== 0) h.expanded = false;
-                                });
-
-                                this.history.unshift({
-                                    original: this.inputText,
-                                    rephrased: event.data,
-                                    keywords: this.searchKeywords,
-                                    is_template: this.templateMode,
-                                    approved: false,
-                                    expanded: true,
-                                    timestamp: new Date().toISOString()
-                                });
-                                // Keep history manageable
-                                if (this.history.length > 50) this.history.pop();
-                                
-                                this.processing = false;
-                                this.triggerToast('Synthesis Complete');
-                            } else if (event.error) {
-                                this.triggerToast('Backend Error: ' + event.error);
-                                this.processing = false;
                             }
+                            if (parsed.data) this[targetKey] = parsed.data;
                         } catch (e) {
                             console.warn('JSON Parse error on line:', line, e);
                         }
                     }
                 }
-                
                 // Process any remaining buffer content
                 if (buffer.trim()) {
-                     try {
-                        const event = JSON.parse(buffer);
-                        if (event.data) { // Handle case where last line was complete but no newline
-                             // Same logic as above, but just for data as status usually comes early
-                             this.history.unshift({
-                                original: this.inputText,
-                                rephrased: event.data,
-                                keywords: this.searchKeywords,
-                                is_template: this.templateMode,
-                                approved: false,
-                                expanded: true,
-                                timestamp: new Date().toISOString()
-                            });
-                            this.processing = false;
-                        }
+                    try {
+                        const parsed = JSON.parse(buffer);
+                        if (parsed.data) this[targetKey] = parsed.data;
                     } catch(e) {}
                 }
+            };
+
+            try {
+                if (this.abMode) {
+                    this.status = 'Dual Generation Mode...';
+                    await Promise.all([
+                        runStream(this.modelA, 'rephrasedContent'),
+                        runStream(this.modelB, 'rephrasedContentB')
+                    ]);
+                } else {
+                    await runStream(this.modelA, 'rephrasedContent');
+                }
+
+                // Collapse previous items and add to history after generation
+                this.history.forEach((h, i) => {
+                    if (i !== 0) h.expanded = false;
+                });
+
+                this.history.unshift({
+                    original: this.inputText,
+                    rephrased: this.rephrasedContent, // Store model A's output as primary
+                    rephrasedB: this.rephrasedContentB, // Store model B's output
+                    keywords: this.searchKeywords,
+                    is_template: this.templateMode,
+                    category: this.currentCategory,
+                    approved: false,
+                    expanded: true,
+                    timestamp: new Date().toISOString()
+                });
+                // Keep history manageable
+                if (this.history.length > 50) this.history.pop();
+                this.triggerToast('Synthesis Complete');
+                this.history = [...this.history]; // Force reactivity
+
+            } catch (error) {
+                this.status = 'Error occurred.';
+                this.triggerToast('Network Exception or API Error');
+                console.error('Generation error:', error);
+            } finally {
+                this.isGenerating = false;
+                this.status = 'Done.';
+            }
+        },
+
+        async predictKeywords() {
+            const text = this.inputText || this.manualOrig;
+            if (!text) return;
+            this.status = 'Predicting keywords...';
+            try {
+                const response = await fetch('/api/suggest-keywords', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                const data = await response.json();
+                if (this.inputText) this.searchKeywords = data.keywords;
+                else this.manualKeywords = data.keywords;
+                this.status = 'Keywords updated.';
+                this.triggerToast('Keywords Predicted');
             } catch (e) {
-                this.triggerToast('Network Exception');
-                this.processing = false;
+                this.status = 'Keyword prediction failed.';
+                this.triggerToast('Keyword Prediction Failed');
+                console.error('Keyword prediction error:', e);
             }
         },
 
@@ -151,20 +187,72 @@ function rephraserApp() {
         regenerateFrom(text) {
             this.inputText = text;
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            setTimeout(() => this.generateAction(), 400);
+            setTimeout(() => this.generateRephrase(), 400);
         },
 
-        async approveEntry(item, idx) {
-            console.log('🔍 Approve button clicked! idx:', idx);
-            console.log('Payload:', { 
-                original_text: item.original, 
-                rephrased_text: item.rephrased,
-                keywords: item.keywords,
-                is_template: item.is_template
-            });
+        // This is the new approve method for the main generator output
+        async approveEntry(isAlt = false) {
+            const content = isAlt ? this.rephrasedContentB : this.rephrasedContent;
+            if (!content) {
+                this.triggerToast('❌ No content to approve!');
+                return;
+            }
+
+            this.isGenerating = true; // Use isGenerating as a general processing indicator
+            try {
+                const res = await fetch('/api/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        original_text: this.inputText,
+                        rephrased_text: content,
+                        keywords: this.searchKeywords,
+                        is_template: this.templateMode,
+                        category: this.currentCategory
+                    })
+                });
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP status ${res.status}`);
+                }
+
+                const data = await res.json();
+                if (data.status === 'success') {
+                    // Update the history item if it exists, or add a new one
+                    const existingEntry = this.history.find(item => item.original === this.inputText && item.rephrased === content);
+                    if (existingEntry) {
+                        existingEntry.approved = true;
+                    } else {
+                        this.history.unshift({
+                            original: this.inputText,
+                            rephrased: content,
+                            keywords: this.searchKeywords,
+                            is_template: this.templateMode,
+                            category: this.currentCategory,
+                            approved: true,
+                            expanded: true,
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                    this.history = [...this.history]; // Force reactivity
+                    this.triggerToast('✅ Saved to Knowledge Base');
+                } else {
+                    this.triggerToast('❌ Save Failed: ' + (data.error || 'Unknown'));
+                }
+            } catch (e) {
+                console.error('Approval error:', e);
+                this.triggerToast('❌ Network Error: ' + e.message);
+            } finally {
+                this.isGenerating = false;
+            }
+        },
+
+        // This is the original approveEntry, modified to handle history items
+        async approveHistoryEntry(item, idx, isAlt = false) {
+            const content = isAlt ? item.rephrasedB : item.rephrased;
+            console.log('🔍 Approve history clicked! idx:', idx, 'isAlt:', isAlt);
             
-            if (!item.original || !item.rephrased) {
-                console.error('Missing data for approval!');
+            if (!item.original || !content) {
                 this.triggerToast('❌ Error: Missing Data');
                 return;
             }
@@ -180,9 +268,10 @@ function rephraserApp() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         original_text: item.original,
-                        rephrased_text: item.rephrased,
+                        rephrased_text: content,
                         keywords: item.keywords,
-                        is_template: item.is_template
+                        is_template: item.is_template,
+                        category: item.category
                     })
                 });
                 
@@ -207,6 +296,34 @@ function rephraserApp() {
             }
         },
 
+        async fetchAuditLogs() {
+            try {
+                const r = await fetch('/api/audit-logs');
+                if (!r.ok) throw new Error(`HTTP status ${r.status}`);
+                this.auditLogs = await r.json();
+                this.triggerToast('Audit Logs Loaded');
+            } catch (e) {
+                this.triggerToast('❌ Failed to load audit logs: ' + e.message);
+                console.error('Error fetching audit logs:', e);
+            }
+        },
+
+        deleteHistoryEntry(idx) {
+            this.history.splice(idx, 1);
+            this.history = [...this.history];
+            this.triggerToast('Item Removed');
+        },
+
+        addCategory() {
+            if (!this.newCategory.trim()) return;
+            if (!this.categories.includes(this.newCategory)) {
+                this.categories.push(this.newCategory);
+                this.currentCategory = this.newCategory;
+            }
+            this.newCategory = '';
+            this.triggerToast('Category Added');
+        },
+
         async importKB() {
             if (!this.kbFile) return;
             this.importing = true;
@@ -220,7 +337,12 @@ function rephraserApp() {
                     this.triggerToast('Corpus Ingested');
                     this.kbFile = null;
                     document.getElementById('kbFileInput').value = '';
+                } else {
+                    this.triggerToast('❌ Import Failed: ' + (data.error || 'Unknown'));
                 }
+            } catch (e) {
+                this.triggerToast('❌ Network Error during import');
+                console.error('Import error:', e);
             } finally { this.importing = false; }
         },
 
@@ -234,15 +356,36 @@ function rephraserApp() {
                         original_text: this.manualOrig,
                         rephrased_text: this.manualReph,
                         keywords: this.manualKeywords,
-                        is_template: this.manualIsTemplate
+                        is_template: this.manualIsTemplate,
+                        category: this.manualCategory // Added category
                     })
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
                     this.triggerToast('Entry Learned');
+                    // Add to history for immediate feedback
+                    this.history.unshift({
+                        original: this.manualOrig,
+                        rephrased: this.manualReph,
+                        keywords: this.manualKeywords,
+                        is_template: this.manualIsTemplate,
+                        category: this.manualCategory,
+                        approved: true, // Manually added entries are considered approved
+                        expanded: true,
+                        timestamp: new Date().toISOString()
+                    });
+                    // Keep history manageable
+                    if (this.history.length > 50) this.history.pop();
+
                     this.manualOrig = ''; this.manualReph = '';
                     this.manualKeywords = ''; this.manualIsTemplate = false;
+                    this.manualCategory = ''; // Clear manual category
+                } else {
+                    this.triggerToast('❌ Add Failed: ' + (data.error || 'Unknown'));
                 }
+            } catch (e) {
+                this.triggerToast('❌ Network Error during manual add');
+                console.error('Manual add error:', e);
             } finally { this.adding = false; }
         }
     }

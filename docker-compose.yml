@@ -71,22 +71,22 @@ services:
     networks:
       - rephraser-network
 
-  # --- Database (MySQL) ---
+  # --- Database (MariaDB) ---
   db:
-    image: mysql:8.0
+    image: mariadb:10.11
     container_name: rephraser-db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: rephraser_db
-      MYSQL_USER: rephraser
-      MYSQL_PASSWORD: secret
-      MYSQL_ROOT_PASSWORD: root
+      MARIADB_DATABASE: rephraser_db
+      MARIADB_USER: rephraser
+      MARIADB_PASSWORD: secret
+      MARIADB_ROOT_PASSWORD: root
     ports:
       - "3310:3306"
     volumes:
-      - db_data:/var/lib/mysql
+      - mariadb_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u rephraser -psecret || exit 1"]
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u rephraser -psecret || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -111,4 +111,5 @@ networks:
     driver: bridge
 
 volumes:
+  mariadb_data:
   db_data:

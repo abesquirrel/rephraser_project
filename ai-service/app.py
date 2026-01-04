@@ -54,12 +54,13 @@ def strip_markdown(text):
     text = re.sub(r'(\*|_)', '', text)
     return text
 
-def retrieve_examples(query_text, k=3, prefer_templates=False):
+def retrieve_examples(query_text, k=3, prefer_templates=False, category=None):
     if faiss_index is None or faiss_index.ntotal == 0:
         return []
     
-    # If prioritizing templates, search more candidates to find them
-    search_k = min(20, len(knowledge_texts)) if prefer_templates else k
+    # If a category is provided, we still search top candidates but filter them
+    # To ensure we get results even with a filter, we search a larger pool if filtered
+    search_k = min(50, len(knowledge_texts)) if (prefer_templates or category) else k
     
     query_vector = embedding_model.encode([query_text]).astype('float32')
     D, I = faiss_index.search(query_vector, search_k)
@@ -67,29 +68,33 @@ def retrieve_examples(query_text, k=3, prefer_templates=False):
     candidates = []
     for idx_val in I[0]:
         if 0 <= idx_val < len(knowledge_texts):
-            candidates.append(knowledge_texts[idx_val])
+            item = knowledge_texts[idx_val]
+            # Filter by category if strictly requested (soft search: preference given to matches)
+            candidates.append(item)
     
-    if prefer_templates:
-        template_count = sum(1 for c in candidates if c.get('is_template'))
-        logger.info(f"Retrieved {len(candidates)} candidates. Found {template_count} templates.")
-        # Sort so is_template: True comes first, preserving similarity order within groups
-        candidates.sort(key=lambda x: x.get('is_template', False), reverse=True)
+    # Ranking logic
+    def rank_score(item):
+        score = 0
+        if prefer_templates and item.get('is_template'):
+            score += 10
+        if category and item.get('category') == category:
+            score += 20
+        return score
+
+    if prefer_templates or category:
+        candidates.sort(key=rank_score, reverse=True)
         
     return candidates[:k]
 
-def call_llm(messages, temperature=0.5, max_tokens=600):
-    # Mock LLM for the purpose of this refactor (assuming usage of Ollama or similar externally)
-    # The original code used `core.py` which called Ollama.
-    # I should bring `core.py` logic inline or import it.
-    # To keep this file self-contained in Docker, I'll inline a simple requests call to Ollama.
-    # OLLAMA_API_URL was imported from config. assuming 'http://host.docker.internal:11434/api/chat' or similar.
-    # Docker container needs to reach host Ollama.
+def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
+    # Use provided model or default
+    default_model = os.environ.get("OLLAMA_MODEL", "llama3:8b-instruct-q3_K_M")
+    target_model = model if model else default_model
     
     url = "http://host.docker.internal:11434/api/chat" 
-    # Note: On Mac Docker, host.docker.internal works. 
     
     payload = {
-        "model": os.environ.get("OLLAMA_MODEL", "llama3:8b-instruct-q3_K_M"), # Default or from config
+        "model": target_model,
         "messages": messages,
         "stream": False,
         "options": {"temperature": temperature, "num_predict": max_tokens}
@@ -100,8 +105,8 @@ def call_llm(messages, temperature=0.5, max_tokens=600):
         r.raise_for_status()
         return r.json().get('message', {}).get('content', '')
     except Exception as e:
-        logger.error(f"LLM Call failed: {e}")
-        return "I encountered an error generating the response."
+        logger.error(f"LLM Call failed for model {target_model}: {e}")
+        return f"Error with {target_model}: Generate failed."
 
 def extract_keywords(text):
     """Uses LLM to extract clean search keywords."""
@@ -163,17 +168,14 @@ def load_knowledge_base():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT original_text, rephrased_text, keywords, is_template FROM knowledge_bases")
+        cursor.execute("SELECT original_text, rephrased_text, keywords, is_template, category FROM knowledge_bases")
         rows = cursor.fetchall()
         cursor.close()
         conn.close()
 
         if rows:
             originals = [r[0] for r in rows]
-            # Store full record metadata if needed for sophisticated search, 
-            # for now we'll just keep building the index on originals.
-            # You can also combine keywords into the search space.
-            texts = [{"rephrased": r[1], "keywords": r[2], "is_template": bool(r[3])} for r in rows]
+            texts = [{"rephrased": r[1], "keywords": r[2], "is_template": bool(r[3]), "category": r[4]} for r in rows]
             embeddings = embedding_model.encode(originals)
     except Exception as e:
         logger.error(f"DB Load failed: {e}")
@@ -290,6 +292,18 @@ def trigger_rebuild():
     rebuild_worker()
     return jsonify({'status': 'rebuild_started'})
 
+@app.route('/suggest_keywords', methods=['POST'])
+def suggest_keywords():
+    """Predicts relevant keywords for a given text."""
+    data = request.json
+    text = data.get('text', '')
+    if not text:
+        return jsonify({'keywords': ''})
+    
+    prompt = f"Given this text, suggest 3-5 relevant comma-separated keywords for indexing. Return ONLY the keywords.\n\nText: {text}"
+    keywords = call_llm([{"role": "user", "content": prompt}], temperature=0.2, max_tokens=50)
+    return jsonify({'keywords': keywords.strip().strip('"')})
+
 @app.route('/rephrase', methods=['POST'])
 def handle_rephrase():
     data = request.json
@@ -298,6 +312,8 @@ def handle_rephrase():
     enable_web_search = data.get('enable_web_search', True)
     search_keywords = data.get('search_keywords', '')
     template_mode = data.get('template_mode', False)
+    category = data.get('category', None)
+    target_model = data.get('model', None) # Support for model switching/AB testing
 
     def thinking_process_stream():
         yield stream_event("Analyzing Context...")
@@ -309,7 +325,7 @@ def handle_rephrase():
         if template_mode:
             yield stream_event("Searching Prioritized Templates...")
             t_start = time.time()
-            examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES, prefer_templates=True)
+            examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES, prefer_templates=True, category=category)
             logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
             yield stream_event(f"Found {len(examples_list)} relevant patterns.")
         else:
@@ -325,21 +341,22 @@ def handle_rephrase():
             
             yield stream_event("Checking Knowledge Base...")
             t_start = time.time()
-            examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES)
+            examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES, category=category)
             logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
             yield stream_event(f"Found {len(examples_list)} examples.")
         
         # Format examples for prompt
         formatted_examples = ""
         for i, ex in enumerate(examples_list):
+            item_cat = f" [{ex.get('category')}]" if ex.get('category') else ""
             rephrased = ex.get('rephrased', '') if isinstance(ex, dict) else ex
-            formatted_examples += f"Example {i+1}:\n{rephrased}\n\n"
+            formatted_examples += f"Example {i+1}{item_cat}:\n{rephrased}\n\n"
 
         yield stream_event("Synthesizing...")
         messages = build_structured_prompt(input_text, formatted_examples, web_context, signature)
 
         l_start = time.time()
-        response = call_llm(messages)
+        response = call_llm(messages, model=target_model)
         logger.info(f"LLM Synthesis took {time.time() - l_start:.3f}s")
         response = strip_markdown(response)
         
