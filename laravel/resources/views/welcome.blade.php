@@ -94,6 +94,38 @@
                         </div>
                     </div>
 
+                    <!-- Engine Tuning -->
+                    <div style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
+                        <span style="font-size: 0.7rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Engine Tuning</span>
+                        
+                        <div style="margin-top: 0.8rem;">
+                            <label class="label-text" style="font-size: 0.7rem; display: flex; justify-content: space-between;">
+                                <span>Creativity (Temp)</span>
+                                <span x-text="temperature"></span>
+                            </label>
+                            <input type="range" x-model="temperature" min="0" max="1" step="0.1" style="width: 100%; accent-color: var(--accent);">
+                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.4); margin-top: 0.2rem;">Low = Precise (Technical) | High = Original (Creative)</div>
+                        </div>
+
+                        <div style="margin-top: 0.8rem;">
+                            <label class="label-text" style="font-size: 0.7rem; display: flex; justify-content: space-between;">
+                                <span>Output Depth (Tokens)</span>
+                                <span x-text="maxTokens"></span>
+                            </label>
+                            <input type="range" x-model="maxTokens" min="100" max="2000" step="100" style="width: 100%; accent-color: var(--accent);">
+                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.4); margin-top: 0.2rem;">Higher allows for longer, more detailed explanations.</div>
+                        </div>
+
+                        <div style="margin-top: 0.8rem;">
+                            <label class="label-text" style="font-size: 0.7rem; display: flex; justify-content: space-between;">
+                                <span>Context Hits (KB)</span>
+                                <span x-text="kbCount"></span>
+                            </label>
+                            <input type="range" x-model="kbCount" min="1" max="10" step="1" style="width: 100%; accent-color: var(--accent);">
+                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.4); margin-top: 0.2rem;">Uses more past examples to better mimic your style.</div>
+                        </div>
+                    </div>
+
                     <div x-show="enableWebSearch" x-transition.opacity style="margin-top: 1.5rem;">
                         <label class="label-text" style="font-size: 0.75rem; display: flex; justify-content: space-between;">
                             Target Keywords

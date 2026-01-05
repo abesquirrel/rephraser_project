@@ -26,6 +26,11 @@ function rephraserApp() {
         history: Alpine.$persist([]).as('rephraser_log_v3'),
         allExpanded: false,
         
+        // Tuning
+        temperature: Alpine.$persist(0.5).as('rephraser_temp'),
+        maxTokens: Alpine.$persist(600).as('rephraser_tokens'),
+        kbCount: Alpine.$persist(3).as('rephraser_kb_count'),
+        
         toast: { active: false, msg: '' },
         
         // KB
@@ -85,7 +90,10 @@ function rephraserApp() {
                         search_keywords: this.searchKeywords,
                         template_mode: this.templateMode,
                         category: this.currentCategory,
-                        model: model
+                        model: model,
+                        temperature: this.temperature,
+                        max_tokens: this.maxTokens,
+                        kb_count: this.kbCount
                     })
                 });
 

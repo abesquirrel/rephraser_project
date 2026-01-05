@@ -66,3 +66,25 @@ it('sanitizes input before sending to AI', function () {
 
     $response->assertStatus(200);
 });
+
+it('passes through tuning parameters to AI service', function () {
+    Http::fake([
+        'http://rephraser-ai:5001/rephrase' => function ($request) {
+            if ($request['temperature'] == 0.8 &&
+                $request['max_tokens'] == 1200 &&
+                $request['kb_count'] == 7) {
+                return Http::response(['data' => 'ok'], 200);
+            }
+            return Http::response(['error' => 'invalid params'], 400);
+        }
+    ]);
+
+    $response = $this->postJson('/api/rephrase', [
+        'text' => 'test text',
+        'temperature' => 0.8,
+        'max_tokens' => 1200,
+        'kb_count' => 7
+    ]);
+
+    $response->assertStatus(200);
+});

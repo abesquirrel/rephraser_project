@@ -109,7 +109,7 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
         "model": target_model,
         "messages": messages,
         "stream": False,
-        "options": {"temperature": temperature, "num_predict": max_tokens}
+        "options": {"temperature": float(temperature), "num_predict": int(max_tokens)}
     }
     
     try:
@@ -365,9 +365,14 @@ def handle_rephrase():
     template_mode = data.get('template_mode', False)
     category = data.get('category', None)
     target_model = data.get('model', None) # Support for model switching/AB testing
+    
+    # Tuning Parameters (with Safe Limits for 16GB RAM)
+    temperature = max(0.0, min(1.0, float(data.get('temperature', 0.5))))
+    max_tokens = max(50, min(2000, int(data.get('max_tokens', 600))))
+    kb_count = max(1, min(10, int(data.get('kb_count', TOP_K_EXAMPLES))))
 
     def thinking_process_stream():
-        yield stream_event("Analyzing Context...")
+        yield stream_event(f"Resource Profile: {max_tokens} tokens | {kb_count} context hits")
         overall_start = time.time()
         
         web_context = ""
@@ -376,7 +381,7 @@ def handle_rephrase():
         if template_mode:
             yield stream_event("Searching Prioritized Templates...")
             t_start = time.time()
-            examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES, prefer_templates=True, category=category)
+            examples_list = retrieve_examples(input_text, k=kb_count, prefer_templates=True, category=category)
             logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
             yield stream_event(f"Found {len(examples_list)} relevant patterns.")
         else:
@@ -392,7 +397,7 @@ def handle_rephrase():
             
             yield stream_event("Checking Knowledge Base...")
             t_start = time.time()
-            examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES, category=category)
+            examples_list = retrieve_examples(input_text, k=kb_count, category=category)
             logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
             yield stream_event(f"Found {len(examples_list)} examples.")
         
@@ -416,7 +421,7 @@ def handle_rephrase():
         messages = build_structured_prompt(input_text, formatted_examples, web_context, signature, direct_instruction)
 
         l_start = time.time()
-        response = call_llm(messages, model=target_model)
+        response = call_llm(messages, temperature=temperature, max_tokens=max_tokens, model=target_model)
         logger.info(f"LLM Synthesis took {time.time() - l_start:.3f}s")
         response = strip_markdown(response)
         
