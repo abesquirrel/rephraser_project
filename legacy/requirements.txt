@@ -1,9 +1,0 @@
-flask
-sentence-transformers
-ddgs
-requests
-faiss-cpu
-numpy
-streamlit
-pyperclip
-flask-cors

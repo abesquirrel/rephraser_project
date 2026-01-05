@@ -12,11 +12,28 @@ class RephraseController extends Controller
 {
     protected $aiServiceUrl = 'http://rephraser-ai:5001';
 
+    private function aiCall()
+    {
+        return Http::withHeaders([
+            'X-AI-KEY' => config('rephraser.ai_key', 'default_secret_key')
+        ]);
+    }
+
+    private function sanitize($text)
+    {
+        // Basic protection against prompt injection: strip common markers
+        return trim(strip_tags($text));
+    }
+
     public function rephrase(Request $request)
     {
+        $data = $request->all();
+        $data['text'] = $this->sanitize($data['text'] ?? '');
+
         // Stream response from Python service
-        $response = Http::withOptions(['stream' => true])
-            ->post("{$this->aiServiceUrl}/rephrase", $request->all());
+        $response = $this->aiCall()
+            ->withOptions(['stream' => true])
+            ->post("{$this->aiServiceUrl}/rephrase", $data);
 
         return response()->stream(function () use ($response) {
             $body = $response->toPsrResponse()->getBody();
@@ -63,8 +80,8 @@ class RephraseController extends Controller
 
     public function suggestKeywords(Request $request)
     {
-        $text = $request->input('text', '');
-        $response = Http::post("{$this->aiServiceUrl}/suggest_keywords", ['text' => $text]);
+        $text = $this->sanitize($request->input('text', ''));
+        $response = $this->aiCall()->post("{$this->aiServiceUrl}/suggest_keywords", ['text' => $text]);
         return $response->json();
     }
 
@@ -140,7 +157,7 @@ class RephraseController extends Controller
     private function triggerRebuild()
     {
         try {
-            Http::post("{$this->aiServiceUrl}/trigger_rebuild");
+            $this->aiCall()->post("{$this->aiServiceUrl}/trigger_rebuild");
         } catch (\Exception $e) {
             Log::error("Failed to notify AI service: " . $e->getMessage());
         }

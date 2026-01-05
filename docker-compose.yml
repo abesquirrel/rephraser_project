@@ -25,6 +25,11 @@ services:
       - DB_USERNAME=rephraser
       - DB_PASSWORD=secret
       - REDIS_HOST=redis
+      - AI_SERVICE_KEY=${AI_SERVICE_KEY:-default_secret_key}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     networks:
       - rephraser-network
 
@@ -45,7 +50,7 @@ services:
 
   # --- AI Service (Python) ---
   ai:
-    build: 
+    build:
       context: ./ai-service
     image: rephraser-ai
     container_name: rephraser-ai
@@ -59,8 +64,9 @@ services:
       - DB_USER=rephraser
       - DB_PASSWORD=secret
       - DB_NAME=rephraser_db
+      - AI_SERVICE_KEY=${AI_SERVICE_KEY:-default_secret_key}
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/health')"]
+      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/health')" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -68,6 +74,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 2G
     networks:
       - rephraser-network
 
@@ -86,10 +96,14 @@ services:
     volumes:
       - mariadb_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u rephraser -psecret || exit 1"]
+      test: [ "CMD-SHELL", "mariadb-admin ping -h localhost -u rephraser -psecret || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     networks:
       - rephraser-network
 
@@ -99,7 +113,7 @@ services:
     container_name: rephraser-redis
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5

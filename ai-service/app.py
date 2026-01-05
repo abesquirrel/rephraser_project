@@ -23,6 +23,7 @@ DB_NAME = os.environ.get('DB_NAME', 'rephraser_db')
 TOP_K_EXAMPLES = 3
 WEB_SEARCH_RESULT_COUNT = 3
 MAX_GENERATION_TOKENS = 600
+AI_SERVICE_KEY = os.environ.get('AI_SERVICE_KEY', 'default_secret_key')
 
 # Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(name)s] - %(message)s')
@@ -30,6 +31,16 @@ logger = logging.getLogger("AI_SERVICE")
 
 app = Flask(__name__)
 CORS(app)
+
+@app.before_request
+def verify_api_key():
+    if request.path in ['/health', '/docs', '/swagger.json']:
+        return None
+    
+    key = request.headers.get('X-AI-KEY')
+    if not key or key != AI_SERVICE_KEY:
+        logger.warning(f"Unauthorized access attempt from {request.remote_addr}")
+        return jsonify({"error": "Unauthorized"}), 401
 
 # Global Resources
 embedding_model = None
