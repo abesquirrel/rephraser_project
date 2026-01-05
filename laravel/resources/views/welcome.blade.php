@@ -13,6 +13,10 @@
     <!-- Alpine.js Plugins -->
     <script defer src="https://unpkg.com/@alpinejs/persist@3.x/dist/cdn.min.js"></script>
     <script defer src="https://unpkg.com/@alpinejs/collapse@3.x/dist/cdn.min.js"></script>
+    
+    <!-- Custom Logic -->
+    <script defer src="{{ asset('js/app.js') }}"></script>
+
     <!-- Alpine.js Core -->
     <script defer src="https://unpkg.com/alpinejs@3.x/dist/cdn.min.js"></script>
 
@@ -98,6 +102,13 @@
                     <div style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
                         <span style="font-size: 0.7rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Engine Tuning</span>
                         
+                        <!-- Presets -->
+                        <div style="display: flex; gap: 0.3rem; margin-top: 0.8rem;">
+                            <button @click="applyPreset('technical')" class="btn-text-only" style="font-size: 0.6rem; padding: 0.2rem 0.4rem; background: rgba(255,255,255,0.05); border-radius: 4px;">🛠 Technical</button>
+                            <button @click="applyPreset('creative')" class="btn-text-only" style="font-size: 0.6rem; padding: 0.2rem 0.4rem; background: rgba(255,255,255,0.05); border-radius: 4px;">🎨 Creative</button>
+                            <button @click="applyPreset('tldr')" class="btn-text-only" style="font-size: 0.6rem; padding: 0.2rem 0.4rem; background: rgba(255,255,255,0.05); border-radius: 4px;">📝 TL;DR</button>
+                        </div>
+                        
                         <div style="margin-top: 0.8rem;">
                             <label class="label-text" style="font-size: 0.7rem; display: flex; justify-content: space-between;">
                                 <span>Creativity (Temp)</span>
@@ -108,11 +119,19 @@
                         </div>
 
                         <div style="margin-top: 0.8rem;">
-                            <label class="label-text" style="font-size: 0.7rem; display: flex; justify-content: space-between;">
-                                <span>Output Depth (Tokens)</span>
-                                <span x-text="maxTokens"></span>
+                            <label class="label-text" style="font-size: 0.7rem; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="display: flex; align-items: center; gap: 0.4rem;">
+                                    Output Depth
+                                    <span :style="'width: 6px; height: 6px; border-radius: 50%; background:' + getHealthColor()"></span>
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <label style="font-size: 0.6rem; display: flex; align-items: center; gap: 0.2rem; cursor: pointer;">
+                                        <input type="checkbox" x-model="autoTokens" style="width: 10px; height: 10px; accent-color: var(--accent);"> ⚡ Auto
+                                    </label>
+                                    <span x-text="maxTokens" :style="autoTokens ? 'opacity: 0.5' : ''"></span>
+                                </span>
                             </label>
-                            <input type="range" x-model="maxTokens" min="100" max="2000" step="100" style="width: 100%; accent-color: var(--accent);">
+                            <input type="range" x-model="maxTokens" :disabled="autoTokens" min="100" max="2000" step="100" style="width: 100%; accent-color: var(--accent); transition: opacity 0.2s;" :style="autoTokens ? 'opacity: 0.3' : ''">
                             <div style="font-size: 0.6rem; color: rgba(255,255,255,0.4); margin-top: 0.2rem;">Higher allows for longer, more detailed explanations.</div>
                         </div>
 
@@ -123,6 +142,12 @@
                             </label>
                             <input type="range" x-model="kbCount" min="1" max="10" step="1" style="width: 100%; accent-color: var(--accent);">
                             <div style="font-size: 0.6rem; color: rgba(255,255,255,0.4); margin-top: 0.2rem;">Uses more past examples to better mimic your style.</div>
+                        </div>
+
+                        <!-- Style Exclusions -->
+                        <div style="margin-top: 1rem;">
+                            <label class="label-text" style="font-size: 0.7rem;">Style Exclusions (What to avoid)</label>
+                            <input type="text" x-model="negativePrompt" placeholder="No jargon, avoid being too formal..." style="font-size: 0.75rem; padding: 0.4rem;">
                         </div>
                     </div>
 
@@ -416,8 +441,5 @@
             <span x-text="toast.msg"></span>
         </div>
     </div>
-
-    <!-- Custom Logic -->
-    <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>

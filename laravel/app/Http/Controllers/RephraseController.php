@@ -29,6 +29,7 @@ class RephraseController extends Controller
     {
         $data = $request->all();
         $data['text'] = $this->sanitize($data['text'] ?? '');
+        $data['negative_prompt'] = $this->sanitize($data['negative_prompt'] ?? '');
 
         // Stream response from Python service
         $response = $this->aiCall()

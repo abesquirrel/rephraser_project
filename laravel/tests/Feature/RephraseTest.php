@@ -72,7 +72,8 @@ it('passes through tuning parameters to AI service', function () {
         'http://rephraser-ai:5001/rephrase' => function ($request) {
             if ($request['temperature'] == 0.8 &&
                 $request['max_tokens'] == 1200 &&
-                $request['kb_count'] == 7) {
+                $request['kb_count'] == 7 &&
+                $request['negative_prompt'] == 'no jargon') {
                 return Http::response(['data' => 'ok'], 200);
             }
             return Http::response(['error' => 'invalid params'], 400);
@@ -83,7 +84,8 @@ it('passes through tuning parameters to AI service', function () {
         'text' => 'test text',
         'temperature' => 0.8,
         'max_tokens' => 1200,
-        'kb_count' => 7
+        'kb_count' => 7,
+        'negative_prompt' => 'no jargon'
     ]);
 
     $response->assertStatus(200);

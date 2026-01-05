@@ -25,11 +25,15 @@ function rephraserApp() {
         thinkingLines: [],
         history: Alpine.$persist([]).as('rephraser_log_v3'),
         allExpanded: false,
+        showThinking: Alpine.$persist(true).as('rephraser_show_thinking'),
         
         // Tuning
-        temperature: Alpine.$persist(0.5).as('rephraser_temp'),
-        maxTokens: Alpine.$persist(600).as('rephraser_tokens'),
-        kbCount: Alpine.$persist(3).as('rephraser_kb_count'),
+        temperature: 0.5,
+        maxTokens: 600,
+        kbCount: 3,
+        autoTokens: Alpine.$persist(true).as('rephraser_auto_tokens'),
+        negativePrompt: Alpine.$persist('').as('rephraser_negative_prompt'),
+        modelSettings: Alpine.$persist({}).as('rephraser_model_settings'),
         
         toast: { active: false, msg: '' },
         
@@ -44,12 +48,73 @@ function rephraserApp() {
         adding: false,
 
         init() {
+            // Ensure data types are correct (safety check for persist)
+            if (!Array.isArray(this.history)) this.history = [];
+            if (typeof this.modelSettings !== 'object' || this.modelSettings === null) this.modelSettings = {};
+
             // Sanitize history state on load
             if (this.history && this.history.length > 0) {
                 this.history.forEach(item => {
                     item.approving = false; // Reset stuck loading states
                 });
             }
+            // Load settings for initial model
+            this.syncModelSettings();
+
+            // Watch for model changes
+            this.$watch('modelA', () => {
+                if (!this.modelA) return;
+                this.syncModelSettings();
+            });
+            this.$watch('temperature', (val) => this.saveModelSetting('temperature', val));
+            this.$watch('maxTokens', (val) => this.saveModelSetting('maxTokens', val));
+            this.$watch('kbCount', (val) => this.saveModelSetting('kbCount', val));
+        },
+
+        syncModelSettings() {
+            const settings = this.modelSettings[this.modelA];
+            if (settings) {
+                this.temperature = settings.temperature ?? 0.5;
+                this.maxTokens = settings.maxTokens ?? 600;
+                this.kbCount = settings.kbCount ?? 3;
+            } else {
+                // Initialize with defaults if never set
+                this.temperature = 0.5;
+                this.maxTokens = 600;
+                this.kbCount = 3;
+            }
+        },
+
+        saveModelSetting(key, value) {
+            if (!this.modelA) return;
+            if (!this.modelSettings[this.modelA]) {
+                this.modelSettings[this.modelA] = { temperature: 0.5, maxTokens: 600, kbCount: 3 };
+            }
+            this.modelSettings[this.modelA][key] = value;
+            // Persistence is handled by $persist on modelSettings
+        },
+
+        applyPreset(type) {
+            if (type === 'technical') {
+                this.temperature = 0.2;
+                this.maxTokens = 800;
+                this.kbCount = 8;
+            } else if (type === 'creative') {
+                this.temperature = 0.8;
+                this.maxTokens = 1200;
+                this.kbCount = 3;
+            } else if (type === 'tldr') {
+                this.temperature = 0.4;
+                this.maxTokens = 300;
+                this.kbCount = 2;
+            }
+            this.triggerToast(`Applied ${type.toUpperCase()} Preset`);
+        },
+
+        getHealthColor() {
+            if (this.maxTokens <= 800) return '#4ade80'; // Green
+            if (this.maxTokens <= 1500) return '#facc15'; // Yellow
+            return '#f87171'; // Red
         },
 
         triggerToast(msg) {
@@ -78,6 +143,13 @@ function rephraserApp() {
             this.thinkingLines = []; // Reset thinking lines
             this.status = 'Connecting...';
 
+            // Auto-Scaling Logic
+            let finalTokens = this.maxTokens;
+            if (this.autoTokens) {
+                const words = this.inputText.trim().split(/\s+/).length;
+                finalTokens = Math.max(200, Math.min(2000, words * 15)); // Approx 15 tokens per word of input for safety
+            }
+
             // Function to handle a single stream
             const runStream = async (model, targetKey) => {
                 const response = await fetch('/api/rephrase', {
@@ -92,8 +164,9 @@ function rephraserApp() {
                         category: this.currentCategory,
                         model: model,
                         temperature: this.temperature,
-                        max_tokens: this.maxTokens,
-                        kb_count: this.kbCount
+                        max_tokens: finalTokens,
+                        kb_count: this.kbCount,
+                        negative_prompt: this.negativePrompt
                     })
                 });
 
@@ -419,5 +492,5 @@ function rephraserApp() {
                 console.error('Manual add error:', e);
             } finally { this.adding = false; }
         }
-    }
+    };
 }

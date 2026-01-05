@@ -165,7 +165,7 @@ def build_template_prompt(original_text, signature="Paul"):
     system = f"You are {signature}. Rephrase into template:\nHello,\n\nObservations:\n...\nActions Taken:\n...\nRecommendations:\n...\nRegards,\n{signature}"
     return [{"role": "system", "content": system}, {"role": "user", "content": f"Rephrase: {original_text}"}]
 
-def build_structured_prompt(original_text, examples, web_context=None, signature="Paul", direct_instruction=None):
+def build_structured_prompt(original_text, examples, web_context=None, signature="Paul", direct_instruction=None, negative_prompt=None):
     # System prompt defining role and default structure
     system = f"You are {signature}. Support Analyst. Clear, concise. RETURN ONLY THE REPHRASED RESPONSE.\n\n"
     
@@ -177,6 +177,9 @@ def build_structured_prompt(original_text, examples, web_context=None, signature
     if direct_instruction:
         system += f"USER DIRECTIVE: {direct_instruction}\n"
         system += "Apply this directive while strictly maintaining the mandatory data requirement above.\n\n"
+    
+    if negative_prompt:
+        system += f"STYLE EXCLUSIONS (AVOID): {negative_prompt}\n\n"
     
     system += f"Format:\nHello,\n\nObservations:\n(List facts and ALL literal identifiers here)\n\nActions Taken:\n...\nRecommendations:\n...\n\nRegards,\n{signature}"
     
@@ -365,6 +368,7 @@ def handle_rephrase():
     template_mode = data.get('template_mode', False)
     category = data.get('category', None)
     target_model = data.get('model', None) # Support for model switching/AB testing
+    negative_prompt = data.get('negative_prompt', None)
     
     # Tuning Parameters (with Safe Limits for 16GB RAM)
     temperature = max(0.0, min(1.0, float(data.get('temperature', 0.5))))
@@ -418,7 +422,7 @@ def handle_rephrase():
             formatted_examples += f"Example {i+1}{item_cat}:\n{rephrased}\n\n"
 
         yield stream_event("Synthesizing...")
-        messages = build_structured_prompt(input_text, formatted_examples, web_context, signature, direct_instruction)
+        messages = build_structured_prompt(input_text, formatted_examples, web_context, signature, direct_instruction, negative_prompt)
 
         l_start = time.time()
         response = call_llm(messages, temperature=temperature, max_tokens=max_tokens, model=target_model)
