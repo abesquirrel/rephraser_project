@@ -113,7 +113,7 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
     }
     
     try:
-        r = requests.post(url, json=payload, timeout=60)
+        r = requests.post(url, json=payload, timeout=120) # Increased timeout for larger models
         if r.status_code != 200:
             logger.error(f"Ollama error {r.status_code}: {r.text}")
         r.raise_for_status()
@@ -162,26 +162,31 @@ def web_search_tool(query):
     return "No relevant information found online."
 
 def build_template_prompt(original_text, signature="Paul"):
-    system = f"You are {signature}. Rephrase into template:\nHello,\n\nObservations:\n...\nActions Taken:\n...\nRecommendations:\n...\nRegards,\n{signature}"
-    return [{"role": "system", "content": system}, {"role": "user", "content": f"Rephrase: {original_text}"}]
+    system = f"You are {signature}. Rephrase into template:\n\n"
+    system += "### SOURCE DATA PROTOCOL\n"
+    system += "1. ONLY use information provided in the Notes.\n"
+    system += "2. DO NOT invent, guess, or hallucinate any IDs, IMEIs, MSISDNs, or Serial Numbers.\n"
+    system += "3. If no specific IDs are in the Notes, DO NOT include any in your response.\n\n"
+    system += f"Format:\nHello,\n\nObservations:\n(List facts and Literal IDs from notes here)\n\nActions Taken:\n...\nRecommendations:\n...\n\nRegards,\n{signature}"
+    return [{"role": "system", "content": system}, {"role": "user", "content": f"Notes: {original_text}"}]
 
 def build_structured_prompt(original_text, examples, web_context=None, signature="Paul", direct_instruction=None, negative_prompt=None):
     # System prompt defining role and default structure
     system = f"You are {signature}. Support Analyst. Clear, concise. RETURN ONLY THE REPHRASED RESPONSE.\n\n"
     
-    system += "### MANDATORY DATA REQUIRMENT\n"
-    system += "You MUST extract and repeat all specific numerical identifiers (MSISDN, IMEI, ICCID, Serial Numbers) from the 'Notes' section below. "
-    system += "Place these identifiers literally in the 'Observations' section of your response. DO NOT redact, change, or omit these numbers. "
-    system += "If the notes say 'IMEI 12345', your response MUST say 'IMEI 12345'.\n\n"
+    system += "### MANDATORY DATA PROTOCOL\n"
+    system += "1. EXTRACT: Repeat all specific numerical identifiers (MSISDN, IMEI, ICCID, Serial Numbers) EXACTLY as they appear in the 'Notes' section.\n"
+    system += "2. ZERO-TOLERANCE FOR INVENTION: DO NOT redact, change, guess, or invent these numbers. If a number is NOT in the Notes, it MUST NOT appear in your response.\n"
+    system += "3. MISSING DATA: If NO identifiers are found in the Notes, leave the 'Observations' section for identifiers empty or omit those specific lines. DO NOT provide placeholder or example IDs.\n\n"
 
     if direct_instruction:
         system += f"USER DIRECTIVE: {direct_instruction}\n"
-        system += "Apply this directive while strictly maintaining the mandatory data requirement above.\n\n"
+        system += "Apply this while strictly following the DATA PROTOCOL above.\n\n"
     
     if negative_prompt:
         system += f"STYLE EXCLUSIONS (AVOID): {negative_prompt}\n\n"
     
-    system += f"Format:\nHello,\n\nObservations:\n(List facts and ALL literal identifiers here)\n\nActions Taken:\n...\nRecommendations:\n...\n\nRegards,\n{signature}"
+    system += f"Format:\nHello,\n\nObservations:\n(Literal facts and extracted IDs only)\n\nActions Taken:\n...\nRecommendations:\n...\n\nRegards,\n{signature}"
     
     user = f"Context (General Knowledge):\n{web_context}\n\nExamples (Style Reference):\n{examples}\n\nNotes (SPECIFIC SOURCE DATA - PRESERVE ALL NUMBERS):\n{original_text}"
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]

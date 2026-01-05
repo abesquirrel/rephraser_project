@@ -146,8 +146,12 @@
 
                         <!-- Style Exclusions -->
                         <div style="margin-top: 1rem;">
-                            <label class="label-text" style="font-size: 0.7rem;">Style Exclusions (What to avoid)</label>
+                            <label class="label-text" style="font-size: 0.7rem;">🚫 Style Exclusions (What to avoid)</label>
                             <input type="text" x-model="negativePrompt" placeholder="No jargon, avoid being too formal..." style="font-size: 0.75rem; padding: 0.4rem;">
+                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.4); margin-top: 0.2rem;">
+                                <strong>Pro-Tip:</strong> Use this to strip out unwanted habits. 
+                                <br>Examples: "no corporate speak", "don't apologize", "avoid being too technical".
+                            </div>
                         </div>
                     </div>
 
