@@ -85,6 +85,11 @@ function rephraserApp() {
             this.$watch('frequencyPenalty', (val) => this.saveModelSetting('frequencyPenalty', val));
             this.$watch('presencePenalty', (val) => this.saveModelSetting('presencePenalty', val));
             
+            // Logic: Template Mode disables Web Search
+            this.$watch('templateMode', (val) => {
+                if (val) this.enableWebSearch = false;
+            });
+
             this.$watch('theme', () => this.applyTheme());
         },
 
