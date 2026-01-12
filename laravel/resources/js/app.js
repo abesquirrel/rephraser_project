@@ -41,7 +41,7 @@ function rephraserApp() {
         modelSettings: Alpine.$persist({}).as('rephraser_model_settings'),
         
         // Theme
-        theme: Alpine.$persist('light').as('rephraser_theme'),
+        theme: Alpine.$persist('dark').as('rephraser_theme'),
         showGuide: false,
         
         toast: { active: false, msg: '' },
@@ -56,9 +56,31 @@ function rephraserApp() {
         manualCategory: '', // Added manualCategory
         adding: false,
 
+        // Archive State
+        viewModal: false,
+        itemToView: null,
+        currentPage: 1,
+        itemsPerPage: 6,
+
+        get paginatedHistory() {
+            // Slice(1) to skip the latest response which is shown in the main view
+            const archive = this.history.slice(1);
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            return archive.slice(start, start + this.itemsPerPage);
+        },
+
+        get totalPages() {
+            return Math.ceil((this.history.length - 1) / this.itemsPerPage);
+        },
+
         init() {
             // Ensure data types are correct (safety check for persist)
             if (!Array.isArray(this.history)) this.history = [];
+            
+            // Performance Clamping for M3 Air (16GB)
+            // Limit context window leverage to prevent swap/lag
+            if (this.kbCount > 5) this.kbCount = 5;
+            if (this.maxTokens > 2048) this.maxTokens = 2048;
             if (typeof this.modelSettings !== 'object' || this.modelSettings === null) this.modelSettings = {};
 
             // Sanitize history state on load
@@ -303,6 +325,10 @@ function rephraserApp() {
                 if (this.history.length > 50) this.history.pop();
                 this.triggerToast('Synthesis Complete');
                 this.history = [...this.history]; // Force reactivity
+                
+                // Auto-clear input and exclusions on success
+                this.inputText = '';
+                this.negativePrompt = '';
 
             } catch (error) {
                 this.status = 'Error occurred.';
