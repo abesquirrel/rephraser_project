@@ -11,13 +11,13 @@
 }
 
 :root {
-    --bg-color: #f3f4f6; /* Darkened from #f9fafb for less glare */
-    --card-bg: rgba(255, 255, 255, 0.75);
-    --card-border: rgba(0, 0, 0, 0.06);
+    --bg-color: #f4f7f9;
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --card-border: rgba(0, 0, 0, 0.05);
     --accent-primary: #0ea5e9;
     --accent-secondary: #6366f1;
-    --text-main: #1f2937;
-    --text-dim: #6b7280;
+    --text-main: #1a202c;
+    --text-dim: #525f7f;
     --success: #10b981;
     --info: #3b82f6;
 

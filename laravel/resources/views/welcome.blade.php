@@ -509,42 +509,34 @@
                     <button @click="showGuide = false" class="text-2xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">&times;</button>
                 </div>
 
-                <div class="space-y-6">
-                    <div class="flex gap-4">
-                        <div class="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold flex-shrink-0 mt-1">1</div>
-                        <div>
-                            <h3 class="font-bold text-lg mb-1">Compose</h3>
-                            <p class="text-gray-500 dark:text-gray-400">Paste your raw notes or rough draft into the main text area. Don't worry about grammar.</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold flex-shrink-0 mt-1">2</div>
-                        <div>
-                            <h3 class="font-bold text-lg mb-1">Configure</h3>
-                            <p class="text-gray-500 dark:text-gray-400">Set your <strong>Signature</strong>. Toggle <strong>Web Search</strong> for fact-checking or <strong>Template Mode</strong> for standard responses.</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold flex-shrink-0 mt-1">3</div>
-                        <div>
-                            <h3 class="font-bold text-lg mb-1">Tune</h3>
-                            <p class="text-gray-500 dark:text-gray-400">Use <strong>Temperature</strong> to control creativity. <strong>KB Count</strong> determines context depth.</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold flex-shrink-0 mt-1">4</div>
-                        <div>
-                            <h3 class="font-bold text-lg mb-1">Generate</h3>
-                            <p class="text-gray-500 dark:text-gray-400">Click <strong>Generate Response</strong>. The AI will analyze your notes and the Knowledge Base to craft a professional reply.</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="w-8 h-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold flex-shrink-0 mt-1">5</div>
-                        <div>
-                            <h3 class="font-bold text-lg mb-1">Refine & Save</h3>
-                            <p class="text-gray-500 dark:text-gray-400">Review the output. <strong>Edit</strong> directly if needed. Click <strong>Approve</strong> to save it to the Knowledge Base.</p>
-                        </div>
-                    </div>
+                <div class="prose prose-sm md:prose-base max-w-none text-gray-600 dark:text-gray-300">
+                    <p>Paul is a sophisticated tool designed to help you transform rough notes into professional, well-structured text. Here’s how to get the most out of it:</p>
+
+                    <h4>1. Compose Your Input</h4>
+                    <p>Start by writing or pasting your initial thoughts, notes, or drafts into the main input area. The more context you provide, the better the AI can understand your intent and generate a relevant response.</p>
+
+                    <h4>2. Fine-Tune with Sliders</h4>
+                    <p>Under the <strong>Configuration</strong> dropdown, you'll find several sliders to control the AI's output:</p>
+                    <ul>
+                        <li><strong>Creativity (Temperature):</strong> This slider controls the randomness of the output. Lower values (e.g., 0.2) make the output more deterministic and focused, which is ideal for technical or factual content. Higher values (e.g., 0.8) encourage more creative and diverse responses.</li>
+                        <li><strong>KB Context:</strong> This determines how many past examples from the Knowledge Base are used as context. A higher number helps the AI maintain consistency with previous approved responses but may slightly increase processing time.</li>
+                        <li><strong>Top P:</strong> An alternative to temperature, this controls the nucleus of word choices. A value of 0.9 means the AI will only consider words that make up the top 90% of the probability mass. It's recommended to adjust either Temperature or Top P, but not both.</li>
+                        <li><strong>Max Tokens:</strong> Sets the maximum length of the generated response. Adjust this based on how long you need the final text to be.</li>
+                        <li><strong>Presence & Frequency Penalty:</strong> These sliders help reduce repetition. <strong>Presence Penalty</strong> discourages the model from repeating the same topics, while <strong>Frequency Penalty</strong> discourages it from using the same words too often.</li>
+                    </ul>
+
+                    <h4>3. Select the Right Language Model</h4>
+                    <p>Paul offers access to different AI models, each with unique strengths. You can select them from the "Model Configuration" dropdown:</p>
+                    <ul>
+                        <li><strong>Claude Sonnet:</strong> A capable and fast model from Anthropic, great for balanced performance in everyday tasks, including summarization, Q&A, and content generation.</li>
+                        <li><strong>Claude Opus:</strong> Anthropic's most powerful model, excelling at complex analysis, research, and tasks requiring deep reasoning and creativity. Use it for your most demanding jobs.</li>
+                        <li><strong>GPT-4o:</strong> The latest flagship model from OpenAI, offering top-tier intelligence, speed, and multimodality. It's a highly versatile choice for any task.</li>
+                        <li><strong>GPT-4 Turbo:</strong> A powerful and optimized version of GPT-4, ideal for complex tasks requiring accuracy and detailed instruction following. It has a large context window, making it great for long documents.</li>
+                    </ul>
+                    <p><strong>Tip:</strong> Use the <strong>A/B Comparison</strong> mode to run your prompt through two different models simultaneously and compare their outputs side-by-side.</p>
+
+                    <h4>4. Generate and Refine</h4>
+                    <p>Once you're happy with your configuration, click <strong>Generate Response</strong>. Review the output, and if it's not quite right, you can edit it directly. When you're satisfied, click <strong>Approve</strong> to save the successful pairing into your Knowledge Base for future reference.</p>
                 </div>
 
                 <div class="mt-8 text-center">
