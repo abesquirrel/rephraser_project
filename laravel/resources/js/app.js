@@ -59,18 +59,36 @@ function rephraserApp() {
         // Archive State
         viewModal: false,
         itemToView: null,
+        viewModal: false,
+        itemToView: null,
+        archiveFilter: 'all', // 'all', 'saved', 'unsaved'
         currentPage: 1,
         itemsPerPage: 6,
 
         get paginatedHistory() {
             // Slice(1) to skip the latest response which is shown in the main view
-            const archive = this.history.slice(1);
+            let archive = this.history.slice(1);
+            
+            // Apply filtering
+            if (this.archiveFilter === 'saved') {
+                archive = archive.filter(item => item.approved);
+            } else if (this.archiveFilter === 'unsaved') {
+                archive = archive.filter(item => !item.approved);
+            }
+
             const start = (this.currentPage - 1) * this.itemsPerPage;
             return archive.slice(start, start + this.itemsPerPage);
         },
 
+        get totalFilteredCount() {
+            let archive = this.history.slice(1);
+            if (this.archiveFilter === 'saved') return archive.filter(i => i.approved).length;
+            if (this.archiveFilter === 'unsaved') return archive.filter(i => !i.approved).length;
+            return archive.length;
+        },
+
         get totalPages() {
-            return Math.ceil((this.history.length - 1) / this.itemsPerPage);
+            return Math.ceil(this.totalFilteredCount / this.itemsPerPage) || 1;
         },
 
         init() {
@@ -365,6 +383,20 @@ function rephraserApp() {
         copyText(text) {
             navigator.clipboard.writeText(text);
             this.triggerToast('Copied to Clipboard');
+        },
+
+        clearUnsaved() {
+            if (!confirm('Are you sure you want to delete all UNSAVED responses from the archive? This cannot be undone.')) return;
+            
+            // Keep the latest response (index 0) and any approved items
+            const latest = this.history[0];
+            const saved = this.history.slice(1).filter(item => item.approved);
+            
+            // Reconstruct history
+            this.history = latest ? [latest, ...saved] : [...saved];
+            
+            this.currentPage = 1;
+            this.triggerToast('Unsaved items cleared');
         },
 
         regenerateFrom(text) {

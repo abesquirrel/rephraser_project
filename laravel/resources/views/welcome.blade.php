@@ -431,11 +431,38 @@
                                 </svg>
                                 Response Archive
                             </h3>
-                            <span x-text="history.length - 1 + ' Items'"
-                                class="info-pill bg-sky-100 dark:bg-sky-900/30"></span>
+                            <div class="flex items-center gap-3">
+                                <span x-text="totalFilteredCount + ' Items'"
+                                    class="info-pill bg-sky-100 dark:bg-sky-900/30"></span>
+                            </div>
                         </button>
 
                         <div x-show="openArchive" x-collapse class="mt-6">
+                            <!-- Archive Controls -->
+                            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                                <div class="flex p-1 bg-black/5 dark:bg-white/5 rounded-lg">
+                                    <button @click="archiveFilter = 'all'; currentPage = 1"
+                                        :class="{'bg-white dark:bg-white/10 shadow-sm text-sky-500': archiveFilter === 'all', 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200': archiveFilter !== 'all'}"
+                                        class="px-4 py-1.5 text-xs font-medium rounded-md transition-all">All</button>
+                                    <button @click="archiveFilter = 'saved'; currentPage = 1"
+                                        :class="{'bg-white dark:bg-white/10 shadow-sm text-emerald-500': archiveFilter === 'saved', 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200': archiveFilter !== 'saved'}"
+                                        class="px-4 py-1.5 text-xs font-medium rounded-md transition-all">Saved</button>
+                                    <button @click="archiveFilter = 'unsaved'; currentPage = 1"
+                                        :class="{'bg-white dark:bg-white/10 shadow-sm text-amber-500': archiveFilter === 'unsaved', 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200': archiveFilter !== 'unsaved'}"
+                                        class="px-4 py-1.5 text-xs font-medium rounded-md transition-all">Unsaved</button>
+                                </div>
+
+                                <button @click="clearUnsaved()"
+                                    class="text-xs text-red-400 hover:text-red-500 font-medium flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Clear Unsaved
+                                </button>
+                            </div>
+
                             <!-- Grid -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <template x-for="(item, idx) in paginatedHistory" :key="item.timestamp">
@@ -450,12 +477,12 @@
                                         </div>
 
                                         <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-3 mb-3 leading-relaxed"
-                                            x-text="item.rephrased"></p>
+                                            x-text="item.rephrased || item.response || item.text"></p>
 
                                         <div
                                             class="flex items-center gap-2 mt-auto pt-3 border-t border-gray-200/50 dark:border-gray-700/50">
                                             <span class="text-[10px] uppercase tracking-wider font-bold text-sky-500"
-                                                x-text="item.modelA || 'AI Model'"></span>
+                                                x-text="item.modelA_name || item.modelA || 'AI Model'"></span>
                                             <span
                                                 class="text-xs text-gray-400 ml-auto group-hover:text-sky-500 transition-colors">View
                                                 Details &rarr;</span>
@@ -500,10 +527,16 @@
                                 <div class="flex items-center gap-3">
                                     <h3 class="text-xl font-bold font-display text-sky-500">Response Details</h3>
                                     <span class="info-pill bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400"
-                                        x-text="itemToView.modelA || 'Unknown Model'"></span>
+                                        x-text="itemToView.modelA_name || itemToView.modelA || 'Unknown Model'"></span>
                                 </div>
                                 <button @click="viewModal = false"
-                                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">&times;</button>
+                                    class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
 
                             <div class="overflow-y-auto p-8 space-y-8 custom-scrollbar">
@@ -544,16 +577,17 @@
                                     <div
                                         class="p-8 rounded-2xl bg-gradient-to-br from-sky-50 dark:from-sky-900/10 to-indigo-50 dark:to-indigo-900/10 border border-sky-100 dark:border-sky-500/20 shadow-sm">
                                         <p class="text-base md:text-lg text-gray-800 dark:text-gray-100 leading-chill font-medium"
-                                            x-text="itemToView.rephrased"></p>
+                                            x-text="itemToView.rephrased || itemToView.response || itemToView.text"></p>
                                     </div>
                                 </div>
                             </div>
 
                             <div
                                 class="p-6 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3">
-                                <button class="btn btn-ghost text-sm" @click="copyText(itemToView.rephrased)">Copy
+                                <button class="btn btn-ghost text-sm"
+                                    @click="copyText(itemToView.rephrased || itemToView.response || itemToView.text)">Copy
                                     Text</button>
-                                <button class="btn btn-primary text-sm" @click="viewModal = false">Close</button>
+                                <button class="btn btn-primary text-sm px-6" @click="viewModal = false">Close</button>
                             </div>
                         </div>
                     </template>
