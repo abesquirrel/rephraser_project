@@ -384,34 +384,109 @@
                                     </div>
 
                                     <!-- Refined Output -->
+                                    <!-- Refined Output Area -->
                                     <div class="glass-card p-6 border-sky-500 shadow-xl shadow-sky-500/10">
-                                        <div class="mb-4">
-                                            <span class="label-text">Refined Output</span>
-                                        </div>
-                                        <div x-show="!item.isEditing">
-                                            <div class="bubble bubble-rephrased text-base p-5 bg-white/50 dark:bg-black/20"
-                                                x-text="item.rephrased"></div>
-                                        </div>
-                                        <div x-show="item.isEditing" x-cloak>
-                                            <label :for="'edit-' + idx" class="sr-only">Edit Rephrased Text</label>
-                                            <textarea :id="'edit-' + idx" x-model="item.rephrased"
-                                                class="edit-textarea w-full p-4 rounded-xl bg-white dark:bg-gray-800 border border-green-500/20 focus:border-sky-500"
-                                                rows="10"></textarea>
+
+                                        <!-- Standard Single Output -->
+                                        <div x-show="!item.rephrasedB">
+                                            <div class="mb-4">
+                                                <span class="label-text">Refined Output</span>
+                                            </div>
+                                            <div x-show="!item.isEditing">
+                                                <div class="bubble bubble-rephrased text-base p-5 bg-white/50 dark:bg-black/20"
+                                                    x-text="item.rephrased"></div>
+                                            </div>
+                                            <div x-show="item.isEditing" x-cloak>
+                                                <textarea :id="'edit-' + idx" x-model="item.rephrased"
+                                                    class="edit-textarea w-full p-4 rounded-xl bg-white dark:bg-gray-800 border border-green-500/20 focus:border-sky-500"
+                                                    rows="10"></textarea>
+                                            </div>
                                         </div>
 
-                                        <div class="flex justify-end gap-3 mt-6">
-                                            <button class="btn btn-ghost px-4 py-2 text-sm"
-                                                @click="copyText(item.rephrased)">Copy</button>
-                                            <button class="btn btn-ghost px-4 py-2 text-sm"
-                                                @click="toggleEdit(0, false)">Edit</button>
-                                            <button class="btn px-5 py-2 text-sm font-semibold"
-                                                :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'"
-                                                @click="approveHistoryEntry(item, 0, false)" :disabled="item.approved">
-                                                Approve
-                                            </button>
+                                        <!-- A/B Comparison Output -->
+                                        <div x-show="item.rephrasedB" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <!-- Model A -->
+                                            <div class="text-left">
+                                                <div class="flex items-center gap-2 mb-3">
+                                                    <span
+                                                        class="info-pill bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400 text-xs font-bold"
+                                                        x-text="item.modelA_name || 'Model A'"></span>
+                                                </div>
+                                                <div x-show="!item.isEditing">
+                                                    <div class="bubble bubble-rephrased text-sm md:text-base p-4 bg-white/50 dark:bg-black/20 border border-sky-500/20"
+                                                        x-text="item.rephrased"></div>
+                                                </div>
+                                                <div x-show="item.isEditing" x-cloak>
+                                                    <textarea x-model="item.rephrased"
+                                                        class="edit-textarea w-full p-4 rounded-xl bg-white dark:bg-gray-800 border border-sky-500/20 focus:border-sky-500 text-sm md:text-base"
+                                                        rows="8"></textarea>
+                                                </div>
+                                                <div class="mt-3 flex gap-2">
+                                                    <button class="btn btn-ghost text-xs flex-1"
+                                                        @click="copyText(item.rephrased)">Copy</button>
+                                                    <button class="btn btn-ghost text-xs flex-1"
+                                                        @click="toggleEdit(0, false)"
+                                                        x-text="item.isEditing ? 'Done' : 'Edit'"></button>
+                                                    <button
+                                                        class="btn btn-xs btn-primary bg-sky-500/10 text-sky-500 hover:bg-sky-500 hover:text-white border-0 flex-1"
+                                                        @click="approveHistoryEntry(item, 0, false)"
+                                                        :disabled="item.approved">
+                                                        Approve
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Model B -->
+                                            <div
+                                                class="text-left border-l md:border-l-0 md:border-l border-gray-200/20 pl-0 md:pl-6">
+                                                <div class="flex items-center gap-2 mb-3">
+                                                    <span
+                                                        class="info-pill bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400 text-xs font-bold"
+                                                        x-text="item.modelB_name || 'Model B'"></span>
+                                                </div>
+                                                <div x-show="!item.isEditingB">
+                                                    <div class="bubble bubble-rephrased text-sm md:text-base p-4 bg-white/50 dark:bg-black/20 border border-indigo-500/20"
+                                                        x-text="item.rephrasedB"></div>
+                                                </div>
+                                                <div x-show="item.isEditingB" x-cloak>
+                                                    <textarea x-model="item.rephrasedB"
+                                                        class="edit-textarea w-full p-4 rounded-xl bg-white dark:bg-gray-800 border border-indigo-500/20 focus:border-indigo-500 text-sm md:text-base"
+                                                        rows="8"></textarea>
+                                                </div>
+                                                <div class="mt-3 flex gap-2">
+                                                    <button class="btn btn-ghost text-xs flex-1"
+                                                        @click="copyText(item.rephrasedB)">Copy</button>
+                                                    <button class="btn btn-ghost text-xs flex-1"
+                                                        @click="toggleEdit(0, true)"
+                                                        x-text="item.isEditingB ? 'Done' : 'Edit'"></button>
+                                                    <button
+                                                        class="btn btn-xs btn-primary bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500 hover:text-white border-0 flex-1"
+                                                        @click="approveHistoryEntry(item, 0, true)"
+                                                        :disabled="item.approved">
+                                                        Approve
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Actions (Only for single mode) -->
+                                        <div class="flex flex-wrap gap-3 mt-6 pt-6 border-t border-gray-200/10"
+                                            x-show="!item.rephrasedB">
+
+                                            <div class="flex justify-end gap-3 mt-6">
+                                                <button class="btn btn-ghost px-4 py-2 text-sm"
+                                                    @click="copyText(item.rephrased)">Copy</button>
+                                                <button class="btn btn-ghost px-4 py-2 text-sm"
+                                                    @click="toggleEdit(0, false)">Edit</button>
+                                                <button class="btn px-5 py-2 text-sm font-semibold"
+                                                    :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'"
+                                                    @click="approveHistoryEntry(item, 0, false)"
+                                                    :disabled="item.approved">
+                                                    Approve
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
                             </article>
                         </template>
                     </div>
@@ -709,16 +784,42 @@
 
             <!-- Toast Notifications -->
             <div x-show="toast.active" x-cloak x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:enter-start="opacity-0 -translate-y-4 scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                 x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-2"
-                class="toast fixed bottom-8 right-8 z-50 flex items-center gap-3 px-6 py-4 bg-sky-500 text-white rounded-xl shadow-2xl font-semibold">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" stroke="currentColor"
-                    fill="none">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-                </svg>
-                <span x-text="toast.msg"></span>
+                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
+                class="toast fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-3 text-white rounded-full shadow-2xl font-semibold backdrop-blur-md ring-1 ring-white/20"
+                :class="{
+                    'bg-emerald-500/90': toast.type === 'success',
+                    'bg-rose-500/90': toast.type === 'error', 
+                    'bg-sky-500/90': toast.type === 'info'
+                }">
+                <!-- Icon based on type -->
+                <template x-if="toast.type === 'success'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </template>
+                <template x-if="toast.type === 'error'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                </template>
+                <template x-if="toast.type === 'info'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </template>
+
+                <span x-text="toast.msg" class="tracking-wide text-sm"></span>
             </div>
 
 

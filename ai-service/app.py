@@ -186,9 +186,14 @@ def build_structured_prompt(original_text, examples, web_context=None, signature
     if negative_prompt:
         system += f"STYLE EXCLUSIONS (AVOID): {negative_prompt}\n\n"
     
-    system += f"Format:\nHello,\n\nObservations:\n(Literal facts and extracted IDs only)\n\nActions Taken:\n...\nRecommendations:\n...\n\nRegards,\n{signature}"
+    system += "Format:\nHello,\n\nObservations:\n(Literal facts and extracted IDs only)\n\nActions Taken:\n...\nRecommendations:\n...\n\nRegards,\n{signature}\n\n"
+    system += "CRITICAL: Start your response directly with 'Hello,'. Do not output status messages like 'None found'."
     
-    user = f"Context (General Knowledge):\n{web_context}\n\nExamples (Style Reference):\n{examples}\n\nNotes (SPECIFIC SOURCE DATA - PRESERVE ALL NUMBERS):\n{original_text}"
+    # Re-ordering to prioritize Notes (Source Data)
+    user = f"Notes (SPECIFIC SOURCE DATA - PRESERVE ALL NUMBERS):\n{original_text}\n\n"
+    user += f"Context (General Knowledge):\n{web_context}\n\n"
+    user += f"Examples (Style Reference):\n{examples}"
+    
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
@@ -374,6 +379,9 @@ def handle_rephrase():
     category = data.get('category', None)
     target_model = data.get('model', None) # Support for model switching/AB testing
     negative_prompt = data.get('negative_prompt', None)
+    
+    logger.info(f"DEBUG: Input Text: '{input_text}'")
+    logger.info(f"DEBUG: Target Model: '{target_model}'")
     
     # Tuning Parameters (with Safe Limits for 16GB RAM)
     temperature = max(0.0, min(1.0, float(data.get('temperature', 0.5))))

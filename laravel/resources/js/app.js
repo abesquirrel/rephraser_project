@@ -44,7 +44,12 @@ function rephraserApp() {
         theme: Alpine.$persist('dark').as('rephraser_theme'),
         showGuide: false,
         
-        toast: { active: false, msg: '' },
+        theme: Alpine.$persist('dark').as('rephraser_theme'),
+        showGuide: false,
+        
+        toast: { active: false, msg: '', type: 'info' },
+        
+        // KB
         
         // KB
         kbFile: null,
@@ -128,6 +133,15 @@ function rephraserApp() {
             // Logic: Template Mode disables Web Search
             this.$watch('templateMode', (val) => {
                 if (val) this.enableWebSearch = false;
+            });
+            
+            // Logic: A/B Mode defaults to least demanding configuration
+            this.$watch('abMode', (val) => {
+                if (val) {
+                    this.kbCount = 0;      // Disable KB context to save VRAM
+                    this.maxTokens = 300;  // Reduce tokens for dual generation
+                    this.triggerToast('A/B Mode: Optimized settings applied', 'info');
+                }
             });
 
             this.$watch('theme', () => this.applyTheme());
@@ -217,8 +231,9 @@ function rephraserApp() {
             return '#f87171'; // Red
         },
 
-        triggerToast(msg) {
+        triggerToast(msg, type = 'info') {
             this.toast.msg = msg;
+            this.toast.type = type;
             this.toast.active = true;
             setTimeout(() => this.toast.active = false, 3000);
         },
@@ -236,7 +251,7 @@ function rephraserApp() {
         },
 
         async generateRephrase() { // Renamed from generateAction
-            if (!this.inputText) return;
+            const textToProcess = this.inputText;
             this.isGenerating = true;
             this.rephrasedContent = '';
             this.rephrasedContentB = '';
@@ -246,7 +261,7 @@ function rephraserApp() {
             // Auto-Scaling Logic
             let finalTokens = this.maxTokens;
             if (this.autoTokens) {
-                const words = this.inputText.trim().split(/\s+/).length;
+                const words = textToProcess.trim().split(/\s+/).length;
                 finalTokens = Math.max(200, Math.min(2000, words * 15)); // Approx 15 tokens per word of input for safety
             }
 
@@ -255,8 +270,9 @@ function rephraserApp() {
                 const response = await fetch('/api/rephrase', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        text: this.inputText,
+                        text: textToProcess,
                         signature: this.signature,
                         enable_web_search: this.enableWebSearch,
                         search_keywords: this.searchKeywords,
@@ -325,7 +341,7 @@ function rephraserApp() {
                 });
 
                 this.history.unshift({
-                    original: this.inputText,
+                    original: textToProcess,
                     rephrased: this.decodeEntities(this.rephrasedContent), // Store model A's output as primary
                     rephrasedB: this.rephrasedContentB ? this.decodeEntities(this.rephrasedContentB) : null, // Store model B's output
                     keywords: this.searchKeywords,
@@ -341,7 +357,7 @@ function rephraserApp() {
                 });
                 // Keep history manageable
                 if (this.history.length > 50) this.history.pop();
-                this.triggerToast('Synthesis Complete');
+                this.triggerToast('Synthesis Complete', 'success');
                 this.history = [...this.history]; // Force reactivity
                 
                 // Auto-clear input and exclusions on success
@@ -350,7 +366,7 @@ function rephraserApp() {
 
             } catch (error) {
                 this.status = 'Error occurred.';
-                this.triggerToast('Network Exception or API Error');
+                this.triggerToast('Network Exception or API Error', 'error');
                 console.error('Generation error:', error);
             } finally {
                 this.isGenerating = false;
@@ -372,10 +388,10 @@ function rephraserApp() {
                 if (this.inputText) this.searchKeywords = data.keywords;
                 else this.manualKeywords = data.keywords;
                 this.status = 'Keywords updated.';
-                this.triggerToast('Keywords Predicted');
+                this.triggerToast('Keywords Predicted', 'success');
             } catch (e) {
                 this.status = 'Keyword prediction failed.';
-                this.triggerToast('Keyword Prediction Failed');
+                this.triggerToast('Keyword Prediction Failed', 'error');
                 console.error('Keyword prediction error:', e);
             }
         },
@@ -409,7 +425,7 @@ function rephraserApp() {
         async approveEntry(isAlt = false) {
             const content = isAlt ? this.rephrasedContentB : this.rephrasedContent;
             if (!content) {
-                this.triggerToast('❌ No content to approve!');
+                this.triggerToast('❌ No content to approve!', 'error');
                 return;
             }
 
@@ -423,7 +439,8 @@ function rephraserApp() {
                         rephrased_text: content,
                         keywords: this.searchKeywords,
                         is_template: this.templateMode,
-                        category: this.currentCategory
+                        category: this.currentCategory,
+                        model_used: isAlt ? this.modelB : this.modelA
                     })
                 });
                 
@@ -523,9 +540,9 @@ function rephraserApp() {
                 const r = await fetch('/api/audit-logs');
                 if (!r.ok) throw new Error(`HTTP status ${r.status}`);
                 this.auditLogs = await r.json();
-                this.triggerToast('Audit Logs Loaded');
+                this.triggerToast('Audit Logs Loaded', 'info');
             } catch (e) {
-                this.triggerToast('❌ Failed to load audit logs: ' + e.message);
+                this.triggerToast('❌ Failed to load audit logs: ' + e.message, 'error');
                 console.error('Error fetching audit logs:', e);
             }
         },
@@ -533,7 +550,7 @@ function rephraserApp() {
         deleteHistoryEntry(idx) {
             this.history.splice(idx, 1);
             this.history = [...this.history];
-            this.triggerToast('Item Removed');
+            this.triggerToast('Item Removed', 'info');
         },
 
         addCategory() {
@@ -543,7 +560,7 @@ function rephraserApp() {
                 this.currentCategory = this.newCategory;
             }
             this.newCategory = '';
-            this.triggerToast('Category Added');
+            this.triggerToast('Category Added', 'success');
         },
 
         async importKB() {
@@ -556,14 +573,14 @@ function rephraserApp() {
                 const res = await fetch('/api/upload_kb', { method: 'POST', body: fd });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    this.triggerToast('Corpus Ingested');
+                    this.triggerToast('Corpus Ingested', 'success');
                     this.kbFile = null;
                     document.getElementById('kbFileInput').value = '';
                 } else {
-                    this.triggerToast('❌ Import Failed: ' + (data.error || 'Unknown'));
+                    this.triggerToast('❌ Import Failed: ' + (data.error || 'Unknown'), 'error');
                 }
             } catch (e) {
-                this.triggerToast('❌ Network Error during import');
+                this.triggerToast('❌ Network Error during import', 'error');
                 console.error('Import error:', e);
             } finally { this.importing = false; }
         },
@@ -584,7 +601,7 @@ function rephraserApp() {
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    this.triggerToast('Entry Learned');
+                    this.triggerToast('Entry Learned', 'success');
                     // Add to history for immediate feedback
                     this.history.unshift({
                         original: this.manualOrig,
