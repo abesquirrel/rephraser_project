@@ -368,8 +368,17 @@
                                     </h4>
                                     <div
                                         class="p-6 rounded-2xl bg-gradient-to-br from-sky-50 dark:from-sky-900/10 to-indigo-50 dark:to-indigo-900/10 border border-sky-100 dark:border-sky-500/20 shadow-sm">
-                                        <p class="text-base text-gray-800 dark:text-gray-100 leading-chill font-medium"
-                                            x-text="itemToView.rephrased || itemToView.response || itemToView.text"></p>
+
+                                        <div x-show="!itemToView.isEditing">
+                                            <p class="text-base text-gray-800 dark:text-gray-100 leading-chill font-medium"
+                                                x-text="itemToView.rephrased || itemToView.response || itemToView.text">
+                                            </p>
+                                        </div>
+
+                                        <div x-show="itemToView.isEditing" x-cloak>
+                                            <textarea x-model="itemToView.rephrased"
+                                                class="w-full p-3 rounded-lg bg-white dark:bg-black/20 border border-sky-500/30 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 h-48 text-base"></textarea>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -379,7 +388,19 @@
                                 <button class="btn btn-ghost text-sm"
                                     @click="copyText(itemToView.rephrased || itemToView.response || itemToView.text)">Copy
                                     Text</button>
-                                <button class="btn btn-primary text-sm px-6" @click="viewModal = false">Close</button>
+                                <button class="btn btn-ghost text-sm"
+                                    @click="itemToView.isEditing = !itemToView.isEditing"
+                                    x-text="itemToView.isEditing ? 'Cancel Edit' : 'Edit'">
+                                </button>
+                                <button class="btn btn-primary text-sm px-6" x-show="!itemToView.isEditing"
+                                    @click="viewModal = false">Close</button>
+                                <button class="btn btn-success text-sm px-6" x-show="itemToView.isEditing" @click="
+                                        inputText = itemToView.original; 
+                                        rephrasedContent = itemToView.rephrased; 
+                                        approveEntry().then(() => { 
+                                            itemToView.isEditing = false; 
+                                        });
+                                    ">Save Changes</button>
                             </div>
                         </div>
                     </template>

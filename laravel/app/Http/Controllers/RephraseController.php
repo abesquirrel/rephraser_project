@@ -40,7 +40,8 @@ class RephraseController extends Controller
             $body = $response->toPsrResponse()->getBody();
             while (!$body->eof()) {
                 echo $body->read(1024);
-                if (ob_get_level() > 0) ob_flush();
+                if (ob_get_level() > 0)
+                    ob_flush();
                 flush();
             }
         }, 200, [
@@ -53,30 +54,50 @@ class RephraseController extends Controller
     public function approve(Request $request)
     {
         $validated = $request->validate([
+            'id' => 'nullable|integer|exists:knowledge_bases,id',
             'original_text' => 'required|string',
             'rephrased_text' => 'required|string',
             'keywords' => 'nullable|string',
             'is_template' => 'nullable|boolean',
             'category' => 'nullable|string',
-            'model_used' => 'nullable|string'
+            'model_used' => 'nullable|string',
+            'latency_ms' => 'nullable|integer',
+            'temperature' => 'nullable|numeric',
+            'max_tokens' => 'nullable|integer',
+            'top_p' => 'nullable|numeric',
+            'frequency_penalty' => 'nullable|numeric',
+            'presence_penalty' => 'nullable|numeric'
         ]);
 
-        // 1. Save to Database (Source of Truth)
-        $entry = KnowledgeBase::create($validated);
+        // 1. Save or Update Database (Source of Truth)
+        if (!empty($validated['id'])) {
+            $entry = KnowledgeBase::find($validated['id']);
+            $entry->update($validated);
+            $action = 'Update';
+        } else {
+            $entry = KnowledgeBase::create($validated);
+            $action = 'Approve/Create';
+        }
 
         // Tier 2: Audit Logging
         AuditLog::create([
-            'action' => 'Approve/Create',
+            'action' => $action,
             'original_content' => $validated['original_text'],
             'rephrased_content' => $validated['rephrased_text'],
             'model_used' => $validated['model_used'] ?? null,
+            'latency_ms' => $validated['latency_ms'] ?? null,
+            'temperature' => $validated['temperature'] ?? null,
+            'max_tokens' => $validated['max_tokens'] ?? null,
+            'top_p' => $validated['top_p'] ?? null,
+            'frequency_penalty' => $validated['frequency_penalty'] ?? null,
+            'presence_penalty' => $validated['presence_penalty'] ?? null,
             'user_name' => 'System' // Can be updated if auth is added later
         ]);
 
         // 2. Notify AI Service to rebuild index
         $this->triggerRebuild();
 
-        return response()->json(['status' => 'success']);
+        return response()->json(['status' => 'success', 'id' => $entry->id]);
     }
 
     public function suggestKeywords(Request $request)
@@ -97,7 +118,7 @@ class RephraseController extends Controller
             $path = $request->file('file')->getRealPath();
             $file = fopen($path, 'r');
             $header = fgetcsv($file);
-            
+
             // Check if first row is a header or data
             $isHeader = false;
             if ($header && (stripos($header[0], 'original') !== false || stripos($header[1], 'rephrased') !== false)) {
@@ -114,7 +135,7 @@ class RephraseController extends Controller
             }
             fclose($file);
         } elseif ($request->has('original_text')) {
-             KnowledgeBase::create($request->all());
+            KnowledgeBase::create($request->all());
         }
 
         // Notify AI
@@ -131,7 +152,7 @@ class RephraseController extends Controller
             $keywords = isset($row[2]) ? trim($row[2]) : null;
             $isTemplate = isset($row[3]) ? filter_var($row[3], FILTER_VALIDATE_BOOLEAN) : false;
             $category = isset($row[4]) ? trim($row[4]) : null;
-            
+
             // Skip if it looks like a header row
             if (strtolower($original) === 'original_text' || strtolower($rephrased) === 'rephrased_text') {
                 return;
@@ -141,9 +162,9 @@ class RephraseController extends Controller
                 KnowledgeBase::create([
                     'original_text' => $original,
                     'rephrased_text' => $rephrased,
-                    'keywords'      => $keywords,
-                    'is_template'   => $isTemplate,
-                    'category'      => $category
+                    'keywords' => $keywords,
+                    'is_template' => $isTemplate,
+                    'category' => $category
                 ]);
 
                 AuditLog::create([

@@ -370,7 +370,15 @@ function rephraserApp() {
                     modelA_name: this.modelA || 'llama3:8b-instruct-q3_K_M',
                     isEditing: false, 
                     timestamp: new Date().toISOString(),
-                    duration: performance.now() - startTime
+                    duration: performance.now() - startTime,
+                    // Snapshot config for accurate data collection
+                    config: {
+                        temperature: this.temperature,
+                        maxTokens: this.maxTokens,
+                        topP: this.topP,
+                        frequencyPenalty: this.frequencyPenalty,
+                        presencePenalty: this.presencePenalty
+                    }
                 });
                 // Keep history manageable
                 if (this.history.length > 50) this.history.pop();
@@ -429,6 +437,9 @@ function rephraserApp() {
             
             // Keep the latest response (index 0) and any approved items
             const latest = this.history[0];
+            // Ensure we use the latest item for approval context if it matches content
+            // (If user edits content, we might still want the original config, or maybe not. 
+            //  For now, we assume implicit approval of the latest generation context).
             const saved = this.history.slice(1).filter(item => item.approved);
             
             // Reconstruct history
@@ -458,12 +469,20 @@ function rephraserApp() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        id: this.itemToView?.id || undefined, // Allow updating existing item via View Modal context
                         original_text: this.inputText,
                         rephrased_text: content,
                         keywords: this.searchKeywords,
                         is_template: this.templateMode,
                         category: this.currentCategory,
-                        model_used: this.modelA
+                        model_used: this.modelA,
+                        // Performance Data
+                        latency_ms: isNaN(latest?.duration) ? null : Math.round(latest.duration),
+                        temperature: latest?.config?.temperature ?? this.temperature,
+                        max_tokens: latest?.config?.maxTokens ?? this.maxTokens,
+                        top_p: latest?.config?.topP ?? this.topP,
+                        frequency_penalty: latest?.config?.frequencyPenalty ?? this.frequencyPenalty,
+                        presence_penalty: latest?.config?.presencePenalty ?? this.presencePenalty
                     })
                 });
                 
@@ -477,6 +496,7 @@ function rephraserApp() {
                     const existingEntry = this.history.find(item => item.original === this.inputText && item.rephrased === content);
                     if (existingEntry) {
                         existingEntry.approved = true;
+                        existingEntry.id = data.id; // Save ID for future updates
                     } else {
                         this.history.unshift({
                             original: this.inputText,
@@ -485,6 +505,7 @@ function rephraserApp() {
                             is_template: this.templateMode,
                             category: this.currentCategory,
                             approved: true,
+                            id: data.id,
                             expanded: true,
                             timestamp: new Date().toISOString()
                         });
