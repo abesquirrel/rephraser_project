@@ -68,12 +68,12 @@
 
 body {
     font-family: "Inter", sans-serif;
-    font-size: 0.95rem; /* Increased base font size */
+    font-size: 1rem; /* Standard font size */
     background-color: var(--bg-color);
     color: var(--text-main);
-    line-height: 1.6; /* Improved line height for readability */
+    line-height: 1.6;
     min-height: 100vh;
-    padding: 2.5rem 1rem;
+    padding: 0; /* Let container handle padding */
     overflow-x: hidden;
     background-image: radial-gradient(
             circle at 10% 20%,
@@ -137,7 +137,7 @@ body {
 
 .header h1 {
     font-family: "Outfit", sans-serif;
-    font-size: 3.5rem;
+    /* font-size removed to let Tailwind control it */
     font-weight: 700;
     letter-spacing: -0.02em;
     margin-bottom: 0.75rem;
@@ -160,10 +160,10 @@ body {
 .glass-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 1rem; /* Slightly smaller radius */
-    padding: 2rem; /* A bit less padding */
-    margin-bottom: 2rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Softer shadow */
+    border-radius: 0.75rem; /* More compact radius */
+    padding: 1.5rem; /* Reduced padding for better density */
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     position: relative;
     overflow: hidden;
 }
