@@ -10,14 +10,14 @@ The project is built on a containerized microservice architecture:
 
 ```mermaid
 graph TD
-    User[Web Browser] -->|HTTP:8000| Nginx[Nginx Gateway]
-    Nginx -->|Proxy| Laravel[Laravel App (Frontend/Backend)]
-    Laravel -->|SQL| MariaDB[(MariaDB Database)]
-    Laravel -->|JSON/HTTP| AI[Python AI Service :5001]
-    AI -->|Embedding Search| FAISS[(FAISS Vector Store)]
-    AI -->|Inference| Ollama[Ollama (Host Machine :11434)]
+    User["Web Browser"] -->|HTTP:8000| Nginx["Nginx Gateway"]
+    Nginx -->|Proxy| Laravel["Laravel App (Frontend/Backend)"]
+    Laravel -->|SQL| MariaDB[("MariaDB Database")]
+    Laravel -->|JSON/HTTP| AI["Python AI Service :5001"]
+    AI -->|Embedding Search| FAISS[("FAISS Vector Store")]
+    AI -->|Inference| Ollama["Ollama (Host Machine :11434)"]
     AI -->|SQL (Index Build)| MariaDB
-    Laravel -->|Cache/Queue| Redis[(Redis)]
+    Laravel -->|Cache/Queue| Redis[("Redis")]
 ```
 
 ### Components
@@ -38,9 +38,9 @@ The following sequence details the lifecycle of a rephrasing request:
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant L as Laravel (UI)
-    participant A as AI Service
-    participant O as Ollama (LLM)
+    participant L as "Laravel (UI)"
+    participant A as "AI Service"
+    participant O as "Ollama (LLM)"
     participant D as Database
 
     U->>L: Submits "Notes"
@@ -66,6 +66,7 @@ Before deploying, ensure you have the following installed on your host machine:
 
 1.  **Docker Desktop** (or Docker Engine + Docker Compose).
 2.  **Ollama**: This application relies on local LLMs.
+
     - [Download Ollama](https://ollama.com)
     - **Pull Required Models**:
 
