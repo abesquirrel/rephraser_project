@@ -11,48 +11,49 @@
 }
 
 :root {
-    /* Light Mode - "Deep Slate" (Much less white) */
-    --bg-color: #64748b; /* Slate-500: A decided medium-grey */
-    --card-bg: #f1f5f9; /* Slate-100: Off-white/Grey cards */
-    --card-border: rgba(255, 255, 255, 0.2);
+    /* Light Mode - More subtle and clean */
+    --bg-color: #f8f9fa; /* A very light grey */
+    --card-bg: #ffffff; /* Pure white cards */
+    --card-border: rgba(0, 0, 0, 0.1); /* Softer border */
     
     /* Accents */
     --accent-primary: #0ea5e9; /* Sky 500 */
     --accent-secondary: #6366f1; /* Indigo 500 */
     
     /* Text */
-    --text-main: #1e293b; /* Slate 800 - High contrast on cards */
-    --text-dim: #475569; /* Slate 600 */
+    --text-main: #212529; /* Darker text for better contrast */
+    --text-dim: #6c757d; /* A muted grey */
     
     /* Functional */
-    --success: #059669; /* Emerald 600 */
-    --info: #2563eb; /* Blue 600 */
-    --input-bg: rgba(255, 255, 255, 0.7);
+    --success: #198754; /* A classic green */
+    --info: #0dcaf0; /* A vibrant cyan */
+    --input-bg: #f8f9fa; /* Consistent with the background */
     
     --glass-shine: linear-gradient(
         135deg,
-        rgba(255, 255, 255, 0.4),
-        rgba(255, 255, 255, 0.05)
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.1)
     );
 }
 
 .dark {
-    /* Dark Mode - "Deep Zinc" */
-    --bg-color: #09090b; /* Zinc 950 - Very dark, almost black */
-    --card-bg: rgba(24, 24, 27, 0.6); /* Zinc 900 translucent */
-    --card-border: rgba(255, 255, 255, 0.08); /* Subtle border */
+    /* Dark Mode - A bit softer */
+    --bg-color: #121212; /* A soft black */
+    --card-bg: #1e1e1e; /* Dark grey cards */
+    --card-border: rgba(255, 255, 255, 0.1);
     
-    --accent-primary: #38bdf8; /* Sky 400 - Pops against dark */
+    /* Accents */
+    --accent-primary: #38bdf8; /* Sky 400 */
     --accent-secondary: #818cf8; /* Indigo 400 */
     
     /* Text */
-    --text-main: #e4e4e7; /* Zinc 200 */
-    --text-dim: #a1a1aa; /* Zinc 400 */
+    --text-main: #e8eaed; /* Off-white for easier reading */
+    --text-dim: #9aa0a6; /* A lighter grey */
     
     /* Functional */
-    --success: #10b981; /* Emerald 500 */
-    --info: #3b82f6; /* Blue 500 */
-    --input-bg: rgba(0, 0, 0, 0.3);
+    --success: #20c997; /* A brighter green */
+    --info: #66d9ef; /* A soft cyan */
+    --input-bg: #2c2c2c; /* A slightly lighter dark grey */
 }
 
 .icon {
@@ -158,30 +159,13 @@ body {
 /* Premium Card Design */
 .glass-card {
     background: var(--card-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--card-border);
-    border-radius: 1.25rem;
-    padding: 2.25rem;
+    border-radius: 1rem; /* Slightly smaller radius */
+    padding: 2rem; /* A bit less padding */
     margin-bottom: 2rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Softer shadow */
     position: relative;
     overflow: hidden;
-}
-
-.glass-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(
-        to right,
-        transparent,
-        rgba(255, 255, 255, 0.1),
-        transparent
-    );
 }
 
 .section-title {

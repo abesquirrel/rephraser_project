@@ -71,7 +71,7 @@
             </button>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-8 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
             <!-- LEFT COLUMN: Input & Config -->
             <section class="flex flex-col gap-8" aria-label="Input Configuration">
