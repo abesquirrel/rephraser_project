@@ -13,17 +13,50 @@ graph TD
     User[Web Browser] -->|HTTP:8000| Nginx[Nginx Gateway]
     Nginx -->|Proxy| Laravel[Laravel App (Frontend/Backend)]
     Laravel -->|SQL| MariaDB[(MariaDB Database)]
-    Laravel -->|Rephrase Requests| AI[Python AI Service :5001]
+    Laravel -->|JSON/HTTP| AI[Python AI Service :5001]
     AI -->|Embedding Search| FAISS[(FAISS Vector Store)]
-    AI -->|Inference| Ollama[Ollama (Host Machine)]
+    AI -->|Inference| Ollama[Ollama (Host Machine :11434)]
     AI -->|SQL (Index Build)| MariaDB
+    Laravel -->|Cache/Queue| Redis[(Redis)]
 ```
 
-- **Laravel (App)**: Handles the UI (Blade + Alpine.js), business logic, and database management.
-- **Python AI Service**: specialized Flask API that handles RAG, Vector Search (FAISS), and LLM Prompt Engineering.
+### Components
+
+- **Laravel (App)**: Handles the UI (Blade + Alpine.js), business logic, and database management. It acts as the primary orchestrator.
+- **Python AI Service**: A specialized Flask API that handles:
+  - **RAG**: Retrieval-Augmented Generation using a local FAISS vector store.
+  - **Prompt Engineering**: Structuring data for the LLM.
+  - **Web Search**: DuckDuckGo integration for context (when enabled).
 - **MariaDB**: The "Source of Truth" for all knowledge base entries and audit logs.
-- **Redis**: Caching and queue management (optional, configured for future scaling).
-- **Ollama**: External LLM provider running on the host machine.
+- **Redis**: Caching and queue management.
+- **Ollama**: External LLM provider running on the host machine (accessed via `host.docker.internal`).
+
+### Workflow
+
+The following sequence details the lifecycle of a rephrasing request:
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant L as Laravel (UI)
+    participant A as AI Service
+    participant O as Ollama (LLM)
+    participant D as Database
+
+    U->>L: Submits "Notes"
+    L->>A: POST /rephrase (text, config)
+    activate A
+    A->>A: Extract Keywords
+    A->>D: Fetch Knowledge Base
+    A->>A: Local RAG Search (FAISS)
+    A->>O: Generate Response (Prompt + Context)
+    activate O
+    O-->>A: Streamed Token Response
+    deactivate O
+    A-->>L: JSON Stream (Progress + Text)
+    deactivate A
+    L-->>U: Updates UI Live
+```
 
 ---
 
@@ -35,12 +68,17 @@ Before deploying, ensure you have the following installed on your host machine:
 2.  **Ollama**: This application relies on local LLMs.
     - [Download Ollama](https://ollama.com)
     - **Pull Required Models**:
+
       ```bash
+      # Primary Model (optimized for speed/balance)
       ollama pull llama3:8b-instruct-q3_K_M
+
+      # Optional/Alternative Models
       ollama pull mistral:latest
       ollama pull gemma2:9b
       ```
-      _(Note: `llama3:8b-instruct-q3_K_M` is optimized for speed/memory balance on consumer hardware)_
+
+    - **Start Ollama**: Ensure it is running (`ollama serve`).
 
 ---
 
@@ -63,7 +101,12 @@ A helper script is provided, but manually ensuring the `.env` exists is good pra
 cp laravel/.env.example laravel/.env
 ```
 
-_Note: The default credentials in `.env.example` pre-configured to work with the Docker stack._
+**Key Configuration (`laravel/.env`)**:
+
+- `APP_URL`: Set to `http://localhost:8000`
+- `DB_HOST`: Must be `db` (internal Docker DNS).
+- `AI_SERVICE_URL`: Must be `http://ai:5001`.
+- `AI_SERVICE_KEY`: Ensure this matches the key in `docker-compose.yml` (default: `default_secret_key`).
 
 ### 3. Start the Application
 
@@ -89,22 +132,22 @@ chmod +x start_docker.sh
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ Advanced Configuration
 
-### Laravel (`laravel/.env`)
+### AI Service Settings (`docker-compose.yml`)
 
-Key variables to verify:
+The AI service is configured with safe defaults for 16GB RAM machines:
 
-- `DB_HOST=db`: Connects to the internal Docker service.
-- `AI_SERVICE_URL=http://ai:5001`: Internal URL for the Python service.
+- `DB_HOST`: Database container name.
+- `AI_SERVICE_KEY`: API Key for internal security. If you change this, you MUST change it in `laravel/.env` as well.
+- `OLLAMA_MODEL`: Default model to use if none specified by frontend (default in logic: `llama3:8b-instruct-q3_K_M`).
 
-### AI Service (`docker-compose.yml`)
+### Security
 
-The AI service has safe defaults for 16GB RAM machines:
+The communication between Laravel and the AI Service is secured via an API Key (`AI_SERVICE_KEY`).
 
-- **Environment Variables**:
-  - `DB_HOST`: Database container name.
-  - `AI_SERVICE_KEY`: API Key for internal security (default: `default_secret_key`).
+- **Laravel**: Sends this key in the `X-AI-KEY` header.
+- **AI Service**: Validates this header before processing requests.
 
 ---
 
@@ -145,7 +188,7 @@ The AI service has safe defaults for 16GB RAM machines:
 
 ### Rebuilding After Changes
 
-If you modify `app.py` or `requirements.txt`:
+If you modify `ai-service/app.py` or `ai-service/requirements.txt`:
 
 ```bash
 docker-compose up -d --build ai
@@ -155,8 +198,7 @@ If you modify Laravel PHP code:
 
 ```bash
 # Usually instant (mapped volume), but for asset changes:
-npm run build
-# (Run this inside the laravel directory or container)
+docker-compose exec app npm run build
 ```
 
 ---
