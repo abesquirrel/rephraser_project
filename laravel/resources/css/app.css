@@ -68,7 +68,7 @@
 
 body {
     font-family: "Inter", sans-serif;
-    font-size: 0.95rem; /* Increased base font size */
+    font-size: 1rem; /* Increased base font size */
     background-color: var(--bg-color);
     color: var(--text-main);
     line-height: 1.6; /* Improved line height for readability */
@@ -551,4 +551,14 @@ body {
     font-size: 0.9rem;
     color: var(--text-dim);
     line-height: 1.4;
+}
+
+@media (min-width: 768px) {
+    .header h1 {
+        font-size: 4rem;
+    }
+    .container {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
 }
