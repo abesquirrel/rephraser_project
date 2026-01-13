@@ -4,7 +4,6 @@ function rephraserApp() {
     return {
         inputText: '',
         rephrasedContent: '',
-        rephrasedContentB: '', // For A/B testing
         status: '',
         signature: Alpine.$persist('Paul').as('rephraser_sig'), // Kept persist for signature
         enableWebSearch: true,
@@ -14,13 +13,11 @@ function rephraserApp() {
         newCategory: '', 
         categories: ['General', 'Technical', 'Billing', 'Sales', 'Feedback'],
         modelA: 'llama3:8b-instruct-q3_K_M',
-        modelB: 'mistral:latest',
         availableModels: [
             {id: 'llama3:8b-instruct-q3_K_M', name: 'Llama3'},
             {id: 'mistral:latest', name: 'Mistral'},
             {id: 'gemma2:9b', name: 'Gemma2 9B'}
         ],
-        abMode: false,
         isGenerating: false,
         auditLogs: [],
         activeTab: 'generator', // generator, history, audit
@@ -135,15 +132,6 @@ function rephraserApp() {
                 if (val) this.enableWebSearch = false;
             });
             
-            // Logic: A/B Mode defaults to least demanding configuration
-            this.$watch('abMode', (val) => {
-                if (val) {
-                    this.kbCount = 0;      // Disable KB context to save VRAM
-                    this.maxTokens = 300;  // Reduce tokens for dual generation
-                    this.triggerToast('A/B Mode: Optimized settings applied', 'info');
-                }
-            });
-
             this.$watch('theme', () => this.applyTheme());
         },
 
@@ -254,7 +242,6 @@ function rephraserApp() {
             const textToProcess = this.inputText;
             this.isGenerating = true;
             this.rephrasedContent = '';
-            this.rephrasedContentB = '';
             this.thinkingLines = []; // Reset thinking lines
             this.status = 'Connecting...';
 
@@ -325,15 +312,7 @@ function rephraserApp() {
             };
 
             try {
-                if (this.abMode) {
-                    this.status = 'Dual Generation Mode...';
-                    await Promise.all([
-                        runStream(this.modelA, 'rephrasedContent'),
-                        runStream(this.modelB, 'rephrasedContentB')
-                    ]);
-                } else {
-                    await runStream(this.modelA, 'rephrasedContent');
-                }
+                await runStream(this.modelA, 'rephrasedContent');
 
                 // Collapse previous items and add to history after generation
                 this.history.forEach((h, i) => {
@@ -343,16 +322,13 @@ function rephraserApp() {
                 this.history.unshift({
                     original: textToProcess,
                     rephrased: this.decodeEntities(this.rephrasedContent), // Store model A's output as primary
-                    rephrasedB: this.rephrasedContentB ? this.decodeEntities(this.rephrasedContentB) : null, // Store model B's output
                     keywords: this.searchKeywords,
                     is_template: this.templateMode,
                     category: this.currentCategory,
                     approved: false,
                     expanded: true,
                     modelA_name: this.modelA || 'llama3:8b-instruct-q3_K_M',
-                    modelB_name: this.modelB || 'mistral:latest',
                     isEditing: false, 
-                    isEditingB: false,
                     timestamp: new Date().toISOString()
                 });
                 // Keep history manageable
@@ -422,8 +398,8 @@ function rephraserApp() {
         },
 
         // This is the new approve method for the main generator output
-        async approveEntry(isAlt = false) {
-            const content = isAlt ? this.rephrasedContentB : this.rephrasedContent;
+        async approveEntry() {
+            const content = this.rephrasedContent;
             if (!content) {
                 this.triggerToast('❌ No content to approve!', 'error');
                 return;
@@ -440,7 +416,7 @@ function rephraserApp() {
                         keywords: this.searchKeywords,
                         is_template: this.templateMode,
                         category: this.currentCategory,
-                        model_used: isAlt ? this.modelB : this.modelA
+                        model_used: this.modelA
                     })
                 });
                 
@@ -479,16 +455,15 @@ function rephraserApp() {
             }
         },
 
-        toggleEdit(idx, isAlt = false) {
-            const key = isAlt ? 'isEditingB' : 'isEditing';
-            this.history[idx][key] = !this.history[idx][key];
+        toggleEdit(idx) {
+            this.history[idx].isEditing = !this.history[idx].isEditing;
             this.history = [...this.history];
         },
 
         // This is the original approveEntry, modified to handle history items
-        async approveHistoryEntry(item, idx, isAlt = false) {
-            const content = isAlt ? item.rephrasedB : item.rephrased;
-            console.log('🔍 Approve history clicked! idx:', idx, 'isAlt:', isAlt);
+        async approveHistoryEntry(item, idx) {
+            const content = item.rephrased;
+            console.log('🔍 Approve history clicked! idx:', idx);
             
             if (!item.original || !content) {
                 this.triggerToast('❌ Error: Missing Data');
@@ -510,7 +485,7 @@ function rephraserApp() {
                         keywords: item.keywords,
                         is_template: item.is_template,
                         category: item.category,
-                        model_used: isAlt ? item.modelB_name : item.modelA_name
+                        model_used: item.modelA_name
                     })
                 });
                 

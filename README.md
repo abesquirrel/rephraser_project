@@ -116,15 +116,7 @@ The AI service has safe defaults for 16GB RAM machines:
 - **Generate**: Click the button. The AI uses your Knowledge Base to find similar past examples and rephrase your text using the preferred tone.
 - **Approve**: If the output is good, click **"Approve"**. This is critical—it saves the result to the Knowledge Base, making the AI smarter for next time.
 
-### 2. A/B Testing (Dual Model Mode)
-
-- Toggle **"Dual Model Mode"** in the sidebar.
-- Select two different models (e.g., Llama 3 vs Mistral).
-- Click Generate. You will see two columns.
-- **Edit & Compare**: You can edit either response directly.
-- **Approve**: Click "Approve" on the version you prefer. The system records which model provided the better answer.
-
-### 3. Knowledge Base
+### 2. Knowledge Base
 
 - **Import**: Upload a CSV with `original_text` and `rephrased_text` columns to bulk-train the system.
 - **Manual Entry**: Manually add specific templates or difficult edge cases.

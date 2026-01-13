@@ -143,148 +143,122 @@
                                         </div>
                                     </div>
 
-                                    <!-- Col 2 -->
-                                    <div class="flex flex-col gap-3">
-                                        <label class="flex items-center gap-2 cursor-pointer">
+                                    <!-- Global Toggles -->
+                                    <div class="space-y-3 mb-6">
+                                        <label
+                                            class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                             <input type="checkbox" x-model="showThinking"
-                                                class="rounded text-sky-500 focus:ring-sky-500">
-                                            <span class="text-sm">Show Thinking</span>
+                                                class="rounded text-sky-500 focus:ring-sky-500 w-4 h-4">
+                                            <span class="text-sm font-medium">Show Thinking</span>
                                         </label>
-                                        <label class="flex items-center gap-2 cursor-pointer">
+                                        <label
+                                            class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                             <input type="checkbox" x-model="enableWebSearch"
-                                                class="rounded text-sky-500 focus:ring-sky-500">
-                                            <span class="text-sm">Online Research</span>
+                                                class="rounded text-sky-500 focus:ring-sky-500 w-4 h-4">
+                                            <span class="text-sm font-medium">Online Research</span>
                                         </label>
-                                        <label class="flex items-center gap-2 cursor-pointer">
+                                        <label
+                                            class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                             <input type="checkbox" x-model="templateMode"
-                                                class="rounded text-sky-500 focus:ring-sky-500">
-                                            <span class="text-sm">Template Mode</span>
-                                        </label>
-                                        <label class="flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" x-model="abMode"
-                                                class="rounded text-sky-500 focus:ring-sky-500">
-                                            <span class="text-sm">A/B Comparison</span>
+                                                class="rounded text-sky-500 focus:ring-sky-500 w-4 h-4">
+                                            <span class="text-sm font-medium">Template Mode</span>
                                         </label>
                                     </div>
-                                </div>
 
-                                <!-- Tuning -->
-                                <div class="mt-6 pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
-                                    <!-- Keywords -->
-                                    <div class="mb-6">
-                                        <div class="flex justify-between items-center mb-2">
-                                            <label class="label-text mb-0">Keywords Analysis</label>
-                                            <button class="text-sky-500 text-xs hover:underline flex items-center gap-1"
-                                                @click="predictKeywords()" :disabled="!inputText.trim()">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
-                                                    viewBox="0 0 24 24" stroke="currentColor" fill="none">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-                                                </svg>
-                                                Predict Keywords
-                                            </button>
-                                        </div>
-                                        <input type="text" x-model="searchKeywords"
-                                            placeholder="Detected keywords will appear here..."
-                                            class="form-input w-full p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                                    </div>
-
-                                    <!-- Model Selection -->
-                                    <div class="mb-4">
-                                        <div class="flex justify-between items-end mb-2">
-                                            <label class="label-text">Model Configuration</label>
-                                            <div class="flex gap-2">
-                                                <button
-                                                    class="info-pill cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors"
-                                                    @click="applyPreset('creative')">Creative</button>
-                                                <button
-                                                    class="info-pill cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors"
-                                                    @click="applyPreset('technical')">Technical</button>
-                                                <button
-                                                    class="info-pill cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors"
-                                                    @click="applyPreset('tldr')">Concise</button>
-                                            </div>
-                                        </div>
-                                        <div class="flex gap-2">
+                                    <!-- Model Configuration -->
+                                    <div class="mb-8">
+                                        <!-- Dropdown -->
+                                        <div class="mb-4">
+                                            <label class="label-text mb-2 block">Primary Model</label>
                                             <select x-model="modelA"
-                                                class="form-select flex-1 text-sm p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                                                <option value="">Primary Model...</option>
+                                                class="form-select w-full text-sm p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+                                                <option value="">Select Model...</option>
                                                 <template x-for="m in availableModels" :key="m.id">
                                                     <option :value="m.id" x-text="m.name" :selected="m.id === modelA">
                                                     </option>
                                                 </template>
                                             </select>
-                                            <select x-model="modelB"
-                                                class="form-select flex-1 text-sm p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
-                                                x-show="abMode" x-transition>
-                                                <option value="">Model B...</option>
-                                                <template x-for="m in availableModels" :key="m.id">
-                                                    <option :value="m.id" x-text="m.name" :selected="m.id === modelB">
-                                                    </option>
-                                                </template>
-                                            </select>
+                                        </div>
+
+                                        <!-- Presets -->
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <button
+                                                class="info-pill w-full justify-center text-center cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors py-2"
+                                                @click="applyPreset('creative')">Creative</button>
+                                            <button
+                                                class="info-pill w-full justify-center text-center cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors py-2"
+                                                @click="applyPreset('technical')">Technical</button>
+                                            <button
+                                                class="info-pill w-full justify-center text-center cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors py-2"
+                                                @click="applyPreset('tldr')">Concise</button>
                                         </div>
                                     </div>
 
+
                                     <!-- Sliders -->
-                                    <div class="grid grid-cols-2 gap-6 mb-4">
+                                    <div class="space-y-6 mb-8">
+                                        <!-- Creativity -->
                                         <div>
                                             <label class="label-text flex justify-between">
                                                 <span>Creativity</span> <span x-text="temperature"></span>
                                             </label>
-                                            <div class="text-xs text-gray-400 mb-1">Low for strict facts, high for
+                                            <div class="text-xs text-gray-400 mb-2">Low for strict facts, high for
                                                 creative writing.</div>
                                             <input type="range" x-model="temperature" min="0" max="1" step="0.1"
                                                 class="w-full accent-sky-500">
                                         </div>
+
+                                        <!-- Past Examples -->
                                         <div>
                                             <label class="label-text flex justify-between">
                                                 <span>Use Past Examples</span> <span x-text="kbCount"></span>
                                             </label>
-                                            <div class="text-xs text-gray-400 mb-1">How many previous saved responses to
+                                            <div class="text-xs text-gray-400 mb-2">How many previous saved responses to
                                                 mimic style from.</div>
                                             <input type="range" x-model="kbCount" min="0" max="5" step="1"
                                                 class="w-full accent-sky-500">
                                         </div>
-                                    </div>
 
-                                    <div class="grid grid-cols-2 gap-6 mb-4">
+                                        <!-- Top P -->
                                         <div>
                                             <label class="label-text flex justify-between items-center">
                                                 <span title="Controls diversity via nucleus sampling.">Top P ⓘ</span>
                                                 <span x-text="topP"></span>
                                             </label>
-                                            <div class="text-xs text-gray-400 mb-1">Limits word choices to top
+                                            <div class="text-xs text-gray-400 mb-2">Limits word choices to top
                                                 probability mass.</div>
                                             <input type="range" x-model="topP" min="0" max="1" step="0.05"
                                                 class="w-full accent-sky-500">
                                         </div>
+
+                                        <!-- Response Length -->
                                         <div>
                                             <label class="label-text flex justify-between">
                                                 <span>Response Length</span> <span x-text="maxTokens"></span>
                                             </label>
-                                            <div class="text-xs text-gray-400 mb-1">Maximum length of the generated
+                                            <div class="text-xs text-gray-400 mb-2">Maximum length of the generated
                                                 answer.</div>
                                             <input type="range" x-model="maxTokens" min="100" max="2048" step="100"
                                                 class="w-full accent-sky-500">
                                         </div>
-                                    </div>
 
-                                    <div class="grid grid-cols-2 gap-6 mb-4">
+                                        <!-- Topic Repetition -->
                                         <div>
                                             <label class="label-text flex justify-between">
                                                 <span>Topic Repetition</span> <span x-text="presencePenalty"></span>
                                             </label>
-                                            <div class="text-xs text-gray-400 mb-1">Increase to stop the AI from staying
+                                            <div class="text-xs text-gray-400 mb-2">Increase to stop the AI from staying
                                                 on one topic.</div>
                                             <input type="range" x-model="presencePenalty" min="-2" max="2" step="0.1"
                                                 class="w-full accent-sky-500">
                                         </div>
+
+                                        <!-- Word Repetition -->
                                         <div>
                                             <label class="label-text flex justify-between">
                                                 <span>Word Repetition</span> <span x-text="frequencyPenalty"></span>
                                             </label>
-                                            <div class="text-xs text-gray-400 mb-1">Increase to stop the AI from
+                                            <div class="text-xs text-gray-400 mb-2">Increase to stop the AI from
                                                 repeating the same words.</div>
                                             <input type="range" x-model="frequencyPenalty" min="-2" max="2" step="0.1"
                                                 class="w-full accent-sky-500">
@@ -385,10 +359,11 @@
 
                                     <!-- Refined Output -->
                                     <!-- Refined Output Area -->
+                                    <!-- Refined Output Area -->
                                     <div class="glass-card p-6 border-sky-500 shadow-xl shadow-sky-500/10">
 
                                         <!-- Standard Single Output -->
-                                        <div x-show="!item.rephrasedB">
+                                        <div>
                                             <div class="mb-4">
                                                 <span class="label-text">Refined Output</span>
                                             </div>
@@ -403,85 +378,17 @@
                                             </div>
                                         </div>
 
-                                        <!-- A/B Comparison Output -->
-                                        <div x-show="item.rephrasedB" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <!-- Model A -->
-                                            <div class="text-left">
-                                                <div class="flex items-center gap-2 mb-3">
-                                                    <span
-                                                        class="info-pill bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400 text-xs font-bold"
-                                                        x-text="item.modelA_name || 'Model A'"></span>
-                                                </div>
-                                                <div x-show="!item.isEditing">
-                                                    <div class="bubble bubble-rephrased text-sm md:text-base p-4 bg-white/50 dark:bg-black/20 border border-sky-500/20"
-                                                        x-text="item.rephrased"></div>
-                                                </div>
-                                                <div x-show="item.isEditing" x-cloak>
-                                                    <textarea x-model="item.rephrased"
-                                                        class="edit-textarea w-full p-4 rounded-xl bg-white dark:bg-gray-800 border border-sky-500/20 focus:border-sky-500 text-sm md:text-base"
-                                                        rows="8"></textarea>
-                                                </div>
-                                                <div class="mt-3 flex gap-2">
-                                                    <button class="btn btn-ghost text-xs flex-1"
-                                                        @click="copyText(item.rephrased)">Copy</button>
-                                                    <button class="btn btn-ghost text-xs flex-1"
-                                                        @click="toggleEdit(0, false)"
-                                                        x-text="item.isEditing ? 'Done' : 'Edit'"></button>
-                                                    <button
-                                                        class="btn btn-xs btn-primary bg-sky-500/10 text-sky-500 hover:bg-sky-500 hover:text-white border-0 flex-1"
-                                                        @click="approveHistoryEntry(item, 0, false)"
-                                                        :disabled="item.approved">
-                                                        Approve
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <!-- Model B -->
-                                            <div
-                                                class="text-left border-l md:border-l-0 md:border-l border-gray-200/20 pl-0 md:pl-6">
-                                                <div class="flex items-center gap-2 mb-3">
-                                                    <span
-                                                        class="info-pill bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400 text-xs font-bold"
-                                                        x-text="item.modelB_name || 'Model B'"></span>
-                                                </div>
-                                                <div x-show="!item.isEditingB">
-                                                    <div class="bubble bubble-rephrased text-sm md:text-base p-4 bg-white/50 dark:bg-black/20 border border-indigo-500/20"
-                                                        x-text="item.rephrasedB"></div>
-                                                </div>
-                                                <div x-show="item.isEditingB" x-cloak>
-                                                    <textarea x-model="item.rephrasedB"
-                                                        class="edit-textarea w-full p-4 rounded-xl bg-white dark:bg-gray-800 border border-indigo-500/20 focus:border-indigo-500 text-sm md:text-base"
-                                                        rows="8"></textarea>
-                                                </div>
-                                                <div class="mt-3 flex gap-2">
-                                                    <button class="btn btn-ghost text-xs flex-1"
-                                                        @click="copyText(item.rephrasedB)">Copy</button>
-                                                    <button class="btn btn-ghost text-xs flex-1"
-                                                        @click="toggleEdit(0, true)"
-                                                        x-text="item.isEditingB ? 'Done' : 'Edit'"></button>
-                                                    <button
-                                                        class="btn btn-xs btn-primary bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500 hover:text-white border-0 flex-1"
-                                                        @click="approveHistoryEntry(item, 0, true)"
-                                                        :disabled="item.approved">
-                                                        Approve
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Actions (Only for single mode) -->
-                                        <div class="flex flex-wrap gap-3 mt-6 pt-6 border-t border-gray-200/10"
-                                            x-show="!item.rephrasedB">
+                                        <!-- Actions -->
+                                        <div class="flex flex-wrap gap-3 mt-6 pt-6 border-t border-gray-200/10">
 
                                             <div class="flex justify-end gap-3 mt-6">
                                                 <button class="btn btn-ghost px-4 py-2 text-sm"
                                                     @click="copyText(item.rephrased)">Copy</button>
                                                 <button class="btn btn-ghost px-4 py-2 text-sm"
-                                                    @click="toggleEdit(0, false)">Edit</button>
+                                                    @click="toggleEdit(0)">Edit</button>
                                                 <button class="btn px-5 py-2 text-sm font-semibold"
                                                     :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'"
-                                                    @click="approveHistoryEntry(item, 0, false)"
-                                                    :disabled="item.approved">
+                                                    @click="approveHistoryEntry(item, 0)" :disabled="item.approved">
                                                     Approve
                                                 </button>
                                             </div>
