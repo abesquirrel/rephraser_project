@@ -28,16 +28,16 @@
 </head>
 
 <body x-data="rephraserApp()" class="antialiased min-h-screen transition-colors duration-300">
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <div class="container mx-auto px-6 py-4 max-w-[96%]">
 
         <!-- Header -->
-        <header class="header animate-fade mb-8 flex flex-col md:flex-row justify-between items-center gap-4 px-2">
+        <header class="header animate-fade mb-6 flex flex-col md:flex-row justify-between items-center gap-4 px-1">
             <div class="text-left">
                 <h1
-                    class="text-3xl font-bold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
+                    class="text-2xl font-bold tracking-tight mb-0.5 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
                     Paul: The Rephraser
                 </h1>
-                <p class="text-base text-gray-500 dark:text-gray-400">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
                     Precise Support Analysis. Clean Output.
                 </p>
             </div>
@@ -73,10 +73,10 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div class="grid grid-cols-1 gap-6 items-start">
 
             <!-- LEFT COLUMN: Input & Config -->
-            <section class="flex flex-col gap-6" aria-label="Input Configuration">
+            <section class="flex flex-col gap-4" aria-label="Input Configuration">
                 <!-- Main Input -->
                 <div class="glass-card animate-fade p-0 overflow-visible delay-[100ms]">
                     <div class="p-6 pb-4">
@@ -140,10 +140,10 @@
             </section>
 
             <!-- RIGHT COLUMN: Output & History -->
-            <section class="flex flex-col gap-6" aria-label="Output">
+            <section class="flex flex-col gap-4" aria-label="Output">
                 <template x-if="history.length > 0">
                     <div class="animate-fade delay-[200ms]">
-                        <h2 class="section-title mb-4 flex items-center justify-between">
+                        <h2 class="section-title mb-3 flex items-center justify-between">
                             <span>Latest Response</span>
                             <span class="info-pill font-normal"
                                 x-text="new Date(history[0].timestamp).toLocaleTimeString()"></span>
@@ -388,9 +388,9 @@
         </div>
 
         <!-- KB Management (Advanced Section) -->
-        <div x-data="{ expanded: false }" class="glass-card animate-fade p-0 overflow-hidden delay-[300ms] mt-8">
+        <div x-data="{ expanded: false }" class="glass-card animate-fade p-0 overflow-hidden delay-[300ms] mt-6">
             <button @click="expanded = !expanded"
-                class="w-full flex justify-between items-center p-6 hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none">
+                class="w-full flex justify-between items-center p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none">
                 <div class="section-title m-0 flex items-center gap-3 text-sky-500">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" stroke="currentColor"
                         fill="none">
