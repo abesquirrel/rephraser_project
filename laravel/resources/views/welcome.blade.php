@@ -198,7 +198,7 @@
                                                     @click="toggleEdit(0)">Edit</button>
                                                 <button class="btn px-5 py-2 text-sm font-semibold"
                                                     :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'"
-                                                    @click="approveHistoryEntry(item, 0)" :disabled="item.approved">
+                                                    @click="approveHistoryEntry(item, 0)">
                                                     Approve
                                                 </button>
                                             </div>

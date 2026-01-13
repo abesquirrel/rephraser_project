@@ -553,7 +553,15 @@ function rephraserApp() {
                         keywords: item.keywords,
                         is_template: item.is_template,
                         category: item.category,
-                        model_used: item.modelA_name
+                        model_used: item.modelA_name,
+                        id: item.id || undefined, // Support updating existing
+                        // Performance Data from item snapshot
+                        latency_ms: isNaN(item.duration) ? null : Math.round(item.duration),
+                        temperature: item.config?.temperature,
+                        max_tokens: item.config?.maxTokens,
+                        top_p: item.config?.topP,
+                        frequency_penalty: item.config?.frequencyPenalty,
+                        presence_penalty: item.config?.presencePenalty
                     })
                 });
                 
@@ -564,6 +572,7 @@ function rephraserApp() {
                 const data = await res.json();
                 if (data.status === 'success') {
                     this.history[idx].approved = true;
+                    this.history[idx].id = data.id; // Save ID for updates
                     this.history = [...this.history]; // Force reactivity
                     // Use new Modal for approval
                     this.showModalAlert('Response saved to Knowledge Base');
