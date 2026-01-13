@@ -16,7 +16,7 @@ graph TD
     Laravel -->|JSON/HTTP| AI["Python AI Service :5001"]
     AI -->|Embedding Search| FAISS[("FAISS Vector Store")]
     AI -->|Inference| Ollama["Ollama (Host Machine :11434)"]
-    AI -->|SQL (Index Build)| MariaDB
+    AI -->|SQL Index Build| MariaDB
     Laravel -->|Cache/Queue| Redis[("Redis")]
 ```
 
