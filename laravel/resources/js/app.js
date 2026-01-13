@@ -108,6 +108,13 @@ function rephraserApp() {
             return topModel.replace(':latest', '').replace(':8b-instruct-q3_K_M', '');
         },
 
+        get avgLatency() {
+            const timedItems = this.history.filter(h => h.duration);
+            if (timedItems.length === 0) return '0.0s';
+            const avg = timedItems.reduce((acc, curr) => acc + curr.duration, 0) / timedItems.length;
+            return (avg / 1000).toFixed(1) + 's';
+        },
+
         init() {
             // Ensure data types are correct (safety check for persist)
             if (!Array.isArray(this.history)) this.history = [];
@@ -271,6 +278,8 @@ function rephraserApp() {
 
         async generateRephrase() { // Renamed from generateAction
             const textToProcess = this.inputText;
+            if (!textToProcess) return;
+            const startTime = performance.now();
             this.isGenerating = true;
             this.rephrasedContent = '';
             this.thinkingLines = []; // Reset thinking lines
@@ -360,7 +369,8 @@ function rephraserApp() {
                     expanded: true,
                     modelA_name: this.modelA || 'llama3:8b-instruct-q3_K_M',
                     isEditing: false, 
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    duration: performance.now() - startTime
                 });
                 // Keep history manageable
                 if (this.history.length > 50) this.history.pop();

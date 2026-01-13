@@ -500,7 +500,7 @@
                         <div>
                             <h4 class="text-sm font-bold uppercase tracking-widest text-indigo-500 mb-4">Usage Stats
                             </h4>
-                            <div class="grid grid-cols-3 gap-2">
+                            <div class="grid grid-cols-4 gap-2">
                                 <div
                                     class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-3 text-center">
                                     <div class="text-2xl font-bold text-gray-900 dark:text-white"
@@ -522,6 +522,13 @@
                                         x-text="preferredModel"></div>
                                     <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wide mt-1">Top
                                         Model</div>
+                                </div>
+                                <div
+                                    class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-3 text-center">
+                                    <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"
+                                        x-text="avgLatency"></div>
+                                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wide mt-1">Avg
+                                        Latency</div>
                                 </div>
                             </div>
                         </div>
@@ -941,7 +948,7 @@
                                     <input type="range" x-model="maxTokens" min="100" max="2048" step="100"
                                         class="w-full accent-indigo-500 mt-2">
                                     <div class="text-xs text-gray-400 mt-1">Max token limit (100 tokens ≈ 75 words).
-                                        Safe limit for M3 16GB.</div>
+                                    </div>
                                 </div>
                                 <!-- Topic Repetition -->
                                 <div>
