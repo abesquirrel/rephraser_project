@@ -46,6 +46,7 @@ function rephraserApp() {
         
         toast: { active: false, msg: '', type: 'info' },
         showSuccessModal: false,
+        showConfigModal: false,
         successMessage: '',
         
         // KB
@@ -95,6 +96,18 @@ function rephraserApp() {
             return Math.ceil(this.totalFilteredCount / this.itemsPerPage) || 1;
         },
 
+        get preferredModel() {
+            if (this.history.length === 0) return 'None';
+            const counts = {};
+            for (const item of this.history) {
+                const model = item.modelA_name || 'Unknown';
+                counts[model] = (counts[model] || 0) + 1;
+            }
+            const topModel = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+            // Clean up model name
+            return topModel.replace(':latest', '').replace(':8b-instruct-q3_K_M', '');
+        },
+
         init() {
             // Ensure data types are correct (safety check for persist)
             if (!Array.isArray(this.history)) this.history = [];
@@ -135,6 +148,14 @@ function rephraserApp() {
             });
             
             this.$watch('theme', () => this.applyTheme());
+            
+            // Scroll Lock for Modal
+            this.$watch('showConfigModal', (val) => {
+                document.body.style.overflow = val ? 'hidden' : '';
+            });
+            this.$watch('showGuide', (val) => {
+                document.body.style.overflow = val ? 'hidden' : '';
+            });
         },
 
         toggleTheme() {
