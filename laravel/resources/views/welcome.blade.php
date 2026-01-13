@@ -28,16 +28,16 @@
 </head>
 
 <body x-data="rephraserApp()" class="antialiased min-h-screen transition-colors duration-300">
-    <div class="container mx-auto px-6 py-4 max-w-[96%]">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
 
         <!-- Header -->
-        <header class="header animate-fade mb-6 flex flex-col md:flex-row justify-between items-center gap-4 px-1">
+        <header class="header animate-fade mb-10 flex flex-col md:flex-row justify-between items-center gap-4 px-2">
             <div class="text-left">
                 <h1
-                    class="text-2xl font-bold tracking-tight mb-0.5 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
+                    class="text-4xl font-bold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
                     Paul: The Rephraser
                 </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
+                <p class="text-lg text-gray-500 dark:text-gray-400">
                     Precise Support Analysis. Clean Output.
                 </p>
             </div>
@@ -73,13 +73,13 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 gap-6 items-start">
+        <div class="grid grid-cols-1 gap-8 items-start">
 
             <!-- LEFT COLUMN: Input & Config -->
-            <section class="flex flex-col gap-4" aria-label="Input Configuration">
+            <section class="flex flex-col gap-8" aria-label="Input Configuration">
                 <!-- Main Input -->
                 <div class="glass-card animate-fade p-0 overflow-visible delay-[100ms]">
-                    <div class="p-6 pb-4">
+                    <div class="p-8 pb-6">
                         <div class="section-title mb-2 text-sky-500 text-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
                                 stroke="currentColor" fill="none" stroke-width="2">
@@ -89,10 +89,10 @@
                             <span>Compose</span>
                         </div>
 
-                        <div class="mb-3 flex-1 flex flex-col">
+                        <div class="mb-6 flex-1 flex flex-col">
                             <label for="rawInputArea" class="sr-only">Input text to rephrase</label>
                             <textarea id="rawInputArea" x-model="inputText" placeholder="Input notes..."
-                                class="w-full min-h-[150px] p-3 text-sm leading-relaxed rounded-lg bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"></textarea>
+                                class="w-full min-h-[250px] p-4 text-base leading-relaxed rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"></textarea>
                         </div>
 
                         <div class="flex gap-4 items-center">
@@ -140,7 +140,7 @@
             </section>
 
             <!-- RIGHT COLUMN: Output & History -->
-            <section class="flex flex-col gap-4" aria-label="Output">
+            <section class="flex flex-col gap-8" aria-label="Output">
                 <template x-if="history.length > 0">
                     <div class="animate-fade delay-[200ms]">
                         <h2 class="section-title mb-3 flex items-center justify-between">
