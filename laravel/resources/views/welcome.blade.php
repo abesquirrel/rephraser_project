@@ -28,57 +28,58 @@
 </head>
 
 <body x-data="rephraserApp()" class="antialiased min-h-screen transition-colors duration-300">
-    <div class="container mx-auto px-4 py-6 max-w-7xl">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
 
         <!-- Header -->
-        <header class="header animate-fade relative text-center mb-6 flex justify-between items-center px-2">
-            <div class="absolute inset-0 flex justify-center items-center pointer-events-none">
+        <header class="header animate-fade mb-8 flex flex-col md:flex-row justify-between items-center gap-4 px-2">
+            <div class="text-left">
+                <h1
+                    class="text-3xl font-bold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
+                    Paul: The Rephraser
+                </h1>
+                <p class="text-base text-gray-500 dark:text-gray-400">
+                    Precise Support Analysis. Clean Output.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-4">
                 <button @click="toggleTheme()"
                     class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500"
                     :title="theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'"
                     aria-label="Toggle Color Theme">
                     <!-- Sun Icon (for Dark Mode) -->
-                    <svg x-show="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" class="icon w-6 h-6"
+                    <svg x-show="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" class="icon w-5 h-5"
                         viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
                     </svg>
                     <!-- Moon Icon (for Light Mode) -->
-                    <svg x-show="theme === 'light'" xmlns="http://www.w3.org/2000/svg" class="icon w-6 h-6"
+                    <svg x-show="theme === 'light'" xmlns="http://www.w3.org/2000/svg" class="icon w-5 h-5"
                         viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
                     </svg>
                 </button>
+
+                <button @click="showGuide = true"
+                    class="inline-flex items-center gap-2 text-sm text-sky-500 hover:text-sky-600 hover:underline focus:outline-none focus:ring-2 focus:ring-sky-500 rounded px-2 py-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor"
+                        fill="none" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                    </svg>
+                    How to Use
+                </button>
             </div>
-
-            <h1
-                class="text-2xl md:text-3xl font-bold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
-                Paul: The Rephraser
-            </h1>
-            <p class="text-lg text-gray-500 dark:text-gray-400">
-                Precise Support Analysis. Clean Output.
-            </p>
-
-            <button @click="showGuide = true"
-                class="mt-4 inline-flex items-center gap-2 text-sm text-sky-500 hover:text-sky-600 hover:underline focus:outline-none focus:ring-2 focus:ring-sky-500 rounded px-2 py-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor"
-                    fill="none" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                </svg>
-                How to Use
-            </button>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[calc(100vh-8rem)] overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
             <!-- LEFT COLUMN: Input & Config -->
-            <section class="flex flex-col gap-3 h-full overflow-y-auto pr-2 custom-scrollbar"
-                aria-label="Input Configuration">
+            <section class="flex flex-col gap-6" aria-label="Input Configuration">
                 <!-- Main Input -->
-                <div class="glass-card animate-fade p-0 overflow-visible delay-[100ms] flex-shrink-0">
-                    <div class="p-4 pb-3">
+                <div class="glass-card animate-fade p-0 overflow-visible delay-[100ms]">
+                    <div class="p-6 pb-4">
                         <div class="section-title mb-2 text-sky-500 text-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
                                 stroke="currentColor" fill="none" stroke-width="2">
@@ -139,10 +140,10 @@
             </section>
 
             <!-- RIGHT COLUMN: Output & History -->
-            <section class="flex flex-col gap-3 h-full overflow-y-auto pl-2 custom-scrollbar" aria-label="Output">
+            <section class="flex flex-col gap-6" aria-label="Output">
                 <template x-if="history.length > 0">
                     <div class="animate-fade delay-[200ms]">
-                        <h2 class="section-title mb-6 flex items-center justify-between">
+                        <h2 class="section-title mb-4 flex items-center justify-between">
                             <span>Latest Response</span>
                             <span class="info-pill font-normal"
                                 x-text="new Date(history[0].timestamp).toLocaleTimeString()"></span>
@@ -387,7 +388,7 @@
         </div>
 
         <!-- KB Management (Advanced Section) -->
-        <div x-data="{ expanded: false }" class="glass-card animate-fade p-0 overflow-hidden delay-[300ms] mt-16">
+        <div x-data="{ expanded: false }" class="glass-card animate-fade p-0 overflow-hidden delay-[300ms] mt-8">
             <button @click="expanded = !expanded"
                 class="w-full flex justify-between items-center p-6 hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none">
                 <div class="section-title m-0 flex items-center gap-3 text-sky-500">
