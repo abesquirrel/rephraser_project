@@ -45,6 +45,8 @@ function rephraserApp() {
         showGuide: false,
         
         toast: { active: false, msg: '', type: 'info' },
+        showSuccessModal: false,
+        successMessage: '',
         
         // KB
         
@@ -226,6 +228,14 @@ function rephraserApp() {
             setTimeout(() => this.toast.active = false, 3000);
         },
 
+        showModalAlert(msg) {
+            this.successMessage = msg;
+            this.showSuccessModal = true;
+            setTimeout(() => {
+                this.showSuccessModal = false;
+            }, 2500); // Show for 2.5 seconds
+        },
+
         decodeEntities(text) {
             if (!text) return '';
             const textarea = document.createElement('textarea');
@@ -339,6 +349,12 @@ function rephraserApp() {
                 // Auto-clear input and exclusions on success
                 this.inputText = '';
                 this.negativePrompt = '';
+
+                // Auto-scroll to results
+                this.$nextTick(() => {
+                    const results = document.getElementById('results-area');
+                    if (results) results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
 
             } catch (error) {
                 this.status = 'Error occurred.';
@@ -497,7 +513,10 @@ function rephraserApp() {
                 if (data.status === 'success') {
                     this.history[idx].approved = true;
                     this.history = [...this.history]; // Force reactivity
-                    this.triggerToast('✅ Saved to Knowledge Base');
+                    // Use new Modal for approval
+                    this.showModalAlert('Response saved to Knowledge Base');
+                    // Also trigger toast for good measure/logs
+                    // this.triggerToast('✅ Saved to Knowledge Base');
                 } else {
                     this.triggerToast('❌ Save Failed: ' + (data.error || 'Unknown'));
                 }

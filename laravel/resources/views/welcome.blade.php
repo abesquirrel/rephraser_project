@@ -277,6 +277,45 @@
                                     </div>
                                 </div>
                             </div>
+
+                                    <!-- KB Settings (Mini) - Moved -->
+                                    <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                                        <div class="flex items-center gap-2 mb-4">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                            </svg>
+                                            <span class="font-medium text-gray-700 dark:text-gray-200">Knowledge Base</span>
+                                        </div>
+                                        
+                                        <div class="space-y-4">
+                                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                                <span>Total Items</span>
+                                                <span class="font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded" x-text="auditLogs.length">0</span>
+                                            </div>
+                                            
+                                            <div class="space-y-2">
+                                                <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Bulk Import</label>
+                                                <div class="flex gap-2">
+                                                    <input type="file" id="miniKBImport" @change="kbFile = $event.target.files[0]" 
+                                                        class="block w-full text-xs text-gray-500
+                                                        file:mr-2 file:py-2 file:px-4
+                                                        file:rounded-full file:border-0
+                                                        file:text-xs file:font-semibold
+                                                        file:bg-sky-50 file:text-sky-700
+                                                        hover:file:bg-sky-100
+                                                        transition-colors">
+                                                </div>
+                                                <button class="w-full btn btn-ghost text-xs flex justify-center items-center gap-2 mt-2" 
+                                                    @click="importKB()" :disabled="!kbFile">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                                    </svg>
+                                                    Import Data
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -292,42 +331,7 @@
                     </div>
                 </div>
 
-                <!-- KB Settings (Mini) -->
-                <div x-data="{ expanded: false }" class="glass-card animate-fade p-0 overflow-hidden delay-[300ms]">
-                    <button @click="expanded = !expanded"
-                        class="w-full flex justify-between items-center p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none">
-                        <div class="flex items-center gap-3 text-sm font-medium">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24"
-                                stroke="currentColor" fill="none">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                            </svg>
-                            Knowledge Base
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="info-pill text-xs" x-text="auditLogs.length + ' Items'"></span>
-                            <span x-text="expanded ? 'Hide' : 'Manage'" class="info-pill text-xs"></span>
-                        </div>
-                    </button>
 
-                    <div x-show="expanded" x-cloak x-collapse
-                        class="border-t border-gray-200/50 dark:border-gray-700/50 bg-black/5 dark:bg-white/5">
-                        <div class="p-4 flex gap-2 items-center">
-                            <label class="sr-only" for="miniKBImport">Import KB File</label>
-                            <input type="file" id="miniKBImport" @change="kbFile = $event.target.files[0]"
-                                class="flex-1 text-xs">
-                            <button class="btn btn-ghost text-xs flex items-center gap-1" @click="importKB()"
-                                :disabled="!kbFile">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                    stroke="currentColor" fill="none">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                                </svg>
-                                Import
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </section>
 
             <!-- RIGHT COLUMN: Output & History -->
@@ -360,7 +364,8 @@
                                     <!-- Refined Output -->
                                     <!-- Refined Output Area -->
                                     <!-- Refined Output Area -->
-                                    <div class="glass-card p-6 border-sky-500 shadow-xl shadow-sky-500/10">
+                                    <div id="results-area"
+                                        class="glass-card p-6 border-sky-500 shadow-xl shadow-sky-500/10">
 
                                         <!-- Standard Single Output -->
                                         <div>
@@ -918,6 +923,25 @@
             </div>
         </div>
     </div>
+    <!-- Success Alert Modal -->
+    <div x-show="showSuccessModal" x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-90"
+        class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none" x-cloak>
+        <div class="glass-card bg-emerald-500/10 border-emerald-500/50 p-8 rounded-2xl shadow-2xl backdrop-blur-xl flex flex-col items-center gap-4 text-center max-w-sm mx-4 transform">
+            <div class="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Saved!</h3>
+                <p class="text-gray-600 dark:text-gray-300" x-text="successMessage">The response has been added to your Knowledge Base.</p>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
