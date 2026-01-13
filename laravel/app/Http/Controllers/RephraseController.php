@@ -12,11 +12,29 @@ class RephraseController extends Controller
 {
     protected $aiServiceUrl = 'http://rephraser-ai:5001';
 
+    private function aiCall()
+    {
+        return Http::withHeaders([
+            'X-AI-KEY' => config('rephraser.ai_key', 'default_secret_key')
+        ]);
+    }
+
+    private function sanitize($text)
+    {
+        // Basic protection against prompt injection: strip common markers
+        return trim(strip_tags($text));
+    }
+
     public function rephrase(Request $request)
     {
+        $data = $request->all();
+        $data['text'] = $this->sanitize($data['text'] ?? '');
+        $data['negative_prompt'] = $this->sanitize($data['negative_prompt'] ?? '');
+
         // Stream response from Python service
-        $response = Http::withOptions(['stream' => true])
-            ->post("{$this->aiServiceUrl}/rephrase", $request->all());
+        $response = $this->aiCall()
+            ->withOptions(['stream' => true])
+            ->post("{$this->aiServiceUrl}/rephrase", $data);
 
         return response()->stream(function () use ($response) {
             $body = $response->toPsrResponse()->getBody();
@@ -39,7 +57,8 @@ class RephraseController extends Controller
             'rephrased_text' => 'required|string',
             'keywords' => 'nullable|string',
             'is_template' => 'nullable|boolean',
-            'category' => 'nullable|string'
+            'category' => 'nullable|string',
+            'model_used' => 'nullable|string'
         ]);
 
         // 1. Save to Database (Source of Truth)
@@ -50,6 +69,7 @@ class RephraseController extends Controller
             'action' => 'Approve/Create',
             'original_content' => $validated['original_text'],
             'rephrased_content' => $validated['rephrased_text'],
+            'model_used' => $validated['model_used'] ?? null,
             'user_name' => 'System' // Can be updated if auth is added later
         ]);
 
@@ -61,8 +81,8 @@ class RephraseController extends Controller
 
     public function suggestKeywords(Request $request)
     {
-        $text = $request->input('text', '');
-        $response = Http::post('http://ai:5001/suggest_keywords', ['text' => $text]);
+        $text = $this->sanitize($request->input('text', ''));
+        $response = $this->aiCall()->post("{$this->aiServiceUrl}/suggest_keywords", ['text' => $text]);
         return $response->json();
     }
 
@@ -138,7 +158,7 @@ class RephraseController extends Controller
     private function triggerRebuild()
     {
         try {
-            Http::post("{$this->aiServiceUrl}/trigger_rebuild");
+            $this->aiCall()->post("{$this->aiServiceUrl}/trigger_rebuild");
         } catch (\Exception $e) {
             Log::error("Failed to notify AI service: " . $e->getMessage());
         }

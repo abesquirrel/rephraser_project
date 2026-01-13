@@ -5,6 +5,7 @@ import json
 import threading
 import time
 import requests
+from datetime import datetime
 import re
 import numpy as np
 import faiss
@@ -22,6 +23,7 @@ DB_NAME = os.environ.get('DB_NAME', 'rephraser_db')
 TOP_K_EXAMPLES = 3
 WEB_SEARCH_RESULT_COUNT = 3
 MAX_GENERATION_TOKENS = 600
+AI_SERVICE_KEY = os.environ.get('AI_SERVICE_KEY', 'default_secret_key')
 
 # Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(name)s] - %(message)s')
@@ -29,6 +31,16 @@ logger = logging.getLogger("AI_SERVICE")
 
 app = Flask(__name__)
 CORS(app)
+
+@app.before_request
+def verify_api_key():
+    if request.path in ['/health', '/docs', '/swagger.json']:
+        return None
+    
+    key = request.headers.get('X-AI-KEY')
+    if not key or key != AI_SERVICE_KEY:
+        logger.warning(f"Unauthorized access attempt from {request.remote_addr}")
+        return jsonify({"error": "Unauthorized"}), 401
 
 # Global Resources
 embedding_model = None
@@ -97,11 +109,13 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
         "model": target_model,
         "messages": messages,
         "stream": False,
-        "options": {"temperature": temperature, "num_predict": max_tokens}
+        "options": {"temperature": float(temperature), "num_predict": int(max_tokens)}
     }
     
     try:
-        r = requests.post(url, json=payload, timeout=60)
+        r = requests.post(url, json=payload, timeout=120) # Increased timeout for larger models
+        if r.status_code != 200:
+            logger.error(f"Ollama error {r.status_code}: {r.text}")
         r.raise_for_status()
         return r.json().get('message', {}).get('content', '')
     except Exception as e:
@@ -148,13 +162,38 @@ def web_search_tool(query):
     return "No relevant information found online."
 
 def build_template_prompt(original_text, signature="Paul"):
-    system = f"You are {signature}. Rephrase into template:\nHello,\n\nObservations:\n...\nActions Taken:\n...\nRecommendations:\n...\nRegards,\n{signature}"
-    return [{"role": "system", "content": system}, {"role": "user", "content": f"Rephrase: {original_text}"}]
+    system = f"You are {signature}. Rephrase into template:\n\n"
+    system += "### SOURCE DATA PROTOCOL\n"
+    system += "1. ONLY use information provided in the Notes.\n"
+    system += "2. DO NOT invent, guess, or hallucinate any IDs, IMEIs, MSISDNs, or Serial Numbers.\n"
+    system += "3. If no specific IDs are in the Notes, DO NOT include any in your response.\n\n"
+    system += f"Format:\nHello,\n\nObservations:\n(List facts and Literal IDs from notes here)\n\nActions Taken:\n...\nRecommendations:\n...\n\nRegards,\n{signature}"
+    return [{"role": "system", "content": system}, {"role": "user", "content": f"Notes: {original_text}"}]
 
-def build_structured_prompt(original_text, examples, web_context=None, signature="Paul"):
-    # (Simplified for brevity, but mimicking structure)
-    system = f"You are {signature}. Support Analyst. Clear, concise. RETURN ONLY THE REPHRASED RESPONSE. NO PREAMBLE. NO 'Here is the response'. NO MARKDOWN unless part of the email. Structure:\nHello,\n\nObservations:\n...\nActions Taken:\n...\nRecommendations:\n...\nRegards,\n{signature}"
-    user = f"Context:\n{web_context}\n\nExamples:\n{examples}\n\nNotes: {original_text}"
+def build_structured_prompt(original_text, examples, web_context=None, signature="Paul", direct_instruction=None, negative_prompt=None):
+    # System prompt defining role and default structure
+    system = f"You are {signature}. Support Analyst. Clear, concise. RETURN ONLY THE REPHRASED RESPONSE.\n\n"
+    
+    system += "### MANDATORY DATA PROTOCOL\n"
+    system += "1. EXTRACT: Repeat all specific numerical identifiers (MSISDN, IMEI, ICCID, Serial Numbers) EXACTLY as they appear in the 'Notes' section.\n"
+    system += "2. ZERO-TOLERANCE FOR INVENTION: DO NOT redact, change, guess, or invent these numbers. If a number is NOT in the Notes, it MUST NOT appear in your response.\n"
+    system += "3. MISSING DATA: If NO identifiers are found in the Notes, leave the 'Observations' section for identifiers empty or omit those specific lines. DO NOT provide placeholder or example IDs.\n\n"
+
+    if direct_instruction:
+        system += f"USER DIRECTIVE: {direct_instruction}\n"
+        system += "Apply this while strictly following the DATA PROTOCOL above.\n\n"
+    
+    if negative_prompt:
+        system += f"STYLE EXCLUSIONS (AVOID): {negative_prompt}\n\n"
+    
+    system += "Format:\nHello,\n\nObservations:\n(Literal facts and extracted IDs only)\n\nActions Taken:\n...\nRecommendations:\n...\n\nRegards,\n{signature}\n\n"
+    system += "CRITICAL: Start your response directly with 'Hello,'. Do not output status messages like 'None found'."
+    
+    # Re-ordering to prioritize Notes (Source Data)
+    user = f"Notes (SPECIFIC SOURCE DATA - PRESERVE ALL NUMBERS):\n{original_text}\n\n"
+    user += f"Context (General Knowledge):\n{web_context}\n\n"
+    user += f"Examples (Style Reference):\n{examples}"
+    
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
@@ -300,9 +339,34 @@ def suggest_keywords():
     if not text:
         return jsonify({'keywords': ''})
     
-    prompt = f"Given this text, suggest 3-5 relevant comma-separated keywords for indexing. Return ONLY the keywords.\n\nText: {text}"
-    keywords = call_llm([{"role": "user", "content": prompt}], temperature=0.2, max_tokens=50)
-    return jsonify({'keywords': keywords.strip().strip('"')})
+    prompt = f"List 3-5 keywords for indexing this text. Return ONLY a comma-separated list of clean, relevant tags. NO numbers, NO identifiers (IMEI/MSISDN), NO PREAMBLE, NO EXPLANATION.\n\nText: {text}"
+    keywords = call_llm([{"role": "user", "content": prompt}], temperature=0.1, max_tokens=100)
+    
+    # Strict list extraction
+    # Remove common conversational preambles more aggressively
+    preamble_patterns = [
+        r'^[^{}\w]*(the\s+)?keywords(\s+are|\s+suggested)?\s*:?\s*',
+        r'^Here\s+are\s+.*keywords.*:\s*',
+        r'^Suggested\s+keywords:\s*',
+        r'^Comma-separated\s+keywords:\s*',
+        r'^The\s+relevant\s+keywords\s+are:\s*'
+    ]
+    cleaned = keywords
+    for pattern in preamble_patterns:
+        cleaned = re.sub(pattern, '', cleaned, flags=re.IGNORECASE)
+    
+    cleaned = cleaned.strip().strip('\"').strip("'").strip(".")
+    
+    # Split into list to filter and merge
+    if "\n" in cleaned:
+        items = [i.strip("- ").strip("123456789. ") for i in cleaned.split("\n") if i.strip()]
+    else:
+        items = [i.strip() for i in cleaned.split(",") if i.strip()]
+    
+    # Limit to top items
+    final_keywords = ", ".join(items[:5])
+        
+    return jsonify({'keywords': final_keywords})
 
 @app.route('/rephrase', methods=['POST'])
 def handle_rephrase():
@@ -314,9 +378,18 @@ def handle_rephrase():
     template_mode = data.get('template_mode', False)
     category = data.get('category', None)
     target_model = data.get('model', None) # Support for model switching/AB testing
+    negative_prompt = data.get('negative_prompt', None)
+    
+    logger.info(f"DEBUG: Input Text: '{input_text}'")
+    logger.info(f"DEBUG: Target Model: '{target_model}'")
+    
+    # Tuning Parameters (with Safe Limits for 16GB RAM)
+    temperature = max(0.0, min(1.0, float(data.get('temperature', 0.5))))
+    max_tokens = max(50, min(2000, int(data.get('max_tokens', 600))))
+    kb_count = max(1, min(10, int(data.get('kb_count', TOP_K_EXAMPLES))))
 
     def thinking_process_stream():
-        yield stream_event("Analyzing Context...")
+        yield stream_event(f"Resource Profile: {max_tokens} tokens | {kb_count} context hits")
         overall_start = time.time()
         
         web_context = ""
@@ -325,7 +398,7 @@ def handle_rephrase():
         if template_mode:
             yield stream_event("Searching Prioritized Templates...")
             t_start = time.time()
-            examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES, prefer_templates=True, category=category)
+            examples_list = retrieve_examples(input_text, k=kb_count, prefer_templates=True, category=category)
             logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
             yield stream_event(f"Found {len(examples_list)} relevant patterns.")
         else:
@@ -341,9 +414,18 @@ def handle_rephrase():
             
             yield stream_event("Checking Knowledge Base...")
             t_start = time.time()
-            examples_list = retrieve_examples(input_text, k=TOP_K_EXAMPLES, category=category)
+            examples_list = retrieve_examples(input_text, k=kb_count, category=category)
             logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
             yield stream_event(f"Found {len(examples_list)} examples.")
+        
+        # Feature: Support for bracketed instructions <rephrase as formal email>
+        instruction_match = re.search(r'<(.*?)>', input_text)
+        direct_instruction = instruction_match.group(1) if instruction_match else None
+        
+        if direct_instruction:
+            yield stream_event(f"Applying Instruction: {direct_instruction[:30]}...")
+            # Clean instruction from text to avoid redundancy if desired, or keep for context
+            # Let's keep it in the text but flag it specifically
         
         # Format examples for prompt
         formatted_examples = ""
@@ -353,10 +435,10 @@ def handle_rephrase():
             formatted_examples += f"Example {i+1}{item_cat}:\n{rephrased}\n\n"
 
         yield stream_event("Synthesizing...")
-        messages = build_structured_prompt(input_text, formatted_examples, web_context, signature)
+        messages = build_structured_prompt(input_text, formatted_examples, web_context, signature, direct_instruction, negative_prompt)
 
         l_start = time.time()
-        response = call_llm(messages, model=target_model)
+        response = call_llm(messages, temperature=temperature, max_tokens=max_tokens, model=target_model)
         logger.info(f"LLM Synthesis took {time.time() - l_start:.3f}s")
         response = strip_markdown(response)
         

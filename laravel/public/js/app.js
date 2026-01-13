@@ -13,6 +13,11 @@ function rephraserApp() {
         categories: ['General', 'Technical', 'Billing', 'Sales', 'Feedback'],
         modelA: 'llama3:8b-instruct-q3_K_M',
         modelB: 'mistral:latest',
+        availableModels: [
+            {id: 'llama3:8b-instruct-q3_K_M', name: 'Llama3'},
+            {id: 'mistral:latest', name: 'Mistral'},
+            {id: 'gemma2:9b', name: 'Gemma2 9B'}
+        ],
         abMode: false,
         isGenerating: false,
         auditLogs: [],
@@ -20,6 +25,15 @@ function rephraserApp() {
         thinkingLines: [],
         history: Alpine.$persist([]).as('rephraser_log_v3'),
         allExpanded: false,
+        showThinking: Alpine.$persist(true).as('rephraser_show_thinking'),
+        
+        // Tuning
+        temperature: 0.5,
+        maxTokens: 600,
+        kbCount: 3,
+        autoTokens: Alpine.$persist(true).as('rephraser_auto_tokens'),
+        negativePrompt: Alpine.$persist('').as('rephraser_negative_prompt'),
+        modelSettings: Alpine.$persist({}).as('rephraser_model_settings'),
         
         toast: { active: false, msg: '' },
         
@@ -34,18 +48,86 @@ function rephraserApp() {
         adding: false,
 
         init() {
+            // Ensure data types are correct (safety check for persist)
+            if (!Array.isArray(this.history)) this.history = [];
+            if (typeof this.modelSettings !== 'object' || this.modelSettings === null) this.modelSettings = {};
+
             // Sanitize history state on load
             if (this.history && this.history.length > 0) {
                 this.history.forEach(item => {
                     item.approving = false; // Reset stuck loading states
                 });
             }
+            // Load settings for initial model
+            this.syncModelSettings();
+
+            // Watch for model changes
+            this.$watch('modelA', () => {
+                if (!this.modelA) return;
+                this.syncModelSettings();
+            });
+            this.$watch('temperature', (val) => this.saveModelSetting('temperature', val));
+            this.$watch('maxTokens', (val) => this.saveModelSetting('maxTokens', val));
+            this.$watch('kbCount', (val) => this.saveModelSetting('kbCount', val));
+        },
+
+        syncModelSettings() {
+            const settings = this.modelSettings[this.modelA];
+            if (settings) {
+                this.temperature = settings.temperature ?? 0.5;
+                this.maxTokens = settings.maxTokens ?? 600;
+                this.kbCount = settings.kbCount ?? 3;
+            } else {
+                // Initialize with defaults if never set
+                this.temperature = 0.5;
+                this.maxTokens = 600;
+                this.kbCount = 3;
+            }
+        },
+
+        saveModelSetting(key, value) {
+            if (!this.modelA) return;
+            if (!this.modelSettings[this.modelA]) {
+                this.modelSettings[this.modelA] = { temperature: 0.5, maxTokens: 600, kbCount: 3 };
+            }
+            this.modelSettings[this.modelA][key] = value;
+            // Persistence is handled by $persist on modelSettings
+        },
+
+        applyPreset(type) {
+            if (type === 'technical') {
+                this.temperature = 0.2;
+                this.maxTokens = 800;
+                this.kbCount = 8;
+            } else if (type === 'creative') {
+                this.temperature = 0.8;
+                this.maxTokens = 1200;
+                this.kbCount = 3;
+            } else if (type === 'tldr') {
+                this.temperature = 0.4;
+                this.maxTokens = 300;
+                this.kbCount = 2;
+            }
+            this.triggerToast(`Applied ${type.toUpperCase()} Preset`);
+        },
+
+        getHealthColor() {
+            if (this.maxTokens <= 800) return '#4ade80'; // Green
+            if (this.maxTokens <= 1500) return '#facc15'; // Yellow
+            return '#f87171'; // Red
         },
 
         triggerToast(msg) {
             this.toast.msg = msg;
             this.toast.active = true;
             setTimeout(() => this.toast.active = false, 3000);
+        },
+
+        decodeEntities(text) {
+            if (!text) return '';
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = text;
+            return textarea.value;
         },
 
         toggleAllHistory() {
@@ -61,6 +143,13 @@ function rephraserApp() {
             this.thinkingLines = []; // Reset thinking lines
             this.status = 'Connecting...';
 
+            // Auto-Scaling Logic
+            let finalTokens = this.maxTokens;
+            if (this.autoTokens) {
+                const words = this.inputText.trim().split(/\s+/).length;
+                finalTokens = Math.max(200, Math.min(2000, words * 15)); // Approx 15 tokens per word of input for safety
+            }
+
             // Function to handle a single stream
             const runStream = async (model, targetKey) => {
                 const response = await fetch('/api/rephrase', {
@@ -73,7 +162,11 @@ function rephraserApp() {
                         search_keywords: this.searchKeywords,
                         template_mode: this.templateMode,
                         category: this.currentCategory,
-                        model: model
+                        model: model,
+                        temperature: this.temperature,
+                        max_tokens: finalTokens,
+                        kb_count: this.kbCount,
+                        negative_prompt: this.negativePrompt
                     })
                 });
 
@@ -133,13 +226,17 @@ function rephraserApp() {
 
                 this.history.unshift({
                     original: this.inputText,
-                    rephrased: this.rephrasedContent, // Store model A's output as primary
-                    rephrasedB: this.rephrasedContentB, // Store model B's output
+                    rephrased: this.decodeEntities(this.rephrasedContent), // Store model A's output as primary
+                    rephrasedB: this.rephrasedContentB ? this.decodeEntities(this.rephrasedContentB) : null, // Store model B's output
                     keywords: this.searchKeywords,
                     is_template: this.templateMode,
                     category: this.currentCategory,
                     approved: false,
                     expanded: true,
+                    modelA_name: this.modelA || 'llama3:8b-instruct-q3_K_M',
+                    modelB_name: this.modelB || 'mistral:latest',
+                    isEditing: false, 
+                    isEditingB: false,
                     timestamp: new Date().toISOString()
                 });
                 // Keep history manageable
@@ -247,6 +344,12 @@ function rephraserApp() {
             }
         },
 
+        toggleEdit(idx, isAlt = false) {
+            const key = isAlt ? 'isEditingB' : 'isEditing';
+            this.history[idx][key] = !this.history[idx][key];
+            this.history = [...this.history];
+        },
+
         // This is the original approveEntry, modified to handle history items
         async approveHistoryEntry(item, idx, isAlt = false) {
             const content = isAlt ? item.rephrasedB : item.rephrased;
@@ -271,7 +374,8 @@ function rephraserApp() {
                         rephrased_text: content,
                         keywords: item.keywords,
                         is_template: item.is_template,
-                        category: item.category
+                        category: item.category,
+                        model_used: isAlt ? item.modelB_name : item.modelA_name
                     })
                 });
                 
@@ -388,5 +492,5 @@ function rephraserApp() {
                 console.error('Manual add error:', e);
             } finally { this.adding = false; }
         }
-    }
+    };
 }

@@ -9,5 +9,5 @@ class AuditLog extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['action', 'original_content', 'rephrased_content', 'user_name'];
+    protected $fillable = ['action', 'original_content', 'rephrased_content', 'user_name', 'model_used'];
 }
