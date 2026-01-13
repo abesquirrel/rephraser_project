@@ -112,6 +112,17 @@ class RephraseController extends Controller
         return AuditLog::orderBy('created_at', 'desc')->take(50)->get();
     }
 
+    public function getModels()
+    {
+        try {
+            $response = $this->aiCall()->get("{$this->aiServiceUrl}/list_models");
+            return $response->json();
+        } catch (\Exception $e) {
+            Log::error("Failed to fetch models: " . $e->getMessage());
+            return response()->json(['models' => [], 'error' => 'Service Unavailable']);
+        }
+    }
+
     public function upload_kb(Request $request)
     {
         if ($request->hasFile('file')) {

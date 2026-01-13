@@ -850,18 +850,91 @@
                                 <div class="form-group">
                                     <label class="label-text">Signature</label>
                                     <input type="text" x-model="signature" placeholder="Paul"
-                                        class="form-input w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700">
+                                        class="form-input w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors">
                                 </div>
 
                                 <div>
-                                    <label class="label-text mb-2 block">Primary Model</label>
+                                    <label class="label-text mb-2 block flex justify-between items-center">
+                                        <span>Primary Model</span>
+                                        <button @click="fetchOllamaModels()"
+                                            class="text-xs text-sky-500 hover:underline flex items-center gap-1 transition-opacity"
+                                            :class="isRefreshingModels ? 'opacity-50 cursor-wait' : ''"
+                                            :disabled="isRefreshingModels">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
+                                                :class="isRefreshingModels ? 'animate-spin' : ''" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                            <span x-text="isRefreshingModels ? 'Refreshing...' : 'Refresh'"></span>
+                                        </button>
+                                    </label>
                                     <select x-model="modelA"
-                                        class="form-select w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700">
+                                        class="form-select w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700 mb-4 focus:ring-1 focus:ring-sky-500">
                                         <option value="">Select Model...</option>
                                         <template x-for="m in availableModels" :key="m.id">
                                             <option :value="m.id" x-text="m.name" :selected="m.id === modelA"></option>
                                         </template>
                                     </select>
+
+                                    <!-- Dynamic Import List -->
+                                    <div
+                                        class="border border-gray-200/50 dark:border-gray-700/50 rounded-lg overflow-hidden flex flex-col h-40">
+                                        <div
+                                            class="bg-gray-50 dark:bg-white/5 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 items-center flex justify-between">
+                                            <span>Detected in Ollama</span>
+                                            <span class="text-xs" x-show="ollamaModels.length > 0"
+                                                x-text="ollamaModels.length"></span>
+                                        </div>
+                                        <div class="flex-1 overflow-y-auto p-1 space-y-1 relative"
+                                            style="scrollbar-width: thin; scrollbar-color: rgba(156, 163, 175, 0.3) transparent;">
+                                            <template x-if="ollamaModels.length === 0 && !isRefreshingModels">
+                                                <div
+                                                    class="h-full flex flex-col items-center justify-center p-4 text-center opacity-50 space-y-2">
+                                                    <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                                        stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="1.5"
+                                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                    </svg>
+                                                    <span class="text-xs">No models detected</span>
+                                                </div>
+                                            </template>
+                                            <template x-if="isRefreshingModels">
+                                                <div class="h-full flex items-center justify-center">
+                                                    <svg class="animate-spin h-5 w-5 text-sky-500"
+                                                        xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                            stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                        </path>
+                                                    </svg>
+                                                </div>
+                                            </template>
+                                            <template x-for="modelName in ollamaModels" :key="modelName">
+                                                <div
+                                                    class="flex justify-between items-center p-2 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 group animate-fade">
+                                                    <div class="flex items-center gap-2 overflow-hidden">
+                                                        <div class="w-1.5 h-1.5 rounded-full"
+                                                            :class="isModelImported(modelName) ? 'bg-sky-400' : 'bg-gray-300 dark:bg-gray-600'">
+                                                        </div>
+                                                        <span x-text="modelName"
+                                                            class="text-xs font-mono truncate max-w-[160px]"
+                                                            :class="isModelImported(modelName) ? 'text-sky-500 font-medium' : 'text-gray-600 dark:text-gray-400'"></span>
+                                                    </div>
+                                                    <button @click="toggleModelImport(modelName)"
+                                                        class="text-[10px] font-bold uppercase px-2 py-1 rounded transition-colors border shadow-sm opacity-80 group-hover:opacity-100"
+                                                        :class="isModelImported(modelName) 
+                                                            ? 'border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white' 
+                                                            : 'border-emerald-500/30 text-emerald-500 hover:bg-emerald-500 hover:text-white'"
+                                                        x-text="isModelImported(modelName) ? 'Unlink' : 'Import'">
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="flex gap-2 pt-2">
