@@ -28,16 +28,16 @@
 </head>
 
 <body x-data="rephraserApp()" class="antialiased min-h-screen transition-colors duration-300">
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <div class="container mx-auto px-4 py-4 max-w-7xl">
 
         <!-- Header -->
-        <header class="header animate-fade mb-10 flex flex-col md:flex-row justify-between items-center gap-4 px-2">
+        <header class="header animate-fade mb-4 flex flex-col md:flex-row justify-between items-center gap-4 px-2">
             <div class="text-left">
                 <h1
-                    class="text-4xl font-bold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
+                    class="text-2xl font-bold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
                     Paul: The Rephraser
                 </h1>
-                <p class="text-lg text-gray-500 dark:text-gray-400">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
                     Precise Support Analysis. Clean Output.
                 </p>
             </div>
@@ -73,13 +73,13 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 gap-8 items-start">
+        <div class="grid grid-cols-1 gap-4 items-start">
 
             <!-- LEFT COLUMN: Input & Config -->
             <section class="flex flex-col gap-8" aria-label="Input Configuration">
                 <!-- Main Input -->
                 <div class="glass-card animate-fade p-0 overflow-visible delay-[100ms]">
-                    <div class="p-8 pb-6">
+                    <div class="p-5 pb-4">
                         <div class="section-title mb-2 text-sky-500 text-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
                                 stroke="currentColor" fill="none" stroke-width="2">
@@ -89,10 +89,10 @@
                             <span>Compose</span>
                         </div>
 
-                        <div class="mb-6 flex-1 flex flex-col">
+                        <div class="mb-4 flex-1 flex flex-col">
                             <label for="rawInputArea" class="sr-only">Input text to rephrase</label>
                             <textarea id="rawInputArea" x-model="inputText" placeholder="Input notes..."
-                                class="w-full min-h-[250px] p-4 text-base leading-relaxed rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"></textarea>
+                                class="w-full min-h-[160px] p-4 text-base leading-relaxed rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"></textarea>
                         </div>
 
                         <div class="flex gap-4 items-center">
@@ -140,7 +140,7 @@
             </section>
 
             <!-- RIGHT COLUMN: Output & History -->
-            <section class="flex flex-col gap-8" aria-label="Output">
+            <section class="flex flex-col gap-4" aria-label="Output">
                 <template x-if="history.length > 0">
                     <div class="animate-fade delay-[200ms]">
                         <h2 class="section-title mb-3 flex items-center justify-between">
@@ -588,10 +588,10 @@
                 x-transition:leave-end="opacity-0 scale-95">
 
                 <!-- Modal Header -->
-                <div class="flex justify-between items-center p-8 pb-4 border-b border-gray-200/10">
+                <div class="flex justify-between items-center p-6 pb-4 border-b border-gray-200/10">
                     <div>
                         <h2
-                            class="text-3xl font-bold font-display bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500">
+                            class="text-2xl font-bold font-display bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500">
                             Mastering Paul</h2>
                         <p class="text-gray-500 dark:text-gray-400 mt-1">The complete guide to AI-powered support
                             analysis.</p>
@@ -607,7 +607,7 @@
                 </div>
 
                 <!-- Modal Content -->
-                <div class="overflow-y-auto p-8 custom-scrollbar space-y-12">
+                <div class="overflow-y-auto p-6 custom-scrollbar space-y-8">
 
                     <!-- Section 1: Core Workflow -->
                     <section>
@@ -751,7 +751,7 @@
 
                 </div>
 
-                <div class="p-8 pt-4 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 text-center">
+                <div class="p-6 pt-4 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 text-center">
                     <button class="btn btn-primary px-10 py-3 shadow-xl shadow-sky-500/20" @click="showGuide = false">
                         Start Rephrasing
                     </button>
@@ -796,8 +796,8 @@
             x-transition:leave-end="opacity-0 scale-95">
 
             <!-- Modal Header -->
-            <div class="flex justify-between items-center p-6 border-b border-gray-200/10 bg-white/5">
-                <h3 class="text-xl font-bold font-display text-gray-900 dark:text-gray-100">
+            <div class="flex justify-between items-center p-5 border-b border-gray-200/10 bg-white/5">
+                <h3 class="text-lg font-bold font-display text-gray-900 dark:text-gray-100">
                     Configuration & Settings
                 </h3>
                 <button @click="showConfigModal = false"
@@ -811,7 +811,7 @@
             </div>
 
             <!-- Scrollable Content -->
-            <div class="overflow-y-auto p-6 custom-scrollbar">
+            <div class="overflow-y-auto p-5 custom-scrollbar">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                     <!-- Left Column: User & Model -->
@@ -1011,7 +1011,7 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="p-6 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3 z-10">
+            <div class="p-5 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3 z-10">
                 <button class="btn btn-primary px-8 py-3" @click="showConfigModal = false">
                     Done
                 </button>

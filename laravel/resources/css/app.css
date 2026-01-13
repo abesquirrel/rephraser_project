@@ -10,6 +10,10 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+html {
+    font-size: 12px; /* Enhanced Global Zoom Out (~75%) */
+}
+
 :root {
     /* Light Mode - More subtle and clean */
     --bg-color: #f8f9fa; /* A very light grey */
