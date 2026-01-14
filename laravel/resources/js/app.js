@@ -60,6 +60,7 @@ function rephraserApp() {
         manualIsTemplate: false,
         manualCategory: '', // Added manualCategory
         adding: false,
+        isPredictingKeywords: false,
 
         // Archive State
         viewModal: false,
@@ -253,10 +254,16 @@ function rephraserApp() {
         },
 
         triggerToast(msg, type = 'info') {
-            this.toast.msg = msg;
-            this.toast.type = type;
-            this.toast.active = true;
-            setTimeout(() => this.toast.active = false, 3000);
+            this.toast = {
+                active: true,
+                msg: msg,
+                type: type
+            };
+            setTimeout(() => {
+                if (this.toast.msg === msg) {
+                    this.toast.active = false;
+                }
+            }, 3000);
         },
 
         showModalAlert(msg) {
@@ -411,6 +418,7 @@ function rephraserApp() {
         async predictKeywords() {
             const text = this.inputText || this.manualOrig;
             if (!text) return;
+            this.isPredictingKeywords = true;
             this.status = 'Predicting keywords...';
             try {
                 const response = await fetch('/api/suggest-keywords', {
@@ -427,6 +435,8 @@ function rephraserApp() {
                 this.status = 'Keyword prediction failed.';
                 this.triggerToast('Keyword Prediction Failed', 'error');
                 console.error('Keyword prediction error:', e);
+            } finally {
+                this.isPredictingKeywords = false;
             }
         },
 
@@ -514,7 +524,7 @@ function rephraserApp() {
                         });
                     }
                     this.history = [...this.history]; // Force reactivity
-                    this.triggerToast('✅ Saved to Knowledge Base');
+                    this.showModalAlert('Response saved to Knowledge Base');
                 } else {
                     this.triggerToast('❌ Save Failed: ' + (data.error || 'Unknown'));
                 }
@@ -659,7 +669,7 @@ function rephraserApp() {
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    this.triggerToast('Entry Learned', 'success');
+                    this.showModalAlert('Entry learned and added to Knowledge Base');
                     // Add to history for immediate feedback
                     this.history.unshift({
                         original: this.manualOrig,

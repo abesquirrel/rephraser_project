@@ -9,6 +9,10 @@
     <title>Paul: The Rephraser</title>
     <meta name="description" content="A premium, AI-powered support analyst rephrasing tool.">
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+
     <!-- Modern Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -442,9 +446,20 @@
                             <div class="flex-1 min-w-[200px]">
                                 <label class="label-text flex justify-between">
                                     Keywords
-                                    <button @click="predictKeywords()" class="text-sky-500 hover:underline text-xs"
-                                        :disabled="!manualOrig">
-                                        Auto-Predict
+                                    <button @click="predictKeywords()"
+                                        class="text-sky-500 hover:underline text-xs flex items-center gap-1"
+                                        :disabled="!manualOrig || isPredictingKeywords">
+                                        <template x-if="isPredictingKeywords">
+                                            <svg class="animate-spin h-3 w-3 text-sky-500"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                    stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                </path>
+                                            </svg>
+                                        </template>
+                                        <span x-text="isPredictingKeywords ? 'Predicting...' : 'Auto-Predict'"></span>
                                     </button>
                                 </label>
                                 <input type="text" x-model="manualKeywords" placeholder="firmware, latency..."
@@ -565,7 +580,7 @@
                 x-transition:leave="transition ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                 x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
-                class="toast fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-3 text-white rounded-full shadow-2xl font-semibold backdrop-blur-md ring-1 ring-white/20"
+                class="toast fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-5 py-2.5 text-white rounded-2xl shadow-2xl font-semibold backdrop-blur-md ring-1 ring-white/20 max-w-[90vw] md:max-w-lg w-auto min-w-0"
                 :class="{
                     'bg-emerald-500/90': toast.type === 'success',
                     'bg-rose-500/90': toast.type === 'error', 
@@ -970,9 +985,21 @@
                                 <div>
                                     <label class="label-text flex justify-between">
                                         Keywords
-                                        <button @click="predictKeywords()" class="text-sky-500 hover:underline text-xs"
-                                            :disabled="!inputText">
-                                            Auto-Predict
+                                        <button @click="predictKeywords()"
+                                            class="text-sky-500 hover:underline text-xs flex items-center gap-1"
+                                            :disabled="!inputText || isPredictingKeywords">
+                                            <template x-if="isPredictingKeywords">
+                                                <svg class="animate-spin h-3 w-3 text-sky-500"
+                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                        stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                    </path>
+                                                </svg>
+                                            </template>
+                                            <span
+                                                x-text="isPredictingKeywords ? 'Predicting...' : 'Auto-Predict'"></span>
                                         </button>
                                     </label>
                                     <div class="relative">
