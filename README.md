@@ -68,13 +68,10 @@ Before deploying, ensure you have the following installed on your host machine:
 2.  **Ollama**: This application relies on local LLMs.
 
     - [Download Ollama](https://ollama.com)
-    - **Pull Required Models**:
+    - **Pull Models**: The application can now detect any locally installed models. However, we recommend these:
 
       ```bash
-      # Primary Model (optimized for speed/balance)
       ollama pull llama3:8b-instruct-q3_K_M
-
-      # Optional/Alternative Models
       ollama pull mistral:latest
       ollama pull gemma2:9b
       ```
@@ -165,7 +162,13 @@ The communication between Laravel and the AI Service is secured via an API Key (
 - **Import**: Upload a CSV with `original_text` and `rephrased_text` columns to bulk-train the system.
 - **Manual Entry**: Manually add specific templates or difficult edge cases.
 
----
+- **Manual Entry**: Manually add specific templates or difficult edge cases.
+
+### 3. Dynamic Model Import
+
+- **Discovery**: Go to **Settings** (Icon) -> **Primary Model** -> Click **Refresh**. The system will scan your local Ollama instance for available models.
+- **Import**: Found models will be listed in the "Detected in Ollama" section. Click **"Import"** to add them to your active roster.
+- **Select**: The model is now available in the dropdown and will be saved as your preference.
 
 ## 🔧 Troubleshooting
 

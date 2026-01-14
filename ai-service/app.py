@@ -368,6 +368,25 @@ def suggest_keywords():
         
     return jsonify({'keywords': final_keywords})
 
+@app.route('/list_models', methods=['GET'])
+def list_models():
+    """Proxies the request to Ollama to list locally available models."""
+    try:
+        # Connect to Ollama on host.docker.internal
+        url = "http://host.docker.internal:11434/api/tags"
+        r = requests.get(url, timeout=5)
+        if r.status_code == 200:
+            data = r.json()
+            # Extract just the descriptions we need or pass raw
+            # Ollama returns {'models': [{'name': '...', ...}]}
+            models = [m.get('name') for m in data.get('models', [])]
+            return jsonify({'models': models})
+        else:
+            return jsonify({'models': [], 'error': f"Ollama Error: {r.status_code}"})
+    except Exception as e:
+        logger.error(f"Failed to list models: {e}")
+        return jsonify({'models': [], 'error': str(e)})
+
 @app.route('/rephrase', methods=['POST'])
 def handle_rephrase():
     data = request.json

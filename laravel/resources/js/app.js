@@ -13,15 +13,15 @@ function rephraserApp() {
         newCategory: '', 
         categories: ['General', 'Technical', 'Billing', 'Sales', 'Feedback'],
         modelA: 'llama3:8b-instruct-q3_K_M',
-        availableModels: [
-            {id: 'llama3:8b-instruct-q3_K_M', name: 'Llama3'},
-            {id: 'mistral:latest', name: 'Mistral'},
-            {id: 'gemma2:9b', name: 'Gemma2 9B'}
-        ],
+        availableModels: Alpine.$persist([
+            {id: 'llama3:8b-instruct-q3_K_M', name: 'Llama3 (Default)'}
+        ]).as('rephraser_enabled_models'),
+        ollamaModels: [], // Raw list from API
         isGenerating: false,
         auditLogs: [],
         activeTab: 'generator', // generator, history, audit
         thinkingLines: [],
+        isRefreshingModels: false,
         history: Alpine.$persist([]).as('rephraser_log_v3'),
         allExpanded: false,
         showThinking: Alpine.$persist(true).as('rephraser_show_thinking'),
@@ -163,6 +163,9 @@ function rephraserApp() {
             this.$watch('showGuide', (val) => {
                 document.body.style.overflow = val ? 'hidden' : '';
             });
+            
+            // Initial fetch of models
+            this.fetchOllamaModels();
         },
 
         toggleTheme() {
@@ -681,6 +684,52 @@ function rephraserApp() {
                 this.triggerToast('❌ Network Error during manual add');
                 console.error('Manual add error:', e);
             } finally { this.adding = false; }
+        },
+
+        async fetchOllamaModels() {
+            this.isRefreshingModels = true;
+            try {
+                const res = await fetch('/api/models');
+                const data = await res.json();
+                if (data.models) {
+                    this.ollamaModels = data.models;
+                    // Auto-add any available models if roster is empty (fallback)
+                    if (this.availableModels.length === 0 && this.ollamaModels.length > 0) {
+                        this.ollamaModels.forEach(m => this.toggleModelImport(m));
+                    }
+                    if (this.ollamaModels.length === 0) {
+                        this.triggerToast('No models found in Ollama', 'info');
+                    }
+                } else if (data.error) {
+                     this.triggerToast('Ollama Error: ' + data.error, 'error');
+                }
+            } catch (e) {
+                console.error('Failed to fetch models:', e);
+                this.triggerToast('Connection Error: Check Console', 'error');
+            } finally {
+                this.isRefreshingModels = false;
+            }
+        },
+
+        toggleModelImport(modelName) {
+            const exists = this.availableModels.find(m => m.id === modelName);
+            if (exists) {
+                // Remove
+                this.availableModels = this.availableModels.filter(m => m.id !== modelName);
+                this.triggerToast(`Removed ${modelName}`);
+                // unexpected state safety
+                if(this.modelA === modelName && this.availableModels.length > 0) {
+                    this.modelA = this.availableModels[0].id;
+                }
+            } else {
+                // Add
+                this.availableModels.push({ id: modelName, name: modelName });
+                this.triggerToast(`Imported ${modelName}`);
+            }
+        },
+        
+        isModelImported(modelName) {
+            return this.availableModels.some(m => m.id === modelName);
         }
     };
 }
