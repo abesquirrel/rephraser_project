@@ -58,6 +58,33 @@ function rephraserApp() {
         // KB
         kbFile: null,
         importing: false,
+        
+        // Analytics
+        sessionId: Alpine.$persist(null).as('rephraser_session_id'),
+
+        async startTracking() {
+             if (!this.sessionId) {
+                 this.sessionId = crypto.randomUUID();
+             }
+             
+             try {
+                 await fetch('/api/session/start', {
+                     method: 'POST',
+                     headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                     },
+                     body: JSON.stringify({
+                         session_id: this.sessionId,
+                         user_signature: this.currentUser?.signature || this.signature,
+                         theme: 'dark' // Fixed for now
+                     })
+                 });
+             } catch (e) {
+                 console.error('Session tracking failed', e);
+             }
+        },
+        kbStats: { total_entries: 0, last_updated: null, category_breakdown: [] }, // Added kbStats
         manualOrig: '',
         manualReph: '',
         manualKeywords: '',
@@ -125,6 +152,22 @@ function rephraserApp() {
              return name.replace(':latest', '').replace(':8b-instruct-q3_K_M', '');
         },
 
+        get friendlyStatus() {
+            const lastStatus = this.thinkingLines.length > 0 ? this.thinkingLines[this.thinkingLines.length - 1] : this.status;
+            // Guard clause if status or lastStatus is undefined
+            if (!lastStatus) return 'Ready';
+            
+            const lower = lastStatus.toLowerCase();
+            
+            if (lower.includes('connect')) return 'Handshaking with AI...';
+            if (lower.includes('predict')) return 'Understanding context...';
+            if (lower.includes('search')) return 'Consulting knowledge base...';
+            if (lower.includes('think')) return 'Analyzing best approach...';
+            if (lower.includes('generat')) return 'Drafting your response...';
+            if (lower.includes('queue')) return 'Waiting for availability...';
+            return 'Working on it...';
+        },
+
         init() {
             // Ensure data types are correct (safety check for persist)
             if (!Array.isArray(this.history)) this.history = [];
@@ -148,7 +191,9 @@ function rephraserApp() {
             document.documentElement.classList.add('dark');
 
             // Check if user is authenticated
-            this.checkAuth();
+            this.checkAuth().then(() => {
+                 this.startTracking();
+            });
             this.$watch('modelA', () => {
                 if (!this.modelA) return;
                 this.syncModelSettings();
@@ -161,6 +206,12 @@ function rephraserApp() {
             this.$watch('presencePenalty', (val) => this.saveModelSetting('presencePenalty', val));
 
             // Template Mode disables Web Search
+            this.$watch('templateMode', (val) => {
+                if (val) this.enableWebSearch = false;
+            });
+            this.$watch('enableWebSearch', (val) => {
+                if (val) this.templateMode = false;
+            });
 
             // Scroll Lock for Modal
             this.$watch('showConfigModal', (val) => {
@@ -172,6 +223,7 @@ function rephraserApp() {
             
             // Initial fetch of models
             this.fetchOllamaModels();
+            this.fetchKbStats(); // Fetch stats on load
         },
 
         // Authentication Methods
@@ -248,7 +300,9 @@ function rephraserApp() {
 
         async checkAuth() {
             try {
-                const response = await fetch('/user');
+                const response = await fetch('/user', {
+                    headers: { 'Accept': 'application/json' }
+                });
                 if (response.ok) {
                     const data = await response.json();
                     this.currentUser = data.user;
@@ -417,8 +471,11 @@ function rephraserApp() {
             const runStream = async (model, targetKey) => {
                 const response = await fetch('/api/rephrase', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Session-ID': this.sessionId,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
                     body: JSON.stringify({
                         text: textToProcess,
                         signature: this.signature,
@@ -523,6 +580,17 @@ function rephraserApp() {
             } finally {
                 this.isGenerating = false;
                 this.status = 'Done.';
+            }
+        },
+
+        async fetchKbStats() {
+            try {
+                const response = await fetch('/api/kb-stats');
+                if (response.ok) {
+                    this.kbStats = await response.json();
+                }
+            } catch (e) {
+                console.error('Failed to fetch KB stats', e);
             }
         },
 

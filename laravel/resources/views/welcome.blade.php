@@ -83,6 +83,68 @@
                                 class="w-full min-h-[160px] p-4 text-base leading-relaxed rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"></textarea>
                         </div>
 
+                        <!-- Input Configuration Controls (Moved from Modal) -->
+                        <div class="mb-5 flex flex-wrap gap-4 items-end animate-fade delay-[100ms]">
+                            <!-- Keywords Input -->
+                            <div class="flex-1 min-w-[240px]">
+                                <label class="label-text flex justify-between mb-1.5 text-xs text-gray-500 font-medium">
+                                    <span>Keywords & Context</span>
+                                    <button @click="predictKeywords()"
+                                        class="text-sky-500 hover:text-sky-600 hover:underline text-xs flex items-center gap-1.5 transition-colors"
+                                        :disabled="!inputText || isPredictingKeywords">
+                                        <span x-show="isPredictingKeywords"
+                                            class="animate-spin h-3 w-3 border-2 border-sky-500 border-t-transparent rounded-full"></span>
+                                        <span
+                                            x-text="isPredictingKeywords ? 'Analyzing...' : 'Auto-Predict Tags'"></span>
+                                    </button>
+                                </label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400"
+                                            viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <input type="text" x-model="searchKeywords"
+                                        placeholder="e.g. professional, email response..."
+                                        class="form-input w-full pl-9 p-2.5 text-sm rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all placeholder-gray-400">
+                                </div>
+                            </div>
+
+                            <!-- Toggles Group -->
+                            <div class="flex gap-3 pb-0.5">
+                                <!-- Template Mode -->
+                                <label
+                                    class="flex items-center gap-2.5 cursor-pointer px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
+                                    :class="templateMode ? 'bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-500/30' : ''">
+                                    <div class="relative flex items-center">
+                                        <input type="checkbox" x-model="templateMode" class="peer sr-only">
+                                        <div
+                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-sky-500 shadow-inner">
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-bold uppercase tracking-wider"
+                                        :class="templateMode ? 'text-sky-600 dark:text-sky-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'">Template</span>
+                                </label>
+
+                                <!-- Online Research -->
+                                <label
+                                    class="flex items-center gap-2.5 cursor-pointer px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
+                                    :class="enableWebSearch ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-500/30' : ''">
+                                    <div class="relative flex items-center">
+                                        <input type="checkbox" x-model="enableWebSearch" class="peer sr-only">
+                                        <div
+                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-500 shadow-inner">
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-bold uppercase tracking-wider"
+                                        :class="enableWebSearch ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'">Research</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="flex gap-4 items-center">
                             <button class="btn btn-primary w-full py-3 flex items-center justify-center gap-2"
                                 @click="generateRephrase()" :disabled="isGenerating || !inputText.trim()">
@@ -114,17 +176,43 @@
 
 
                 <!-- Status Pill Container (Floating) -->
-                <div class="fixed bottom-6 right-6 z-20 pointer-events-none" x-show="isGenerating" x-cloak>
+                <!-- Centered Generation Feedback Overlay -->
+                <div x-show="isGenerating" x-cloak
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity"
+                    x-transition:enter="duration-300 ease-out" x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100" x-transition:leave="duration-200 ease-in"
+                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
                     <div
-                        class="status-pill flex items-center gap-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur border border-sky-500 px-4 py-2 rounded-full shadow-lg">
-                        <span class="w-2 h-2 bg-sky-500 rounded-full animate-pulse"></span>
-                        <span
-                            x-text="thinkingLines.length > 0 ? thinkingLines[thinkingLines.length - 1] : 'Thinking...'"
-                            class="text-sm font-medium"></span>
+                        class="glass-card p-8 rounded-3xl flex flex-col items-center gap-6 shadow-2xl border border-sky-500/30 bg-black/80 max-w-sm w-full mx-4">
+                        <!-- Pulsing AI Brain / Spinner -->
+                        <div class="relative w-20 h-20 flex items-center justify-center">
+                            <div class="absolute inset-0 bg-sky-500/20 rounded-full animate-ping"></div>
+                            <div class="absolute inset-2 bg-indigo-500/20 rounded-full animate-pulse delay-75"></div>
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="w-10 h-10 text-sky-400 animate-pulse relative z-10" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+
+                        <div class="text-center space-y-2">
+                            <h3 class="text-xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-400"
+                                x-text="friendlyStatus">
+                            </h3>
+                            <p class="text-sm text-gray-400" x-text="status !== friendlyStatus ? status : ''"></p>
+                            <!-- Sub-text for tech details if different -->
+                        </div>
+
+                        <!-- Progress Bar (Fake but visual) -->
+                        <div class="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden relative">
+                            <div
+                                class="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-500 to-indigo-500 w-1/3 animate-[progress_2s_ease-in-out_infinite]">
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-
             </section>
 
             <!-- RIGHT COLUMN: Output & History -->
@@ -182,8 +270,8 @@
                                             <div class="flex justify-end gap-3 mt-6">
                                                 <button class="btn btn-ghost px-4 py-2 text-sm"
                                                     @click="copyText(item.rephrased)">Copy</button>
-                                                <button class="btn btn-ghost px-4 py-2 text-sm"
-                                                    @click="toggleEdit(0)">Edit</button>
+                                                <button class="btn btn-ghost px-4 py-2 text-sm" @click="toggleEdit(0)"
+                                                    x-text="item.isEditing ? 'Save' : 'Edit'"></button>
                                                 <button class="btn px-5 py-2 text-sm font-semibold"
                                                     :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'"
                                                     @click="approveHistoryEntry(item, 0)">
@@ -488,25 +576,36 @@
 
                     <div class="border-t border-gray-200/50 dark:border-gray-700/50 pt-8">
                         <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Recent Activity Log</h3>
-                            <button class="btn btn-ghost text-xs" @click="fetchAuditLogs()">
-                                Refresh Logs
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Knowledge Base Insights
+                            </h3>
+                            <button class="btn btn-ghost text-xs" @click="fetchKbStats()">
+                                Refresh
                             </button>
                         </div>
-                        <div
-                            class="max-h-60 overflow-y-auto bg-black/5 dark:bg-white/5 rounded-lg p-2 custom-scrollbar">
-                            <template x-if="auditLogs.length === 0">
-                                <p class="text-center opacity-50 p-4 text-sm">No recent activity.</p>
-                            </template>
-                            <template x-for="log in auditLogs" :key="log.id">
-                                <div class="p-3 border-b border-gray-200/10 last:border-0 text-sm">
-                                    <div class="flex justify-between font-medium text-sky-500 mb-1">
-                                        <span x-text="log.action"></span>
-                                        <span x-text="new Date(log.created_at).toLocaleString()"
-                                            class="text-gray-500 dark:text-gray-400 font-normal"></span>
+                        <div class="bg-black/5 dark:bg-white/5 rounded-lg p-4">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="text-center p-2 rounded bg-white/5 border border-white/10">
+                                    <div class="text-2xl font-bold text-sky-500" x-text="kbStats.total_entries">0</div>
+                                    <div class="text-[10px] uppercase text-gray-500 font-bold">Total Entries</div>
+                                </div>
+                                <div class="text-center p-2 rounded bg-white/5 border border-white/10">
+                                    <div class="text-xs font-mono text-gray-400 mt-2"
+                                        x-text="kbStats.last_updated ? new Date(kbStats.last_updated).toLocaleDateString() : 'Never'">
                                     </div>
-                                    <div class="opacity-70">
-                                        <span x-text="log.details || 'No details provided.'"></span>
+                                    <div class="text-[10px] uppercase text-gray-500 font-bold mt-1">Last Updated</div>
+                                </div>
+                            </div>
+
+                            <template x-if="kbStats.category_breakdown && kbStats.category_breakdown.length > 0">
+                                <div>
+                                    <h4 class="text-[10px] uppercase font-bold text-gray-500 mb-2">Top Categories</h4>
+                                    <div class="space-y-1">
+                                        <template x-for="cat in kbStats.category_breakdown" :key="cat.category">
+                                            <div class="flex justify-between items-center text-xs">
+                                                <span class="text-gray-400" x-text="cat.category"></span>
+                                                <span class="font-mono text-sky-400" x-text="cat.count"></span>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
                             </template>
@@ -528,42 +627,7 @@
                             </button>
                         </div>
 
-                        <!-- Usage Statistics -->
-                        <div>
-                            <h4 class="text-sm font-bold uppercase tracking-widest text-indigo-500 mb-4">Usage Stats
-                            </h4>
-                            <div class="grid grid-cols-4 gap-2">
-                                <div
-                                    class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-3 text-center">
-                                    <div class="text-2xl font-bold text-gray-900 dark:text-white"
-                                        x-text="history.length"></div>
-                                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wide mt-1">Total
-                                        Gen</div>
-                                </div>
-                                <div
-                                    class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-3 text-center">
-                                    <div class="text-2xl font-bold text-emerald-500"
-                                        x-text="history.length > 0 ? Math.round((history.filter(h => h.approved).length / history.length) * 100) + '%' : '0%'">
-                                    </div>
-                                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wide mt-1">
-                                        Success Rate</div>
-                                </div>
-                                <div
-                                    class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-3 text-center">
-                                    <div class="text-xl font-bold text-sky-500 whitespace-nowrap overflow-hidden text-ellipsis"
-                                        x-text="preferredModel"></div>
-                                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wide mt-1">Top
-                                        Model</div>
-                                </div>
-                                <div
-                                    class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-3 text-center">
-                                    <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"
-                                        x-text="avgLatency"></div>
-                                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wide mt-1">Avg
-                                        Latency</div>
-                                </div>
-                            </div>
-                        </div>
+
 
                     </div>
                 </div>
@@ -1215,7 +1279,7 @@
 
                                     <!-- Dynamic Import List -->
                                     <div
-                                        class="border border-gray-200/50 dark:border-gray-700/50 rounded-lg overflow-hidden flex flex-col h-40">
+                                        class="border border-gray-200/50 dark:border-gray-700/50 rounded-lg overflow-hidden flex flex-col h-auto max-h-96">
                                         <div
                                             class="bg-gray-50 dark:bg-white/5 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 items-center flex justify-between">
                                             <span>Detected in Ollama</span>
@@ -1302,55 +1366,7 @@
                                     </select>
                                 </div>
 
-                                <!-- Keywords (Restored) -->
-                                <div>
-                                    <label class="label-text flex justify-between">
-                                        Keywords
-                                        <button @click="predictKeywords()"
-                                            class="text-sky-500 hover:underline text-xs flex items-center gap-1"
-                                            :disabled="!inputText || isPredictingKeywords">
-                                            <template x-if="isPredictingKeywords">
-                                                <svg class="animate-spin h-3 w-3 text-sky-500"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                        stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor"
-                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                    </path>
-                                                </svg>
-                                            </template>
-                                            <span
-                                                x-text="isPredictingKeywords ? 'Predicting...' : 'Auto-Predict'"></span>
-                                        </button>
-                                    </label>
-                                    <div class="relative">
-                                        <input type="text" x-model="searchKeywords" placeholder="firmware, latency..."
-                                            class="form-input w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700 pr-10">
-                                        <!-- Simple icon or loading state could go here -->
-                                    </div>
-                                    <div class="text-xs text-gray-400 mt-1">Tags to guide the AI's focus.</div>
-                                </div>
 
-                                <div class="space-y-3 pt-2">
-                                    <label
-                                        class="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                                        <input type="checkbox" x-model="showThinking"
-                                            class="rounded text-sky-500 focus:ring-sky-500 w-5 h-5">
-                                        <span class="font-medium">Show Thinking Process</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                                        <input type="checkbox" x-model="enableWebSearch"
-                                            class="rounded text-sky-500 focus:ring-sky-500 w-5 h-5">
-                                        <span class="font-medium">Online Research</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                                        <input type="checkbox" x-model="templateMode"
-                                            class="rounded text-sky-500 focus:ring-sky-500 w-5 h-5">
-                                        <span class="font-medium">Template Mode</span>
-                                    </label>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -1426,34 +1442,7 @@
                             </div>
                         </div>
 
-                        <!-- KB Widget Embedded -->
-                        <div>
-                            <h4 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">Knowledge Base
-                            </h4>
-                            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center gap-2 group relative">
-                                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                        <span
-                                            class="text-sm font-medium cursor-help border-b border-dashed border-gray-400">Memory
-                                            Active</span>
-                                        <!-- Tooltip -->
-                                        <div
-                                            class="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black text-white text-xs rounded hidden group-hover:block z-50 shadow-xl">
-                                            New approved responses will be saved to the Knowledge Base.
-                                        </div>
-                                    </div>
-                                    <span class="info-pill bg-gray-100 dark:bg-gray-800"
-                                        x-text="auditLogs.length + ' Items'"></span>
-                                </div>
-                                <div class="flex gap-2">
-                                    <input type="file" @change="kbFile = $event.target.files[0]"
-                                        class="block w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-colors">
-                                    <button class="btn btn-ghost text-xs" @click="importKB()"
-                                        :disabled="!kbFile">Import</button>
-                                </div>
-                            </div>
-                        </div>
+
 
                     </div>
                 </div>

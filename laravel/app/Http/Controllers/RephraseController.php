@@ -29,22 +29,54 @@ class RephraseController extends Controller
     public function rephrase(Request $request)
     {
         $data = $request->all();
+        $inputLength = strlen($data['text'] ?? '');
         $data['text'] = $this->sanitize($data['text'] ?? '');
         $data['negative_prompt'] = $this->sanitize($data['negative_prompt'] ?? '');
+
+        // 1. Create Log Record
+        $generationLog = \App\Models\ModelGeneration::create([
+            'session_id' => $request->header('X-Session-ID') ?? session()->getId(),
+            'model_id' => $data['model'] ?? 'unknown',
+            'input_text_length' => $inputLength,
+            'temperature' => $data['temperature'] ?? null,
+            'max_tokens' => $data['max_tokens'] ?? null,
+            'kb_count' => $data['kb_count'] ?? null,
+            'web_search_enabled' => $data['web_search_enabled'] ?? false,
+            'template_mode' => $data['template_mode'] ?? false,
+            // 'prompt_tokens' - could assume from input length approx
+        ]);
+
+        $startTime = microtime(true);
 
         // Stream response from Python service
         $response = $this->aiCall()
             ->withOptions(['stream' => true])
             ->post("{$this->inferenceServiceUrl}/rephrase", $data);
 
-        return response()->stream(function () use ($response) {
+        return response()->stream(function () use ($response, $generationLog, $startTime) {
             $body = $response->toPsrResponse()->getBody();
+            $accumulatedOutput = '';
+
             while (!$body->eof()) {
-                echo $body->read(1024);
+                $chunk = $body->read(1024);
+                $accumulatedOutput .= $chunk;
+                echo $chunk;
                 if (ob_get_level() > 0)
                     ob_flush();
                 flush();
             }
+
+            // 2. Update Log on Completion
+            $duration = (microtime(true) - $startTime) * 1000;
+            $outputLength = strlen($accumulatedOutput);
+
+            $generationLog->update([
+                'generation_time_ms' => (int) $duration,
+                'output_text_length' => $outputLength,
+                'completion_tokens' => (int) ($outputLength / 4), // Rough approx
+                'total_tokens' => (int) (($generationLog->input_text_length + $outputLength) / 4)
+            ]);
+
         }, 200, [
             'Content-Type' => 'application/json',
             'Cache-Control' => 'no-cache',
@@ -193,6 +225,54 @@ class RephraseController extends Controller
                 ]);
             }
         }
+    }
+
+    public function getKbStats()
+    {
+        $total = KnowledgeBase::count();
+        $latest = KnowledgeBase::latest()->first();
+
+        $byCategory = KnowledgeBase::whereNotNull('category')
+            ->where('category', '!=', '')
+            ->selectRaw('category, count(*) as count')
+            ->groupBy('category')
+            ->orderBy('count', 'desc')
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'total_entries' => $total,
+            'last_updated' => $latest ? $latest->updated_at : null,
+            'category_breakdown' => $byCategory
+        ]);
+    }
+
+    public function startSession(Request $request)
+    {
+        $validated = $request->validate([
+            'session_id' => 'required|string|max:64',
+            'user_signature' => 'nullable|string|max:255',
+            'theme' => 'nullable|string|max:10'
+        ]);
+
+        $session = \App\Models\UserSession::firstOrCreate(
+            ['session_id' => $validated['session_id']],
+            [
+                'user_signature' => $validated['user_signature'] ?? null,
+                'theme' => $validated['theme'] ?? 'dark',
+                'started_at' => now(),
+            ]
+        );
+
+        // Update if exists (e.g. signature changed)
+        if (!$session->wasRecentlyCreated) {
+            $session->update([
+                'user_signature' => $validated['user_signature'] ?? $session->user_signature,
+                'theme' => $validated['theme'] ?? $session->theme
+            ]);
+        }
+
+        return response()->json(['message' => 'Session tracked', 'id' => $session->id]);
     }
 
     private function triggerRebuild()

@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class UserSession extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'user_id',
         'session_id',
+        'user_signature',
         'started_at',
         'ended_at',
         'total_generations',
@@ -16,7 +19,7 @@ class UserSession extends Model
         'total_edits',
         'total_web_searches',
         'avg_generation_time_ms',
-        'theme',
+        'theme'
     ];
 
     protected $casts = [

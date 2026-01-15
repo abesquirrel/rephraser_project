@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory; // Added this line
 use Illuminate\Database\Eloquent\Model;
 
 class ModelGeneration extends Model
 {
+    use HasFactory; // Added this line
+
     protected $fillable = [
         'session_id',
         'model_id',
-        'model_display_name',
         'input_text_length',
         'output_text_length',
-        'prompt_tokens',
         'completion_tokens',
         'total_tokens',
         'generation_time_ms',

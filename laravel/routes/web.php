@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RephraseController;
 
 // Public routes
 Route::get('/', function () {
@@ -9,8 +10,11 @@ Route::get('/', function () {
 });
 
 // Authentication routes
+// Analytics Routes
+Route::post('/api/session/start', [RephraseController::class, 'startSession']);
+Route::get('/api/kb-stats', [RephraseController::class, 'getKbStats']);
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 // Protected routes
 Route::middleware('auth')->group(function () {
