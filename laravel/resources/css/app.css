@@ -36,10 +36,10 @@ html {
 }
 
 :root {
-    /* Light Mode - Velvet Rosewood */
-    --bg-color: #EBA5A2; /* Soft Coral/Rose for background */
+    /* Light Mode - Velvet Rosewood (Softened) */
+    --bg-color: #FAF7F8; /* Very light warm gray - much easier on eyes */
     --card-bg: #E9BBBE; /* Soft Pink for cards */
-    --card-border: rgba(35, 28, 54, 0.15); /* Deep Purple border with transparency */
+    --card-border: rgba(115, 93, 120, 0.15); /* Mauve border */
     
     /* Accents */
     --accent-primary: #246A73; /* Teal for primary actions */
@@ -53,12 +53,12 @@ html {
     /* Functional */
     --success: #246A73; /* Using teal for success states */
     --info: #735D78; /* Using mauve for info states */
-    --input-bg: #E9BBBE; /* Soft pink for inputs */
+    --input-bg: #FFFFFF; /* Pure white for better input visibility */
     
     --glass-shine: linear-gradient(
         135deg,
-        rgba(233, 187, 190, 0.8),
-        rgba(235, 165, 162, 0.3)
+        rgba(250, 247, 248, 0.9),
+        rgba(233, 187, 190, 0.3)
     );
 }
 
