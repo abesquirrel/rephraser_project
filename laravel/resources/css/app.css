@@ -36,24 +36,25 @@ html {
 }
 
 /* Dark Mode Variables (Only Mode) */
+/* Dark Mode Variables (Tokyo Night Theme) */
 .dark, :root {
-    /* Dark Mode - A bit softer */
-    --bg-color: #121212; /* A soft black */
-    --card-bg: #1e1e1e; /* Dark grey cards */
-    --card-border: rgba(255, 255, 255, 0.1);
+    /* Tokyo Night Core */
+    --bg-color: #1a1b26; /* Tokyo Night Storm/Background */
+    --card-bg: #24283b; /* Tokyo Night Moon/Lighter Background */
+    --card-border: rgba(122, 162, 247, 0.15); /* Tokyo Night Blue with opacity */
     
     /* Accents */
-    --accent-primary: #38bdf8; /* Sky 400 */
-    --accent-secondary: #818cf8; /* Indigo 400 */
+    --accent-primary: #7aa2f7; /* Tokyo Night Blue */
+    --accent-secondary: #bb9af7; /* Tokyo Night Magenta */
     
     /* Text */
-    --text-main: #e8eaed; /* Off-white for easier reading */
-    --text-dim: #9aa0a6; /* A lighter grey */
+    --text-main: #c0caf5; /* Tokyo Night Foreground */
+    --text-dim: #a9b1d6; /* Tokyo Night Terminal Foreground */
     
     /* Functional */
-    --success: #20c997; /* A brighter green */
-    --info: #66d9ef; /* A soft cyan */
-    --input-bg: #2c2c2c; /* A slightly lighter dark grey */
+    --success: #9ece6a; /* Tokyo Night Green */
+    --info: #7dcfff; /* Tokyo Night Cyan */
+    --input-bg: #16161e; /* Tokyo Night Black (Darker for inputs) */
 }
 
 .icon {
@@ -77,12 +78,12 @@ body {
     overflow-x: hidden;
     background-image: radial-gradient(
             circle at 10% 20%,
-            rgba(14, 165, 233, 0.05) 0%,
+            rgba(122, 162, 247, 0.08) 0%,
             transparent 40%
         ),
         radial-gradient(
             circle at 90% 80%,
-            rgba(168, 85, 247, 0.05) 0%,
+            rgba(187, 154, 247, 0.08) 0%,
             transparent 40%
         );
 }
@@ -147,6 +148,7 @@ body {
         var(--accent-secondary)
     );
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 

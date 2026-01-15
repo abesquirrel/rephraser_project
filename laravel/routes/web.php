@@ -16,4 +16,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+
+    // Admin Routes
+    Route::prefix('admin')->group(function () {
+        Route::get('/users', [\App\Http\Controllers\UserAdminController::class, 'index']);
+        Route::put('/users/{user}', [\App\Http\Controllers\UserAdminController::class, 'update']);
+        Route::delete('/users/{user}', [\App\Http\Controllers\UserAdminController::class, 'destroy']);
+    });
 });
