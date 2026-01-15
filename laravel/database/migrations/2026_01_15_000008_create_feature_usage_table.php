@@ -10,17 +10,19 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('feature_usage', function (Blueprint $table) {
-            $table->id();
-            $table->string('feature_name', 100);
-            $table->integer('usage_count')->default(1);
-            $table->integer('unique_sessions')->default(1);
-            $table->date('date');
-            $table->timestamps();
+        if (!Schema::hasTable('feature_usage')) {
+            Schema::create('feature_usage', function (Blueprint $table) {
+                $table->id();
+                $table->string('feature_name', 100);
+                $table->integer('usage_count')->default(1);
+                $table->integer('unique_sessions')->default(1);
+                $table->date('date');
+                $table->timestamps();
 
-            $table->unique(['feature_name', 'date']);
-            $table->index('date');
-        });
+                $table->unique(['feature_name', 'date']);
+                $table->index('date');
+            });
+        }
     }
 
     /**
