@@ -33,6 +33,26 @@ class RephraseController extends Controller
         $data['text'] = $this->sanitize($data['text'] ?? '');
         $data['negative_prompt'] = $this->sanitize($data['negative_prompt'] ?? '');
 
+        // --- Dynamic Role Lookup ---
+        $roleName = $data['role'] ?? null;
+
+        if ($roleName) {
+            $roleConfig = \App\Models\PromptRole::where('name', $roleName)->first();
+        } else {
+            $roleConfig = \App\Models\PromptRole::where('is_default', true)->first();
+        }
+
+        // Pass dynamic config if found
+        if ($roleConfig) {
+            $data['role_config'] = [
+                'identity' => $roleConfig->identity,
+                'protocol_override' => $roleConfig->protocol,
+                'format_override' => $roleConfig->format
+            ];
+            // Also pass the name just in case the AI needs it for logging
+            $data['role'] = $roleConfig->name;
+        }
+
         // 1. Create Log Record
         $generationLog = \App\Models\ModelGeneration::create([
             'session_id' => $request->header('X-Session-ID') ?? session()->getId(),
@@ -83,6 +103,58 @@ class RephraseController extends Controller
             'X-Accel-Buffering' => 'no', // Nginx specific
         ]);
     }
+
+    // --- Role Management Logic ---
+
+    public function getRoles()
+    {
+        return response()->json(\App\Models\PromptRole::all());
+    }
+
+    public function saveRole(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => 'nullable|exists:prompt_roles,id',
+            'name' => 'required|string|max:50',
+            'identity' => 'required|string',
+            'protocol' => 'required|string',
+            'format' => 'required|string',
+            'is_default' => 'boolean'
+        ]);
+
+        // Enforce exclusivity for is_default
+        if (!empty($validated['is_default']) && $validated['is_default']) {
+            \App\Models\PromptRole::where('is_default', true)->update(['is_default' => false]);
+        }
+
+        if (isset($validated['id'])) {
+            $role = \App\Models\PromptRole::find($validated['id']);
+            $role->update($validated);
+        } else {
+            $role = \App\Models\PromptRole::create($validated);
+        }
+
+        return response()->json(['status' => 'success', 'role' => $role]);
+    }
+
+    public function deleteRole($id)
+    {
+        $role = \App\Models\PromptRole::find($id);
+        if ($role) {
+            // Protect Tech Support specifically as per requirements
+            if ($role->name === 'Tech Support') {
+                return response()->json(['status' => 'error', 'message' => 'The Tech Support role cannot be deleted.'], 400);
+            }
+            if ($role->is_default) {
+                return response()->json(['status' => 'error', 'message' => 'Cannot delete the default role. Please set another role as default first.'], 400);
+            }
+            $role->delete();
+            return response()->json(['status' => 'success']);
+        }
+        return response()->json(['status' => 'error', 'message' => 'Role not found'], 404);
+    }
+
+    // End Role Logic
 
     public function approve(Request $request)
     {

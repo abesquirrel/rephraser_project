@@ -59,6 +59,13 @@ function rephraserApp() {
         kbFile: null,
         importing: false,
         
+        // Config Tab
+        configTab: 'general',
+        promptRoles: [],
+        currRole: null, 
+        selectedRoleName: '', // Selected role for generation
+
+        
         // Analytics
         sessionId: Alpine.$persist(null).as('rephraser_session_id'),
 
@@ -256,10 +263,87 @@ function rephraserApp() {
                 document.body.style.overflow = val ? 'hidden' : '';
             });
             
-            // Initial fetch of models
+            // Initial fetch of models & Roles
             this.fetchOllamaModels();
-            this.fetchKbStats(); // Fetch stats on load
+            this.fetchKbStats(); 
+            this.fetchRoles();
         },
+        
+        // --- Role Management Methods ---
+        async fetchRoles() {
+            try {
+                const res = await fetch('/api/roles');
+                if(res.ok) {
+                    this.promptRoles = await res.json();
+                    // Auto-select the default role
+                    const def = this.promptRoles.find(r => r.is_default);
+                    if(def && !this.selectedRoleName) {
+                        this.selectedRoleName = def.name;
+                    }
+                }
+            } catch(e) {
+                console.error("Failed to fetch roles", e);
+            }
+        },
+
+        createNewRole() {
+            this.currRole = {
+                id: null,
+                name: 'New Custom Role',
+                identity: 'You are {signature}. Analytical Assistant.',
+                protocol: '### PROTOCOL\n1. Analyze request.\n2. Provide clear response.',
+                format: '{signature} reports:\n\n(Content)',
+                is_default: false
+            };
+        },
+
+        selectRole(role) {
+            // Deep copy to allow editing without immediate state reflection if cancelled (though we are binding directly now for simplicity)
+            this.currRole = { ...role };
+        },
+
+        async saveRole() {
+            if(!this.currRole) return;
+            try {
+                const res = await fetch('/api/roles', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify(this.currRole)
+                });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    this.triggerToast('Role Saved Successfully', 'success');
+                    await this.fetchRoles(); // Refresh list
+                    // Re-select to get updated ID if new
+                    this.currRole = { ...data.role };
+                } else {
+                    this.triggerToast('Error saving role: ' + (data.message || 'Unknown'), 'error');
+                }
+            } catch(e) {
+                this.triggerToast('Network Error saving role', 'error');
+            }
+        },
+
+        async deleteRole(id) {
+            if(!confirm('Are you sure you want to delete this role?')) return;
+            try {
+                const res = await fetch(`/api/roles/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    this.triggerToast('Role Deleted', 'info');
+                    this.currRole = null;
+                    await this.fetchRoles();
+                } else {
+                    this.triggerToast('Error: ' + data.message, 'error');
+                }
+            } catch(e) {
+                this.triggerToast('Network Error deleting role', 'error');
+            }
+        },
+
 
         // Authentication Methods
         async register() {
@@ -522,7 +606,10 @@ function rephraserApp() {
                         temperature: this.temperature,
                         max_tokens: finalTokens,
                         kb_count: this.kbCount,
-                        negative_prompt: this.negativePrompt
+                        max_tokens: finalTokens,
+                        kb_count: this.kbCount,
+                        negative_prompt: this.negativePrompt,
+                        role: this.selectedRoleName // Pass selected role
                     })
                 });
 
