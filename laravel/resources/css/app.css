@@ -36,28 +36,29 @@ html {
 }
 
 :root {
-    /* Light Mode - More subtle and clean */
-    --bg-color: #f8f9fa; /* A very light grey */
-    --card-bg: #ffffff; /* Pure white cards */
-    --card-border: rgba(0, 0, 0, 0.1); /* Softer border */
+    /* Light Mode - Velvet Rosewood */
+    --bg-color: #EBA5A2; /* Soft Coral/Rose for background */
+    --card-bg: #E9BBBE; /* Soft Pink for cards */
+    --card-border: rgba(35, 28, 54, 0.15); /* Deep Purple border with transparency */
     
     /* Accents */
-    --accent-primary: #0ea5e9; /* Sky 500 */
-    --accent-secondary: #6366f1; /* Indigo 500 */
+    --accent-primary: #246A73; /* Teal for primary actions */
+    --accent-primary-btn: #246A73; /* Consistent teal for buttons */
+    --accent-secondary: #735D78; /* Mauve/Purple for secondary elements */
     
     /* Text */
-    --text-main: #212529; /* Darker text for better contrast */
-    --text-dim: #6c757d; /* A muted grey */
+    --text-main: #231C36; /* Deep Purple/Navy for main text */
+    --text-dim: #735D78; /* Mauve for secondary text */
     
     /* Functional */
-    --success: #198754; /* A classic green */
-    --info: #0dcaf0; /* A vibrant cyan */
-    --input-bg: #f8f9fa; /* Consistent with the background */
+    --success: #246A73; /* Using teal for success states */
+    --info: #735D78; /* Using mauve for info states */
+    --input-bg: #E9BBBE; /* Soft pink for inputs */
     
     --glass-shine: linear-gradient(
         135deg,
-        rgba(255, 255, 255, 0.6),
-        rgba(255, 255, 255, 0.1)
+        rgba(233, 187, 190, 0.8),
+        rgba(235, 165, 162, 0.3)
     );
 }
 

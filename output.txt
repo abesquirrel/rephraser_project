@@ -1,0 +1,34 @@
+Note: Unnecessary use of -X or --request, POST is already inferred.
+* Host localhost:5001 was resolved.
+* IPv6: ::1
+* IPv4: 127.0.0.1
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying [::1]:5001...
+* Connected to localhost (::1) port 5001
+> POST /rephrase HTTP/1.1
+> Host: localhost:5001
+> User-Agent: curl/8.7.1
+> Accept: */*
+> Content-Type: application/json
+> X-AI-KEY: default_secret_key
+> Content-Length: 122
+> 
+} [122 bytes data]
+* upload completely sent off: 122 bytes
+< HTTP/1.1 200 OK
+< Server: Werkzeug/3.1.5 Python/3.9.25
+< Date: Wed, 14 Jan 2026 22:38:57 GMT
+< Content-Type: application/json
+< Access-Control-Allow-Origin: *
+< Transfer-Encoding: chunked
+< Connection: close
+< 
+{ [122 bytes data]
+{"status": "Resource Profile: 600 tokens | 3 context hits"}
+{"status": "Checking Knowledge Base (Remote)..."}
+{"status": "Found 3 examples."}
+{"status": "Synthesizing..."}
+100   294    0   172  100   122    851    604 --:--:-- --:--:-- --:--:--  1455100   294    0   172  100   122    142    101  0:00:01  0:00:01 --:--:--   243100   294    0   172  100   122     77     55  0:00:02  0:00:02 --:--:--   132100   294    0   172  100   122     53     37  0:00:03  0:00:03 --:--:--    91100   294    0   172  100   122     40     28  0:00:04  0:00:04 --:--:--    69{"data": "Hello,\n\nObservations:\nIMEI 123456789012345\n\nActions Taken:\nChecked device compatibility for eSIM.\n\nRecommendations:\nProceed with eSIM provisioning.\n\n\nRegards,\nPaul \n", "meta": {"latency": 5.063683271408081, "tokens": 41}}
+100   540    0   418  100   122     82     24  0:00:05  0:00:05 --:--:--    50
+* Closing connection

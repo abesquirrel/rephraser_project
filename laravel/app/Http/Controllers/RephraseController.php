@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Log;
 
 class RephraseController extends Controller
 {
-    protected $aiServiceUrl = 'http://rephraser-ai:5001';
+    protected $embeddingServiceUrl = 'http://rephraser-ai-embedding:5002';
+    protected $inferenceServiceUrl = 'http://rephraser-ai-inference:5001';
 
     private function aiCall()
     {
@@ -34,7 +35,7 @@ class RephraseController extends Controller
         // Stream response from Python service
         $response = $this->aiCall()
             ->withOptions(['stream' => true])
-            ->post("{$this->aiServiceUrl}/rephrase", $data);
+            ->post("{$this->inferenceServiceUrl}/rephrase", $data);
 
         return response()->stream(function () use ($response) {
             $body = $response->toPsrResponse()->getBody();
@@ -103,7 +104,7 @@ class RephraseController extends Controller
     public function suggestKeywords(Request $request)
     {
         $text = $this->sanitize($request->input('text', ''));
-        $response = $this->aiCall()->post("{$this->aiServiceUrl}/suggest_keywords", ['text' => $text]);
+        $response = $this->aiCall()->post("{$this->inferenceServiceUrl}/suggest_keywords", ['text' => $text]);
         return $response->json();
     }
 
@@ -115,7 +116,7 @@ class RephraseController extends Controller
     public function getModels()
     {
         try {
-            $response = $this->aiCall()->get("{$this->aiServiceUrl}/list_models");
+            $response = $this->aiCall()->get("{$this->inferenceServiceUrl}/list_models");
             return $response->json();
         } catch (\Exception $e) {
             Log::error("Failed to fetch models: " . $e->getMessage());
@@ -146,7 +147,14 @@ class RephraseController extends Controller
             }
             fclose($file);
         } elseif ($request->has('original_text')) {
-            KnowledgeBase::create($request->all());
+            $validated = $request->validate([
+                'original_text' => 'required|string',
+                'rephrased_text' => 'required|string',
+                'keywords' => 'nullable|string',
+                'is_template' => 'nullable|boolean',
+                'category' => 'nullable|string',
+            ]);
+            KnowledgeBase::create($validated);
         }
 
         // Notify AI
@@ -190,7 +198,7 @@ class RephraseController extends Controller
     private function triggerRebuild()
     {
         try {
-            $this->aiCall()->post("{$this->aiServiceUrl}/trigger_rebuild");
+            $this->aiCall()->post("{$this->embeddingServiceUrl}/trigger_rebuild");
         } catch (\Exception $e) {
             Log::error("Failed to notify AI service: " . $e->getMessage());
         }
