@@ -35,34 +35,8 @@ html {
     font-size: 12px; /* Enhanced Global Zoom Out (~75%) */
 }
 
-:root {
-    /* Light Mode - Velvet Rosewood (Softened) */
-    --bg-color: #FAF7F8; /* Very light warm gray - much easier on eyes */
-    --card-bg: #E9BBBE; /* Soft Pink for cards */
-    --card-border: rgba(115, 93, 120, 0.15); /* Mauve border */
-    
-    /* Accents */
-    --accent-primary: #246A73; /* Teal for primary actions */
-    --accent-primary-btn: #246A73; /* Consistent teal for buttons */
-    --accent-secondary: #735D78; /* Mauve/Purple for secondary elements */
-    
-    /* Text */
-    --text-main: #231C36; /* Deep Purple/Navy for main text */
-    --text-dim: #735D78; /* Mauve for secondary text */
-    
-    /* Functional */
-    --success: #246A73; /* Using teal for success states */
-    --info: #735D78; /* Using mauve for info states */
-    --input-bg: #FFFFFF; /* Pure white for better input visibility */
-    
-    --glass-shine: linear-gradient(
-        135deg,
-        rgba(250, 247, 248, 0.9),
-        rgba(233, 187, 190, 0.3)
-    );
-}
-
-.dark {
+/* Dark Mode Variables (Only Mode) */
+.dark, :root {
     /* Dark Mode - A bit softer */
     --bg-color: #121212; /* A soft black */
     --card-bg: #1e1e1e; /* Dark grey cards */

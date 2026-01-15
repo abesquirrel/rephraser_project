@@ -38,11 +38,14 @@ function rephraserApp() {
         negativePrompt: Alpine.$persist('').as('rephraser_negative_prompt'),
         modelSettings: Alpine.$persist({}).as('rephraser_model_settings'),
         
-        // Theme
-        theme: Alpine.$persist('dark').as('rephraser_theme'),
-        showGuide: false,
+        // Authentication
+        currentUser: null,
+        showLogin: false,
+        showRegister: false,
+        loginForm: { login: '', password: '' },
+        registerForm: { name: '', username: '', email: '', password: '' },
         
-        theme: Alpine.$persist('dark').as('rephraser_theme'),
+        // UI State
         showGuide: false,
         
         toast: { active: false, msg: '', type: 'info' },
@@ -141,10 +144,11 @@ function rephraserApp() {
             // Load settings for initial model
             this.syncModelSettings();
 
-            // apply theme on init
-            this.applyTheme();
+            // Set dark mode by default (no toggle)
+            document.documentElement.classList.add('dark');
 
-            // Watch for model changes
+            // Check if user is authenticated
+            this.checkAuth();
             this.$watch('modelA', () => {
                 if (!this.modelA) return;
                 this.syncModelSettings();
@@ -155,13 +159,8 @@ function rephraserApp() {
             this.$watch('topP', (val) => this.saveModelSetting('topP', val));
             this.$watch('frequencyPenalty', (val) => this.saveModelSetting('frequencyPenalty', val));
             this.$watch('presencePenalty', (val) => this.saveModelSetting('presencePenalty', val));
-            
-            // Logic: Template Mode disables Web Search
-            this.$watch('templateMode', (val) => {
-                if (val) this.enableWebSearch = false;
-            });
-            
-            this.$watch('theme', () => this.applyTheme());
+
+            // Template Mode disables Web Search
 
             // Scroll Lock for Modal
             this.$watch('showConfigModal', (val) => {
@@ -173,6 +172,94 @@ function rephraserApp() {
             
             // Initial fetch of models
             this.fetchOllamaModels();
+        },
+
+        // Authentication Methods
+        async register() {
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(this.registerForm)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    this.currentUser = data.user;
+                    this.signature = data.user.signature; // Auto-set signature from username
+                    this.showRegister = false;
+                    this.triggerToast('Account created successfully!', 'success');
+                    this.registerForm = { name: '', username: '', email: '', password: '' };
+                } else {
+                    const errors = Object.values(data.errors || {}).flat().join(', ');
+                    this.triggerToast(errors || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                this.triggerToast('Registration error: ' + error.message, 'error');
+            }
+        },
+
+        async login() {
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(this.loginForm)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    this.currentUser = data.user;
+                    this.signature = data.user.signature; // Sync signature
+                    this.showLogin = false;
+                    this.triggerToast('Welcome back, ' + data.user.name + '!', 'success');
+                    this.loginForm = { login: '', password: '' };
+                } else {
+                    this.triggerToast(data.errors?.login?.[0] || 'Login failed', 'error');
+                }
+            } catch (error) {
+                this.triggerToast('Login error: ' + error.message, 'error');
+            }
+        },
+
+        async logout() {
+            try {
+                await fetch('/logout', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+
+                this.currentUser = null;
+                this.triggerToast('Logged out successfully', 'info');
+            } catch (error) {
+                this.triggerToast('Logout error: ' + error.message, 'error');
+            }
+        },
+
+        async checkAuth() {
+            try {
+                const response = await fetch('/user');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.currentUser = data.user;
+                    if (data.user.signature) {
+                        this.signature = data.user.signature;
+                    }
+                }
+            } catch (error) {
+                // User not authenticated, that's fine
+                this.currentUser = null;
+            }
         },
 
         // Dynamic Model Descriptions
@@ -218,32 +305,7 @@ function rephraserApp() {
              return name.replace(':latest', '').replace(':8b-instruct-q3_K_M', '');
         },
 
-        toggleTheme() {
-            this.theme = this.theme === 'light' ? 'dark' : 'light';
-        },
 
-        applyTheme() {
-            if (this.theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                // You might need to update CSS variables here if using raw CSS vars
-                // But generally class='dark' on html/body is enough if CSS supports it.
-                // Assuming we are swapping root vars or usage of 'dark:' classes
-                document.documentElement.style.setProperty('--bg-color', '#111827');
-                document.documentElement.style.setProperty('--card-bg', 'rgba(31, 41, 55, 0.7)');
-                document.documentElement.style.setProperty('--input-bg', 'rgba(17, 24, 39, 0.6)'); // Dark input bg
-                document.documentElement.style.setProperty('--text-main', '#f9fafb');
-                document.documentElement.style.setProperty('--text-dim', '#9ca3af');
-                document.documentElement.style.setProperty('--card-border', 'rgba(255, 255, 255, 0.1)');
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.documentElement.style.setProperty('--bg-color', '#f9fafb');
-                document.documentElement.style.setProperty('--card-bg', 'rgba(255, 255, 255, 0.75)');
-                document.documentElement.style.setProperty('--input-bg', '#ffffff'); // White input bg
-                document.documentElement.style.setProperty('--text-main', '#1f2937');
-                document.documentElement.style.setProperty('--text-dim', '#6b7280');
-                document.documentElement.style.setProperty('--card-border', 'rgba(0, 0, 0, 0.06)');
-            }
-        },
 
         syncModelSettings() {
             const settings = this.modelSettings[this.modelA];

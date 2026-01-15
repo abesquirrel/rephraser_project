@@ -585,6 +585,115 @@
                 </div>
             </div>
 
+            <!-- Login Modal -->
+            <div x-show="showLogin" x-cloak @click.self="showLogin = false"
+                class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                <div @click.stop
+                    class="glass-card p-8 rounded-3xl w-full max-w-md mx-4 border border-white/10 shadow-2xl"
+                    x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100">
+
+                    <h2 class="text-2xl font-bold text-white mb-6">Welcome Back</h2>
+
+                    <form @submit.prevent="login" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Username or Email</label>
+                            <input type="text" x-model="loginForm.login" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="Enter username or email">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                            <input type="password" x-model="loginForm.password" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="Enter password">
+                        </div>
+
+                        <div class="flex gap-3 mt-6">
+                            <button type="submit"
+                                class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-sky-500/50">
+                                Login
+                            </button>
+                            <button type="button" @click="showLogin = false"
+                                class="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="mt-6 text-center text-sm text-gray-400">
+                        Don't have an account?
+                        <button @click="showLogin = false; showRegister = true"
+                            class="text-sky-400 hover:text-sky-300 font-semibold">
+                            Register
+                        </button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Register Modal -->
+            <div x-show="showRegister" x-cloak @click.self="showRegister = false"
+                class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                <div @click.stop
+                    class="glass-card p-8 rounded-3xl w-full max-w-md mx-4 border border-white/10 shadow-2xl"
+                    x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100">
+
+                    <h2 class="text-2xl font-bold text-white mb-6">Create Account</h2>
+
+                    <form @submit.prevent="register" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                            <input type="text" x-model="registerForm.name" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="John Doe">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                            <input type="text" x-model="registerForm.username" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="johndoe">
+                            <p class="text-xs text-gray-500 mt-1">Will be used as your default signature</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                            <input type="email" x-model="registerForm.email" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="john@example.com">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                            <input type="password" x-model="registerForm.password" required minlength="8"
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="At least 8 characters">
+                        </div>
+
+                        <div class="flex gap-3 mt-6">
+                            <button type="submit"
+                                class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-emerald-500/50">
+                                Register
+                            </button>
+                            <button type="button" @click="showRegister = false"
+                                class="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="mt-6 text-center text-sm text-gray-400">
+                        Already have an account?
+                        <button @click="showRegister = false; showLogin = true"
+                            class="text-sky-400 hover:text-sky-300 font-semibold">
+                            Login
+                        </button>
+                    </p>
+                </div>
+            </div>
+
             <!-- Toast Notifications -->
             <div x-show="toast.active" x-cloak x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 -translate-y-4 scale-95"
