@@ -15,7 +15,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      ai:
+      ai-inference:
         condition: service_healthy
     environment:
       - DB_CONNECTION=mysql
@@ -48,25 +48,62 @@ services:
     networks:
       - rephraser-network
 
-  # --- AI Service (Python) ---
-  ai:
+  # --- AI Embedding Service (Vector DB) ---
+  ai-embedding:
     build:
-      context: ./ai-service
-    image: rephraser-ai
-    container_name: rephraser-ai
+      context: ./ai-service-embedding
+    image: rephraser-ai-embedding
+    container_name: rephraser-ai-embedding
     restart: unless-stopped
     ports:
-      - "5001:5001"
+      - "5002:5002"
     volumes:
-      - ./ai-service:/app
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - ./ai-service-embedding:/app
     environment:
       - DB_HOST=db
       - DB_USER=rephraser
       - DB_PASSWORD=secret
       - DB_NAME=rephraser_db
       - AI_SERVICE_KEY=${AI_SERVICE_KEY:-default_secret_key}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python3",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:5002/health')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+    networks:
+      - rephraser-network
+
+  # --- AI Inference Service (Logic/Ollama) ---
+  ai-inference:
+    build:
+      context: ./ai-service-inference
+    image: rephraser-ai-inference
+    container_name: rephraser-ai-inference
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./ai-service-inference:/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - AI_EMBEDDING_HOST=ai-embedding
+      - AI_SERVICE_KEY=${AI_SERVICE_KEY:-default_secret_key}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-gemma2:9b}
     healthcheck:
       test:
         [
@@ -80,12 +117,11 @@ services:
       retries: 5
       start_period: 20s
     depends_on:
-      db:
-        condition: service_healthy
+      - ai-embedding
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 1G
     networks:
       - rephraser-network
 

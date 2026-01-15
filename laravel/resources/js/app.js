@@ -22,6 +22,7 @@ function rephraserApp() {
         activeTab: 'generator', // generator, history, audit
         thinkingLines: [],
         isRefreshingModels: false,
+        isRefreshingArchive: false,
         history: Alpine.$persist([]).as('rephraser_log_v3'),
         allExpanded: false,
         showThinking: Alpine.$persist(true).as('rephraser_show_thinking'),
@@ -116,6 +117,11 @@ function rephraserApp() {
             return (avg / 1000).toFixed(1) + 's';
         },
 
+        // Helper to format model name display
+        formatModelName(name) {
+             return name.replace(':latest', '').replace(':8b-instruct-q3_K_M', '');
+        },
+
         init() {
             // Ensure data types are correct (safety check for persist)
             if (!Array.isArray(this.history)) this.history = [];
@@ -156,7 +162,7 @@ function rephraserApp() {
             });
             
             this.$watch('theme', () => this.applyTheme());
-            
+
             // Scroll Lock for Modal
             this.$watch('showConfigModal', (val) => {
                 document.body.style.overflow = val ? 'hidden' : '';
@@ -167,6 +173,49 @@ function rephraserApp() {
             
             // Initial fetch of models
             this.fetchOllamaModels();
+        },
+
+        // Dynamic Model Descriptions
+        modelDescriptions: {
+            'llama3': 'A versatile and robust model by Meta, excellent for general instruction following and logic.',
+            'gemma2': 'Google\'s lightweight yet powerful open model, great for creative writing and reasoning.',
+            'mistral': 'Efficient and high-performance model, strong at coding and concise answers.',
+            'qwen': 'Strong coding and math capabilities, very precise.',
+            'default': 'A capable large language model suited for this task.'
+        },
+
+        getModelDescription(modelName) {
+            const name = modelName.toLowerCase();
+            if (name.includes('llama')) return this.modelDescriptions['llama3'];
+            if (name.includes('gemma')) return this.modelDescriptions['gemma2'];
+            if (name.includes('mistral')) return this.modelDescriptions['mistral'];
+            if (name.includes('qwen')) return this.modelDescriptions['qwen'];
+            return this.modelDescriptions['default'];
+        },
+
+        get modelStats() {
+            // Group History by Model
+            const stats = {};
+            
+            // 1. Calculate Approvals per Model
+            this.history.forEach(item => {
+                if (item.approved && item.modelA_name) {
+                    const model = item.modelA_name; // Full name
+                    if (!stats[model]) stats[model] = 0;
+                    stats[model]++;
+                }
+            });
+
+            // 2. Format as Array for Display
+            // Sort by count desc
+            return Object.entries(stats)
+                .map(([name, count]) => ({ name, count }))
+                .sort((a, b) => b.count - a.count);
+        },
+
+        // Helper to format model name display
+        formatModelName(name) {
+             return name.replace(':latest', '').replace(':8b-instruct-q3_K_M', '');
         },
 
         toggleTheme() {
@@ -468,6 +517,15 @@ function rephraserApp() {
             setTimeout(() => this.generateRephrase(), 400);
         },
 
+        refreshArchive() {
+            this.isRefreshingArchive = true;
+            this.history = [...this.history];
+            setTimeout(() => {
+                this.isRefreshingArchive = false;
+                this.triggerToast('Archive Refreshed');
+            }, 800);
+        },
+
         // This is the new approve method for the main generator output
         async approveEntry() {
             const content = this.rephrasedContent;
@@ -477,6 +535,11 @@ function rephraserApp() {
             }
 
             this.isGenerating = true; // Use isGenerating as a general processing indicator
+            
+            // Fix: Define latest to avoid ReferenceError
+            // Use itemToView if we are in the modal (viewing/editing context), otherwise default to the latest history item
+            const latest = (this.viewModal && this.itemToView) ? this.itemToView : this.history[0];
+            
             try {
                 const res = await fetch('/api/approve', {
                     method: 'POST',
