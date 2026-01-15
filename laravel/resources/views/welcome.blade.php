@@ -36,15 +36,18 @@
 
         <!-- Header -->
         <header class="header animate-fade mb-4 flex flex-col md:flex-row justify-between items-center gap-4 px-2">
-            <div class="text-left">
-                <h1
-                    class="text-2xl font-bold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
-                    Masha: The Rephraser
-                </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    The lazy cat with the best ideas.
-                </p>
-            </div>
+        <div class="text-left">
+            <h1
+                class="text-2xl font-bold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
+                Masha: The Rephraser
+            </h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                The lazy cat with the best ideas.<br>
+                <i>
+                    In training — furballs may occur.
+                </i>
+            </p>
+        </div>
 
             <div class="flex items-center gap-4">
 
@@ -957,7 +960,8 @@
                                     </div>
                                 </div>
                                 <p class="mt-4 text-xs bg-sky-500/10 text-sky-400 p-2 rounded inline-block">
-                                    <strong>Tip:</strong> Create custom roles in the Configuration menu!</p>
+                                    <strong>Tip:</strong> Create custom roles in the Configuration menu!
+                                </p>
                             </div>
                         </section>
 
