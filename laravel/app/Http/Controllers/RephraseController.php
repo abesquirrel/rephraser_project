@@ -275,6 +275,28 @@ class RephraseController extends Controller
         return response()->json(['message' => 'Session tracked', 'id' => $session->id]);
     }
 
+    public function logAction(Request $request)
+    {
+        $validated = $request->validate([
+            'session_id' => 'required|string',
+            'action_type' => 'required|string',
+            'action_details' => 'nullable|array'
+        ]);
+
+        try {
+            \App\Models\UserAction::create([
+                'session_id' => $validated['session_id'],
+                'action_type' => $validated['action_type'],
+                'action_details' => $validated['action_details']
+            ]);
+
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            \Log::error('Failed to log action: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
     private function triggerRebuild()
     {
         try {

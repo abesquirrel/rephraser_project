@@ -62,6 +62,41 @@ function rephraserApp() {
         // Analytics
         sessionId: Alpine.$persist(null).as('rephraser_session_id'),
 
+        async logAction(actionType, details = {}) {
+            if (!this.sessionId) return;
+            try {
+                await fetch('/api/log-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: this.sessionId,
+                        action_type: actionType,
+                        action_details: details
+                    })
+                });
+            } catch (e) {
+                console.error("Failed to log action:", e);
+            }
+        },
+
+        async regenerateResponse(item) {
+            // 1. Log negative feedback
+            await this.logAction('regenerate_negative', {
+                original_text: item.original,
+                previous_response: item.rephrased,
+                model: item.modelA
+            });
+
+            // 2. Set input and regenerate
+            this.inputText = item.original;
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Trigger generation
+            this.generateRephrase();
+        },
+
         async startTracking() {
              if (!this.sessionId) {
                  this.sessionId = crypto.randomUUID();

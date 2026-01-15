@@ -272,6 +272,11 @@
                                                     @click="copyText(item.rephrased)">Copy</button>
                                                 <button class="btn btn-ghost px-4 py-2 text-sm" @click="toggleEdit(0)"
                                                     x-text="item.isEditing ? 'Save' : 'Edit'"></button>
+                                                <button
+                                                    class="btn btn-ghost px-4 py-2 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                    @click="regenerateResponse(item)" :disabled="isGenerating">
+                                                    Regenerate
+                                                </button>
                                                 <button class="btn px-5 py-2 text-sm font-semibold"
                                                     :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'"
                                                     @click="approveHistoryEntry(item, 0)">
