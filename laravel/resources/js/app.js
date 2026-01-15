@@ -5,7 +5,7 @@ function rephraserApp() {
         inputText: '',
         rephrasedContent: '',
         status: '',
-        signature: Alpine.$persist('Paul').as('rephraser_sig'), // Kept persist for signature
+        signature: Alpine.$persist('Masha').as('rephraser_sig'), // Kept persist for signature
         enableWebSearch: true,
         templateMode: false,
         searchKeywords: '',

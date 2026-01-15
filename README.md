@@ -1,4 +1,4 @@
-# Rephraser AI Project
+# Masha: The Rephraser AI
 
 A professional, microservice-based application for knowledge-aware text rephrasing interactions. This system leverages local LLMs (via Ollama) and a RAG (Retrieval-Augmented Generation) pipeline to provide consistent, high-quality responses based on your own historical data. It now features **Fact Checking** capability via live web search and a **Template Mode** for rigid structure adherence.
 
