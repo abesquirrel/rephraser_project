@@ -137,51 +137,94 @@ def web_search_tool(query):
         return "\\n\\n".join(combined_results[:5])
     return "No relevant information found online."
 
-def build_structured_prompt(original_text, examples, web_context=None, signature="Paul", direct_instruction=None, negative_prompt=None, template_mode=False):
-    # Base Format - STRICT PLAIN TEXT
-    response_format = (
-        "Hello,\n\n"
-        "Observations:\n"
-        "(List facts and Literal IDs from notes here)\n\n"
-        "Actions Taken:\n"
-        "...\n"
-        "Recommendations:\n"
-        "...\n\n"
-        "Regards,\n"
-        "{signature}"
-    )
+def build_structured_prompt(original_text, examples, web_context=None, signature="Paul", direct_instruction=None, negative_prompt=None, template_mode=False, role="tech_support", role_config=None):
+    """
+    Constructs the system and user messages for the LLM.
+    Supports expandable 'roles' for future scalability.
+    """
     
+    # --- ROLE DEFINITIONS ---
+    # Scalability: Add new roles here in the future
+    prompts = {
+        "tech_support": {
+            "identity": f"You are {signature}. Technical Support Specialist.",
+            "protocol": (
+                "### PROTOCOL\n"
+                "1. **Audience**: You are writing to a colleague or customer requiring detailed technical context.\n"
+                "2. **Analyze**: Identify the core issue, actions taken, and next steps.\n"
+                "3. **Format**: STICK STRICTLY to the required section headers.\n"
+            ),
+            "format": (
+                "Hello,\n\n"
+                "Observations: (Details of the issue observed, potential problems, and diagnosis)\n\n"
+                "Actions taken: (Active actions performed to fix/correct/improve. Leave empty if none)\n\n"
+                "Recommendations: (Suggestions for the customer, preventive measures, or expected customer actions)\n\n"
+                "Regards,\n"
+                "{signature}"
+            )
+        },
+        "customer_support": {
+            "identity": f"You are {signature}. Customer Support Representative.",
+            "protocol": (
+                "### PROTOCOL\n"
+                "1. **Audience**: You are writing to an END USER. Be polite, empathetic, and clear.\n"
+                "2. **Focus**: Reassure the customer and explain things simply.\n"
+                "3. **Format**: Standard professional letter format.\n"
+            ),
+            "format": (
+                "Hello,\n\n"
+                "(Rephrased content politely explaining the situation and resolution)\n\n"
+                "Regards,\n"
+                "{signature}"
+            )
+        },
+        "general": {
+            "identity": f"You are {signature}. AI Assistant.",
+            "protocol": (
+                "### PROTOCOL\n"
+                "1. **Audience**: General audience.\n"
+                "2. **Goal**: Rephrase the text clearly and professionally.\n"
+            ),
+            "format": (
+                "{signature} says:\n\n"
+                "(Rephrased content here)\n"
+            )
+        }
+    }
+    
+    # Select Role
+    current_role = prompts.get(role, prompts.get("tech_support"))
+    
+    # Override if dynamic config provided
+    if role_config:
+        current_role = {
+            "identity": role_config.get('identity', current_role['identity']).replace('{signature}', signature),
+            "protocol": role_config.get('protocol_override', current_role['protocol']),
+            "format": role_config.get('format_override', current_role['format'])
+        }
+    
+    # --- BUILD SYSTEM PROMPT ---
+    system = f"{current_role['identity']} PLAIN TEXT ONLY.\n\n"
+    system += current_role['protocol'] + "\n"
+
     shared_constraints = (
         "### FORMATTING CONSTRAINTS (CRITICAL)\n"
-        "1. **NO MARKDOWN**: Do not use bold (**), italics (*), headers (###), or lists (-). Write in clean, plain paragraphs.\n"
+        "1. **NO MARKDOWN**: Do not use bold (**), italics (*), headers (###), or lists (-). Write in clean, plain paragraphs within the sections.\n"
         "2. **NO PREAMBLE**: Do not say 'Here is the response'. Start directly with 'Hello,'.\n"
-        "3. **PROFESSIONAL TONE**: Concise, polite, support-oriented.\n\n"
+        "3. **PROFESSIONAL TONE**: Concise, polite, support-oriented.\n"
+        "4. **PRESERVE IDs**: Keep all IMEI, MSISDN, and specific error codes exactly as they appear.\n\n"
     )
     
-    # --- MODE 1: WEB SEARCH / FACT CHECKING ---
+    # --- MODE ADJUSTMENTS ---
     if web_context:
-        system = f"You are {signature}. VALIDATE user notes against Web Context. PRODUCE PLAIN TEXT only.\n\n"
-        system += "### PROTOCOL: FACT CHECK & ENRICH\n"
-        system += "1. **Keywords**: Use the 'Web Search Context' to verify the claims in the 'Notes'.\n"
-        system += "2. **Correction**: If the notes contradict the web context (e.g., wrong compatibility), politely correct the information in the 'Recommendations'.\n"
-        system += "3. **Enrichment**: Add relevant technical details from the web context if they help the customer.\n"
-        system += "4. **IDs**: Preserve all IMEI/MSISDN numbers exactly.\n\n"
-        
-    # --- MODE 2: TEMPLATE ADAPTER ---
+        system += "### MODE: WEB VERIFICATION\n"
+        system += "Use 'Web Search Context' to valid claims in 'Notes'. Correct any technical inaccuracies in the 'Recommendations' section.\n\n"
     elif template_mode:
-        system = f"You are {signature}. Template Adapter. PLAIN TEXT only.\n\n"
-        system += "### PROTOCOL: STRUCTURE MAPPING\n"
-        system += "1. **Structure**: Follow the 'Reference Examples' structure exactly.\n"
-        system += "2. **Content**: Inject 'Notes' data into the template.\n"
-        system += "3. **No Styling**: Remove any markdown from the template if present.\n\n"
-
-    # --- MODE 3: STANDARD REPHRASER ---
+        system += "### MODE: TEMPLATE ADAPTER\n"
+        system += "Use 'Reference Examples' as the structural guide, but inject the 'Notes' content into it.\n\n"
     else:
-        system = f"You are {signature}. Rephraser. PLAIN TEXT only.\n\n"
-        system += "### PROTOCOL: REPHRASE & FIX\n"
-        system += "1. **Grammar**: Fix typos/sentence structure.\n"
-        system += "2. **Clarity**: Concise, easy to read. Remove redundancy.\n"
-        system += "3. **Genericize**: If specific IDs are missing, use generic terms (e.g., 'the device').\n\n"
+        system += "### MODE: REPHRASE\n"
+        system += "Standard rephrasing mode. Focus on clarity and grammar.\n\n"
 
     # --- SHARED INSTRUCTIONS ---
     system += shared_constraints
@@ -194,12 +237,16 @@ def build_structured_prompt(original_text, examples, web_context=None, signature
         system += f"### STYLE EXCLUSIONS (NEGATIVE PROMPT)\n"
         system += f"You MUST AVOID: {negative_prompt}\n\n"
     
-    system += f"### RESPONSE FORMAT\n{response_format}\n\n"
+    # --- FINAL FORMATTING ---
+    system += f"### REQUIRED OUTPUT FORMAT\n"
+    system += "You must follow this structure exactly:\n"
+    system += current_role['format'].format(signature=signature) + "\n\n"
     
-    # Final enforcement of start
     system += "CRITICAL: The output must start exactly with 'Hello,'."
     
+    # --- BUILD USER CONTENT ---
     user = f"Notes (SOURCE DATA):\n{original_text}\n\n"
+    
     if web_context:
         user += f"Web Search Context (FACT CHECKING SOURCE):\n{web_context}\n\n"
     if examples:
@@ -284,6 +331,8 @@ def handle_rephrase():
     target_model = data.get('model', None) 
     negative_prompt = data.get('negative_prompt', None)
     
+    role_config = data.get('role_config', None)
+    
     logger.info(f"DEBUG: Input Text: '{input_text}'")
     
     temperature = max(0.0, min(1.0, float(data.get('temperature', 0.5))))
@@ -340,7 +389,17 @@ def handle_rephrase():
         if examples_list:
             logger.info(f"First Example Preview: {str(examples_list[0])[:100]}...")
 
-        messages = build_structured_prompt(input_text, formatted_examples, web_context, signature, direct_instruction, negative_prompt, template_mode)
+        messages = build_structured_prompt(
+            input_text, 
+            formatted_examples, 
+            web_context, 
+            signature, 
+            direct_instruction, 
+            negative_prompt, 
+            template_mode,
+            role=data.get('role', 'tech_support'),
+            role_config=role_config
+        )
 
         l_start = time.time()
         response = call_llm(messages, temperature=temperature, max_tokens=max_tokens, model=target_model)

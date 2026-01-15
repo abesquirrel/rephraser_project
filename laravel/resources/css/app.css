@@ -35,51 +35,26 @@ html {
     font-size: 12px; /* Enhanced Global Zoom Out (~75%) */
 }
 
-:root {
-    /* Light Mode - Velvet Rosewood */
-    --bg-color: #EBA5A2; /* Soft Coral/Rose for background */
-    --card-bg: #E9BBBE; /* Soft Pink for cards */
-    --card-border: rgba(35, 28, 54, 0.15); /* Deep Purple border with transparency */
+/* Dark Mode Variables (Only Mode) */
+/* Dark Mode Variables (Tokyo Night Theme) */
+.dark, :root {
+    /* Tokyo Night Core */
+    --bg-color: #1a1b26; /* Tokyo Night Storm/Background */
+    --card-bg: #24283b; /* Tokyo Night Moon/Lighter Background */
+    --card-border: rgba(122, 162, 247, 0.15); /* Tokyo Night Blue with opacity */
     
     /* Accents */
-    --accent-primary: #246A73; /* Teal for primary actions */
-    --accent-primary-btn: #246A73; /* Consistent teal for buttons */
-    --accent-secondary: #735D78; /* Mauve/Purple for secondary elements */
+    --accent-primary: #7aa2f7; /* Tokyo Night Blue */
+    --accent-secondary: #bb9af7; /* Tokyo Night Magenta */
     
     /* Text */
-    --text-main: #231C36; /* Deep Purple/Navy for main text */
-    --text-dim: #735D78; /* Mauve for secondary text */
+    --text-main: #c0caf5; /* Tokyo Night Foreground */
+    --text-dim: #a9b1d6; /* Tokyo Night Terminal Foreground */
     
     /* Functional */
-    --success: #246A73; /* Using teal for success states */
-    --info: #735D78; /* Using mauve for info states */
-    --input-bg: #E9BBBE; /* Soft pink for inputs */
-    
-    --glass-shine: linear-gradient(
-        135deg,
-        rgba(233, 187, 190, 0.8),
-        rgba(235, 165, 162, 0.3)
-    );
-}
-
-.dark {
-    /* Dark Mode - A bit softer */
-    --bg-color: #121212; /* A soft black */
-    --card-bg: #1e1e1e; /* Dark grey cards */
-    --card-border: rgba(255, 255, 255, 0.1);
-    
-    /* Accents */
-    --accent-primary: #38bdf8; /* Sky 400 */
-    --accent-secondary: #818cf8; /* Indigo 400 */
-    
-    /* Text */
-    --text-main: #e8eaed; /* Off-white for easier reading */
-    --text-dim: #9aa0a6; /* A lighter grey */
-    
-    /* Functional */
-    --success: #20c997; /* A brighter green */
-    --info: #66d9ef; /* A soft cyan */
-    --input-bg: #2c2c2c; /* A slightly lighter dark grey */
+    --success: #9ece6a; /* Tokyo Night Green */
+    --info: #7dcfff; /* Tokyo Night Cyan */
+    --input-bg: #16161e; /* Tokyo Night Black (Darker for inputs) */
 }
 
 .icon {
@@ -103,12 +78,12 @@ body {
     overflow-x: hidden;
     background-image: radial-gradient(
             circle at 10% 20%,
-            rgba(14, 165, 233, 0.05) 0%,
+            rgba(122, 162, 247, 0.08) 0%,
             transparent 40%
         ),
         radial-gradient(
             circle at 90% 80%,
-            rgba(168, 85, 247, 0.05) 0%,
+            rgba(187, 154, 247, 0.08) 0%,
             transparent 40%
         );
 }
@@ -173,6 +148,7 @@ body {
         var(--accent-secondary)
     );
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 

@@ -29,28 +29,132 @@ class RephraseController extends Controller
     public function rephrase(Request $request)
     {
         $data = $request->all();
+        $inputLength = strlen($data['text'] ?? '');
         $data['text'] = $this->sanitize($data['text'] ?? '');
         $data['negative_prompt'] = $this->sanitize($data['negative_prompt'] ?? '');
+
+        // --- Dynamic Role Lookup ---
+        $roleName = $data['role'] ?? null;
+
+        if ($roleName) {
+            $roleConfig = \App\Models\PromptRole::where('name', $roleName)->first();
+        } else {
+            $roleConfig = \App\Models\PromptRole::where('is_default', true)->first();
+        }
+
+        // Pass dynamic config if found
+        if ($roleConfig) {
+            $data['role_config'] = [
+                'identity' => $roleConfig->identity,
+                'protocol_override' => $roleConfig->protocol,
+                'format_override' => $roleConfig->format
+            ];
+            // Also pass the name just in case the AI needs it for logging
+            $data['role'] = $roleConfig->name;
+        }
+
+        // 1. Create Log Record
+        $generationLog = \App\Models\ModelGeneration::create([
+            'session_id' => $request->header('X-Session-ID') ?? session()->getId(),
+            'model_id' => $data['model'] ?? 'unknown',
+            'input_text_length' => $inputLength,
+            'temperature' => $data['temperature'] ?? null,
+            'max_tokens' => $data['max_tokens'] ?? null,
+            'kb_count' => $data['kb_count'] ?? null,
+            'web_search_enabled' => $data['web_search_enabled'] ?? false,
+            'template_mode' => $data['template_mode'] ?? false,
+            // 'prompt_tokens' - could assume from input length approx
+        ]);
+
+        $startTime = microtime(true);
 
         // Stream response from Python service
         $response = $this->aiCall()
             ->withOptions(['stream' => true])
             ->post("{$this->inferenceServiceUrl}/rephrase", $data);
 
-        return response()->stream(function () use ($response) {
+        return response()->stream(function () use ($response, $generationLog, $startTime) {
             $body = $response->toPsrResponse()->getBody();
+            $accumulatedOutput = '';
+
             while (!$body->eof()) {
-                echo $body->read(1024);
+                $chunk = $body->read(1024);
+                $accumulatedOutput .= $chunk;
+                echo $chunk;
                 if (ob_get_level() > 0)
                     ob_flush();
                 flush();
             }
+
+            // 2. Update Log on Completion
+            $duration = (microtime(true) - $startTime) * 1000;
+            $outputLength = strlen($accumulatedOutput);
+
+            $generationLog->update([
+                'generation_time_ms' => (int) $duration,
+                'output_text_length' => $outputLength,
+                'completion_tokens' => (int) ($outputLength / 4), // Rough approx
+                'total_tokens' => (int) (($generationLog->input_text_length + $outputLength) / 4)
+            ]);
+
         }, 200, [
             'Content-Type' => 'application/json',
             'Cache-Control' => 'no-cache',
             'X-Accel-Buffering' => 'no', // Nginx specific
         ]);
     }
+
+    // --- Role Management Logic ---
+
+    public function getRoles()
+    {
+        return response()->json(\App\Models\PromptRole::all());
+    }
+
+    public function saveRole(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => 'nullable|exists:prompt_roles,id',
+            'name' => 'required|string|max:50',
+            'identity' => 'required|string',
+            'protocol' => 'required|string',
+            'format' => 'required|string',
+            'is_default' => 'boolean'
+        ]);
+
+        // Enforce exclusivity for is_default
+        if (!empty($validated['is_default']) && $validated['is_default']) {
+            \App\Models\PromptRole::where('is_default', true)->update(['is_default' => false]);
+        }
+
+        if (isset($validated['id'])) {
+            $role = \App\Models\PromptRole::find($validated['id']);
+            $role->update($validated);
+        } else {
+            $role = \App\Models\PromptRole::create($validated);
+        }
+
+        return response()->json(['status' => 'success', 'role' => $role]);
+    }
+
+    public function deleteRole($id)
+    {
+        $role = \App\Models\PromptRole::find($id);
+        if ($role) {
+            // Protect Tech Support specifically as per requirements
+            if ($role->name === 'Tech Support') {
+                return response()->json(['status' => 'error', 'message' => 'The Tech Support role cannot be deleted.'], 400);
+            }
+            if ($role->is_default) {
+                return response()->json(['status' => 'error', 'message' => 'Cannot delete the default role. Please set another role as default first.'], 400);
+            }
+            $role->delete();
+            return response()->json(['status' => 'success']);
+        }
+        return response()->json(['status' => 'error', 'message' => 'Role not found'], 404);
+    }
+
+    // End Role Logic
 
     public function approve(Request $request)
     {
@@ -192,6 +296,76 @@ class RephraseController extends Controller
                     'rephrased_content' => $rephrased
                 ]);
             }
+        }
+    }
+
+    public function getKbStats()
+    {
+        $total = KnowledgeBase::count();
+        $latest = KnowledgeBase::latest()->first();
+
+        $byCategory = KnowledgeBase::whereNotNull('category')
+            ->where('category', '!=', '')
+            ->selectRaw('category, count(*) as count')
+            ->groupBy('category')
+            ->orderBy('count', 'desc')
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'total_entries' => $total,
+            'last_updated' => $latest ? $latest->updated_at : null,
+            'category_breakdown' => $byCategory
+        ]);
+    }
+
+    public function startSession(Request $request)
+    {
+        $validated = $request->validate([
+            'session_id' => 'required|string|max:64',
+            'user_signature' => 'nullable|string|max:255',
+            'theme' => 'nullable|string|max:10'
+        ]);
+
+        $session = \App\Models\UserSession::firstOrCreate(
+            ['session_id' => $validated['session_id']],
+            [
+                'user_signature' => $validated['user_signature'] ?? null,
+                'theme' => $validated['theme'] ?? 'dark',
+                'started_at' => now(),
+            ]
+        );
+
+        // Update if exists (e.g. signature changed)
+        if (!$session->wasRecentlyCreated) {
+            $session->update([
+                'user_signature' => $validated['user_signature'] ?? $session->user_signature,
+                'theme' => $validated['theme'] ?? $session->theme
+            ]);
+        }
+
+        return response()->json(['message' => 'Session tracked', 'id' => $session->id]);
+    }
+
+    public function logAction(Request $request)
+    {
+        $validated = $request->validate([
+            'session_id' => 'required|string',
+            'action_type' => 'required|string',
+            'action_details' => 'nullable|array'
+        ]);
+
+        try {
+            \App\Models\UserAction::create([
+                'session_id' => $validated['session_id'],
+                'action_type' => $validated['action_type'],
+                'action_details' => $validated['action_details']
+            ]);
+
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            \Log::error('Failed to log action: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 
