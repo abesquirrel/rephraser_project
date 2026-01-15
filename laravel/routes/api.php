@@ -25,3 +25,11 @@ Route::post('/upload_kb', [RephraseController::class, 'upload_kb']);
 Route::post('/suggest-keywords', [RephraseController::class, 'suggestKeywords']);
 Route::get('/audit-logs', [RephraseController::class, 'getAuditLogs']);
 Route::get('/models', [RephraseController::class, 'getModels']);
+Route::get('/kb-stats', [RephraseController::class, 'getKbStats']);
+Route::post('/log-action', [RephraseController::class, 'logAction']);
+
+// Role Management
+Route::get('/roles', [RephraseController::class, 'getRoles']);
+Route::post('/roles', [RephraseController::class, 'saveRole']);
+Route::delete('/roles/{id}', [RephraseController::class, 'deleteRole']);
+

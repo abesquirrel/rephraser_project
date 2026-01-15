@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Paul: The Rephraser</title>
+    <title>Masha: The Rephraser</title>
     <meta name="description" content="A premium, AI-powered support analyst rephrasing tool.">
 
     <!-- Favicon -->
@@ -39,31 +39,15 @@
             <div class="text-left">
                 <h1
                     class="text-2xl font-bold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
-                    Paul: The Rephraser
+                    Masha: The Rephraser
                 </h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Precise Support Analysis. Clean Output.
+                    The lazy cat with the best ideas.
                 </p>
             </div>
 
             <div class="flex items-center gap-4">
-                <button @click="toggleTheme()"
-                    class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    :title="theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'"
-                    aria-label="Toggle Color Theme">
-                    <!-- Sun Icon (for Dark Mode) -->
-                    <svg x-show="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" class="icon w-5 h-5"
-                        viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-                    </svg>
-                    <!-- Moon Icon (for Light Mode) -->
-                    <svg x-show="theme === 'light'" xmlns="http://www.w3.org/2000/svg" class="icon w-5 h-5"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-                    </svg>
-                </button>
+
 
                 <button @click="showGuide = true"
                     class="inline-flex items-center gap-2 text-sm text-sky-500 hover:text-sky-600 hover:underline focus:outline-none focus:ring-2 focus:ring-sky-500 rounded px-2 py-1">
@@ -99,6 +83,84 @@
                                 class="w-full min-h-[160px] p-4 text-base leading-relaxed rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"></textarea>
                         </div>
 
+                        <!-- Input Configuration Controls (Moved from Modal) -->
+                        <div class="mb-5 flex flex-wrap gap-4 items-end animate-fade delay-[100ms]">
+                            <!-- Keywords Input -->
+                            <div class="flex-1 min-w-[240px]">
+                                <label class="label-text flex justify-between mb-1.5 text-xs text-gray-500 font-medium">
+                                    <span>Keywords & Context</span>
+                                    <button @click="predictKeywords()"
+                                        class="text-sky-500 hover:text-sky-600 hover:underline text-xs flex items-center gap-1.5 transition-colors"
+                                        :disabled="!inputText || isPredictingKeywords">
+                                        <span x-show="isPredictingKeywords"
+                                            class="animate-spin h-3 w-3 border-2 border-sky-500 border-t-transparent rounded-full"></span>
+                                        <span
+                                            x-text="isPredictingKeywords ? 'Analyzing...' : 'Auto-Predict Tags'"></span>
+                                    </button>
+                                </label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400"
+                                            viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <input type="text" x-model="searchKeywords"
+                                        placeholder="e.g. professional, email response..."
+                                        class="form-input w-full pl-9 p-2.5 text-sm rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all placeholder-gray-400">
+                                </div>
+                            </div>
+
+                            <!-- Role Selector -->
+                            <div class="flex-1 min-w-[200px]">
+                                <label class="label-text flex justify-between mb-1.5 text-xs text-gray-500 font-medium">
+                                    <span>Target Role</span>
+                                    <button @click="showConfigModal = true; configTab = 'roles'"
+                                        class="text-xs text-sky-500 hover:underline">Manage</button>
+                                </label>
+                                <select x-model="selectedRoleName"
+                                    class="form-select w-full p-2.5 text-sm rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all font-medium text-gray-700 dark:text-gray-200">
+                                    <template x-for="role in promptRoles" :key="role.id">
+                                        <option :value="role.name"
+                                            x-text="role.name + (role.is_default ? ' (Default)' : '')"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <!-- Toggles Group -->
+                            <div class="flex gap-3 pb-0.5">
+                                <!-- Template Mode -->
+                                <label
+                                    class="flex items-center gap-2.5 cursor-pointer px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
+                                    :class="templateMode ? 'bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-500/30' : ''">
+                                    <div class="relative flex items-center">
+                                        <input type="checkbox" x-model="templateMode" class="peer sr-only">
+                                        <div
+                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-sky-500 shadow-inner">
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-bold uppercase tracking-wider"
+                                        :class="templateMode ? 'text-sky-600 dark:text-sky-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'">Template</span>
+                                </label>
+
+                                <!-- Online Research -->
+                                <label
+                                    class="flex items-center gap-2.5 cursor-pointer px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
+                                    :class="enableWebSearch ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-500/30' : ''">
+                                    <div class="relative flex items-center">
+                                        <input type="checkbox" x-model="enableWebSearch" class="peer sr-only">
+                                        <div
+                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-500 shadow-inner">
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-bold uppercase tracking-wider"
+                                        :class="enableWebSearch ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'">Research</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="flex gap-4 items-center">
                             <button class="btn btn-primary w-full py-3 flex items-center justify-center gap-2"
                                 @click="generateRephrase()" :disabled="isGenerating || !inputText.trim()">
@@ -130,17 +192,43 @@
 
 
                 <!-- Status Pill Container (Floating) -->
-                <div class="fixed bottom-6 right-6 z-20 pointer-events-none" x-show="isGenerating" x-cloak>
+                <!-- Centered Generation Feedback Overlay -->
+                <div x-show="isGenerating" x-cloak
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity"
+                    x-transition:enter="duration-300 ease-out" x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100" x-transition:leave="duration-200 ease-in"
+                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
                     <div
-                        class="status-pill flex items-center gap-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur border border-sky-500 px-4 py-2 rounded-full shadow-lg">
-                        <span class="w-2 h-2 bg-sky-500 rounded-full animate-pulse"></span>
-                        <span
-                            x-text="thinkingLines.length > 0 ? thinkingLines[thinkingLines.length - 1] : 'Thinking...'"
-                            class="text-sm font-medium"></span>
+                        class="glass-card p-8 rounded-3xl flex flex-col items-center gap-6 shadow-2xl border border-sky-500/30 bg-black/80 max-w-sm w-full mx-4">
+                        <!-- Pulsing AI Brain / Spinner -->
+                        <div class="relative w-20 h-20 flex items-center justify-center">
+                            <div class="absolute inset-0 bg-sky-500/20 rounded-full animate-ping"></div>
+                            <div class="absolute inset-2 bg-indigo-500/20 rounded-full animate-pulse delay-75"></div>
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="w-10 h-10 text-sky-400 animate-pulse relative z-10" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+
+                        <div class="text-center space-y-2">
+                            <h3 class="text-xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-400"
+                                x-text="friendlyStatus">
+                            </h3>
+                            <p class="text-sm text-gray-400" x-text="status !== friendlyStatus ? status : ''"></p>
+                            <!-- Sub-text for tech details if different -->
+                        </div>
+
+                        <!-- Progress Bar (Fake but visual) -->
+                        <div class="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden relative">
+                            <div
+                                class="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-500 to-indigo-500 w-1/3 animate-[progress_2s_ease-in-out_infinite]">
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-
             </section>
 
             <!-- RIGHT COLUMN: Output & History -->
@@ -198,8 +286,13 @@
                                             <div class="flex justify-end gap-3 mt-6">
                                                 <button class="btn btn-ghost px-4 py-2 text-sm"
                                                     @click="copyText(item.rephrased)">Copy</button>
-                                                <button class="btn btn-ghost px-4 py-2 text-sm"
-                                                    @click="toggleEdit(0)">Edit</button>
+                                                <button class="btn btn-ghost px-4 py-2 text-sm" @click="toggleEdit(0)"
+                                                    x-text="item.isEditing ? 'Save' : 'Edit'"></button>
+                                                <button
+                                                    class="btn btn-ghost px-4 py-2 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                    @click="regenerateResponse(item)" :disabled="isGenerating">
+                                                    Regenerate
+                                                </button>
                                                 <button class="btn px-5 py-2 text-sm font-semibold"
                                                     :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'"
                                                     @click="approveHistoryEntry(item, 0)">
@@ -504,25 +597,36 @@
 
                     <div class="border-t border-gray-200/50 dark:border-gray-700/50 pt-8">
                         <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Recent Activity Log</h3>
-                            <button class="btn btn-ghost text-xs" @click="fetchAuditLogs()">
-                                Refresh Logs
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Knowledge Base Insights
+                            </h3>
+                            <button class="btn btn-ghost text-xs" @click="fetchKbStats()">
+                                Refresh
                             </button>
                         </div>
-                        <div
-                            class="max-h-60 overflow-y-auto bg-black/5 dark:bg-white/5 rounded-lg p-2 custom-scrollbar">
-                            <template x-if="auditLogs.length === 0">
-                                <p class="text-center opacity-50 p-4 text-sm">No recent activity.</p>
-                            </template>
-                            <template x-for="log in auditLogs" :key="log.id">
-                                <div class="p-3 border-b border-gray-200/10 last:border-0 text-sm">
-                                    <div class="flex justify-between font-medium text-sky-500 mb-1">
-                                        <span x-text="log.action"></span>
-                                        <span x-text="new Date(log.created_at).toLocaleString()"
-                                            class="text-gray-500 dark:text-gray-400 font-normal"></span>
+                        <div class="bg-black/5 dark:bg-white/5 rounded-lg p-4">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="text-center p-2 rounded bg-white/5 border border-white/10">
+                                    <div class="text-2xl font-bold text-sky-500" x-text="kbStats.total_entries">0</div>
+                                    <div class="text-[10px] uppercase text-gray-500 font-bold">Total Entries</div>
+                                </div>
+                                <div class="text-center p-2 rounded bg-white/5 border border-white/10">
+                                    <div class="text-xs font-mono text-gray-400 mt-2"
+                                        x-text="kbStats.last_updated ? new Date(kbStats.last_updated).toLocaleDateString() : 'Never'">
                                     </div>
-                                    <div class="opacity-70">
-                                        <span x-text="log.details || 'No details provided.'"></span>
+                                    <div class="text-[10px] uppercase text-gray-500 font-bold mt-1">Last Updated</div>
+                                </div>
+                            </div>
+
+                            <template x-if="kbStats.category_breakdown && kbStats.category_breakdown.length > 0">
+                                <div>
+                                    <h4 class="text-[10px] uppercase font-bold text-gray-500 mb-2">Top Categories</h4>
+                                    <div class="space-y-1">
+                                        <template x-for="cat in kbStats.category_breakdown" :key="cat.category">
+                                            <div class="flex justify-between items-center text-xs">
+                                                <span class="text-gray-400" x-text="cat.category"></span>
+                                                <span class="font-mono text-sky-400" x-text="cat.count"></span>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
                             </template>
@@ -544,44 +648,118 @@
                             </button>
                         </div>
 
-                        <!-- Usage Statistics -->
-                        <div>
-                            <h4 class="text-sm font-bold uppercase tracking-widest text-indigo-500 mb-4">Usage Stats
-                            </h4>
-                            <div class="grid grid-cols-4 gap-2">
-                                <div
-                                    class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-3 text-center">
-                                    <div class="text-2xl font-bold text-gray-900 dark:text-white"
-                                        x-text="history.length"></div>
-                                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wide mt-1">Total
-                                        Gen</div>
-                                </div>
-                                <div
-                                    class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-3 text-center">
-                                    <div class="text-2xl font-bold text-emerald-500"
-                                        x-text="history.length > 0 ? Math.round((history.filter(h => h.approved).length / history.length) * 100) + '%' : '0%'">
-                                    </div>
-                                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wide mt-1">
-                                        Success Rate</div>
-                                </div>
-                                <div
-                                    class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-3 text-center">
-                                    <div class="text-xl font-bold text-sky-500 whitespace-nowrap overflow-hidden text-ellipsis"
-                                        x-text="preferredModel"></div>
-                                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wide mt-1">Top
-                                        Model</div>
-                                </div>
-                                <div
-                                    class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-3 text-center">
-                                    <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"
-                                        x-text="avgLatency"></div>
-                                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wide mt-1">Avg
-                                        Latency</div>
-                                </div>
-                            </div>
-                        </div>
+
 
                     </div>
+                </div>
+            </div>
+
+            <!-- Login Modal -->
+            <div x-show="showLogin" x-cloak @click.self="showLogin = false"
+                class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                <div @click.stop
+                    class="glass-card p-8 rounded-3xl w-full max-w-md mx-4 border border-white/10 shadow-2xl"
+                    x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100">
+
+                    <h2 class="text-2xl font-bold text-white mb-6">Welcome Back</h2>
+
+                    <form @submit.prevent="login" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Username or Email</label>
+                            <input type="text" x-model="loginForm.login" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="Enter username or email">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                            <input type="password" x-model="loginForm.password" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="Enter password">
+                        </div>
+
+                        <div class="flex gap-3 mt-6">
+                            <button type="submit"
+                                class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-sky-500/50">
+                                Login
+                            </button>
+                            <button type="button" @click="showLogin = false"
+                                class="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="mt-6 text-center text-sm text-gray-400">
+                        Don't have an account?
+                        <button @click="showLogin = false; showRegister = true"
+                            class="text-sky-400 hover:text-sky-300 font-semibold">
+                            Register
+                        </button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Register Modal -->
+            <div x-show="showRegister" x-cloak @click.self="showRegister = false"
+                class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                <div @click.stop
+                    class="glass-card p-8 rounded-3xl w-full max-w-md mx-4 border border-white/10 shadow-2xl"
+                    x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100">
+
+                    <h2 class="text-2xl font-bold text-white mb-6">Create Account</h2>
+
+                    <form @submit.prevent="register" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                            <input type="text" x-model="registerForm.name" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="John Doe">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                            <input type="text" x-model="registerForm.username" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="johndoe">
+                            <p class="text-xs text-gray-500 mt-1">Will be used as your default signature</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                            <input type="email" x-model="registerForm.email" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="john@example.com">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                            <input type="password" x-model="registerForm.password" required minlength="8"
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                placeholder="At least 8 characters">
+                        </div>
+
+                        <div class="flex gap-3 mt-6">
+                            <button type="submit"
+                                class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-emerald-500/50">
+                                Register
+                            </button>
+                            <button type="button" @click="showRegister = false"
+                                class="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="mt-6 text-center text-sm text-gray-400">
+                        Already have an account?
+                        <button @click="showRegister = false; showLogin = true"
+                            class="text-sky-400 hover:text-sky-300 font-semibold">
+                            Login
+                        </button>
+                    </p>
                 </div>
             </div>
 
@@ -647,7 +825,7 @@
                     <div>
                         <h2
                             class="text-2xl font-bold font-display bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500">
-                            Mastering Paul</h2>
+                            Mastering Masha</h2>
                         <p class="text-gray-500 dark:text-gray-400 mt-1">The complete guide to AI-powered support
                             analysis.</p>
                     </div>
@@ -662,364 +840,234 @@
                 </div>
 
                 <!-- Modal Content -->
-                <div class="overflow-y-auto p-6 custom-scrollbar space-y-8">
+                <div class="overflow-y-auto p-6 custom-scrollbar h-full" x-data="{ activeHelpTab: 'guide' }">
 
-                    <!-- Section 1: Core Workflow -->
-                    <section>
-                        <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-                            <span
-                                class="w-8 h-8 rounded-full bg-sky-500/10 text-sky-600 flex items-center justify-center text-sm">1</span>
-                            The Core Workflow
-                        </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-gray-200/10">
-                                <h4 class="font-semibold mb-2 text-sky-500">1. Compose</h4>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">Dump your raw thoughts, bullet
-                                    points, or rough drafts into the <strong>Compose Rephrasing</strong> area. Don't
-                                    worry about grammar or tone.</p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-gray-200/10">
-                                <h4 class="font-semibold mb-2 text-indigo-500">2. Configure</h4>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">Open the
-                                    <strong>Settings Modal</strong> to tweak the AI's behavior. Adjust creativity,
-                                    select models, or enable web search.
-                                </p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-gray-200/10">
-                                <h4 class="font-semibold mb-2 text-emerald-500">3. Refine & Save</h4>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">Generate the response. Edit it if
-                                    needed, then click <strong>Approve</strong> to save it to your Knowledge Base for
-                                    future learning.</p>
-                            </div>
-                        </div>
-                    </section>
+                    <!-- Tab Navigation -->
+                    <div class="flex gap-6 border-b border-gray-200/10 mb-8 sticky top-0 bg-[#0f1115] z-10 pt-2">
+                        <button @click="activeHelpTab = 'guide'"
+                            class="pb-3 text-sm font-bold uppercase tracking-widest transition-colors border-b-2"
+                            :class="activeHelpTab === 'guide' ? 'border-sky-500 text-sky-500' : 'border-transparent text-gray-400 hover:text-gray-200'">
+                            User Guide
+                        </button>
+                        <button @click="activeHelpTab = 'stats'"
+                            class="pb-3 text-sm font-bold uppercase tracking-widest transition-colors border-b-2"
+                            :class="activeHelpTab === 'stats' ? 'border-sky-500 text-sky-500' : 'border-transparent text-gray-400 hover:text-gray-200'">
+                            Stats & Models
+                        </button>
+                    </div>
 
-                    <!-- Section 2: Detailed Configuration & Task Modes -->
-                    <section>
-                        <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-                            <span
-                                class="w-8 h-8 rounded-full bg-indigo-500/10 text-indigo-600 flex items-center justify-center text-sm">2</span>
-                            Task Modes & Controls
-                        </h3>
-                        <div class="space-y-6">
-                            <!-- Task Modes -->
+                    <!-- GUIDE TAB -->
+                    <div x-show="activeHelpTab === 'guide'" class="space-y-12 animate-fade">
+
+                        <!-- Section 1: Core Workflow -->
+                        <section>
+                            <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                                <span
+                                    class="w-8 h-8 rounded-full bg-sky-500/10 text-sky-600 flex items-center justify-center text-sm">1</span>
+                                The Core Workflow
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-gray-200/10">
+                                    <h4 class="font-semibold mb-2 text-sky-500">1. Compose</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Dump your raw thoughts, bullet
+                                        points, or rough drafts into the <strong>Compose Rephrasing</strong> area. Masha
+                                        will handle the grammar and tone.</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-gray-200/10">
+                                    <h4 class="font-semibold mb-2 text-indigo-500">2. Configure</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Use the Settings or dropdowns to
+                                        adjust the Target Role, Creativity, or enable Web Search.</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-gray-200/10">
+                                    <h4 class="font-semibold mb-2 text-emerald-500">3. Refine & Save</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Generate the response. Edit if
+                                        needed, then click <strong>Approve</strong> to save it to Masha's Knowledge
+                                        Base.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Section 2: Task Modes -->
+                        <section>
+                            <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                                <span
+                                    class="w-8 h-8 rounded-full bg-indigo-500/10 text-indigo-600 flex items-center justify-center text-sm">2</span>
+                                Task Modes
+                            </h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div
                                     class="p-4 rounded-xl bg-sky-50 dark:bg-sky-900/10 border border-sky-100 dark:border-sky-800">
                                     <h4 class="font-bold text-sky-600 dark:text-sky-400 mb-2 flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                            fill="none" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
                                         Fact Check Mode
                                     </h4>
                                     <p class="text-xs text-gray-600 dark:text-gray-300">
                                         <strong>Trigger:</strong> Enable "Online Research".<br>
                                         <strong>Goal:</strong> Validate claims against live web data (Reddit, Apple,
-                                        etc.) and correct errors.
+                                        etc.).
                                     </p>
                                 </div>
                                 <div
                                     class="p-4 rounded-xl bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800">
                                     <h4
                                         class="font-bold text-purple-600 dark:text-purple-400 mb-2 flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                            fill="none" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                                        </svg>
                                         Template Mode
                                     </h4>
                                     <p class="text-xs text-gray-600 dark:text-gray-300">
                                         <strong>Trigger:</strong> Enable "Template Mode".<br>
-                                        <strong>Goal:</strong> Strictly map your facts into a saved example structure.
-                                        Ideal for forms.
+                                        <strong>Goal:</strong> Rigidly follow the structure of similar KB entries. Ideal
+                                        for forms.
                                     </p>
                                 </div>
                                 <div
                                     class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
                                     <h4 class="font-bold text-gray-600 dark:text-gray-400 mb-2 flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                            fill="none" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
                                         Standard Mode
                                     </h4>
                                     <p class="text-xs text-gray-600 dark:text-gray-300">
                                         <strong>Trigger:</strong> Both OFF.<br>
-                                        <strong>Goal:</strong> Pure rephrasing, grammar fixing, and professionalization.
+                                        <strong>Goal:</strong> Professional rephrasing based on your Target Role.
                                     </p>
                                 </div>
                             </div>
+                        </section>
 
-                            <div x-data="{ activeHelpTab: 'guide' }" class="flex flex-col h-full">
-                                <!-- Tabs -->
-                                <div class="flex gap-4 border-b border-gray-200/20 mb-6 mx-6 mt-4">
-                                    <button @click="activeHelpTab = 'guide'"
-                                        :class="activeHelpTab === 'guide' ? 'text-sky-500 border-sky-500' : 'text-gray-500 border-transparent hover:text-gray-700'"
-                                        class="pb-2 text-sm font-bold uppercase tracking-wider border-b-2 transition-colors">
-                                        User Guide
-                                    </button>
-                                    <button @click="activeHelpTab = 'models'"
-                                        :class="activeHelpTab === 'models' ? 'text-sky-500 border-sky-500' : 'text-gray-500 border-transparent hover:text-gray-700'"
-                                        class="pb-2 text-sm font-bold uppercase tracking-wider border-b-2 transition-colors">
-                                        Models & Stats
-                                    </button>
+                        <!-- Section 3: Dynamic Roles (NEW) -->
+                        <section>
+                            <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                                <span
+                                    class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center text-sm">3</span>
+                                Dynamic Roles
+                            </h3>
+                            <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
+                                <p>Masha can adopt different personas to suit your audience. Use the <strong>Target
+                                        Role</strong> dropdown to switch contexts instantly.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                    <div class="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200/10">
+                                        <strong class="text-sky-500 block mb-1">Tech Support (Default)</strong>
+                                        <div class="text-xs">Produces structured analysis: <span
+                                                class="font-mono text-gray-400">Observations</span>, <span
+                                                class="font-mono text-gray-400">Actions Taken</span>, <span
+                                                class="font-mono text-gray-400">Recommendations</span>. Ideal for
+                                            internal tickets and detailed logs.</div>
+                                    </div>
+                                    <div class="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200/10">
+                                        <strong class="text-indigo-500 block mb-1">Customer Support</strong>
+                                        <div class="text-xs">Drafts professional, empathetic emails with clear Subject
+                                            lines and salutations. Ideal for direct customer communication.</div>
+                                    </div>
                                 </div>
+                                <p class="mt-4 text-xs bg-sky-500/10 text-sky-400 p-2 rounded inline-block">
+                                    <strong>Tip:</strong> Create custom roles in the Configuration menu!</p>
+                            </div>
+                        </section>
 
-                                <!-- Content -->
-                                <div class="overflow-y-auto px-10 pb-10 flex-1 custom-scrollbar">
+                        <!-- Section 4: KB Management -->
+                        <section>
+                            <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                                <span
+                                    class="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-sm">4</span>
+                                Knowledge Base (KB)
+                            </h3>
+                            <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
+                                <p>The Knowledge Base is Masha's long-term memory. It allows the system to learn from
+                                    your corrections.</p>
+                                <ul>
+                                    <li><strong>Approve Button:</strong> Saves the "Original + Rephrased" pair to the
+                                        KB.</li>
+                                    <li><strong>Category Tagging:</strong> Assign categories (e.g., "Outage", "Billing")
+                                        to filter context later.</li>
+                                    <li><strong>Manual Entry:</strong> Manually add "Golden Samples" via the Settings
+                                        menu.</li>
+                                    <li><strong>Bulk Import:</strong> Upload CSVs to bulk-train the system.</li>
+                                </ul>
+                            </div>
+                        </section>
+                    </div>
 
-                                    <!-- TAB: GUIDE -->
-                                    <div x-show="activeHelpTab === 'guide'" class="space-y-8 animate-fade">
-                                        <!-- Task Modes & Controls -->
-                                        <div>
-                                            <h4 class="font-bold text-gray-900 dark:text-gray-100 mb-4">Task Modes &
-                                                Controls</h4>
+                    <!-- STATS TAB -->
+                    <div x-show="activeHelpTab === 'stats'" class="space-y-8 animate-fade" x-cloak>
 
-                                            <!-- Modes Grid -->
-                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                                <div class="p-4 rounded-xl bg-sky-500/5 border border-sky-500/20">
-                                                    <div
-                                                        class="flex items-center gap-2 mb-2 text-sky-600 dark:text-sky-400 font-bold text-sm uppercase tracking-wider">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                                                        </svg>
-                                                        Fact Check
-                                                    </div>
-                                                    <p class="text-xs text-gray-600 dark:text-gray-400">
-                                                        <strong>Trigger:</strong> "Online Research" ON.<br>
-                                                        <strong>Goal:</strong> Validate claims against live web data
-                                                        (Reddit, Apple, etc).<br>
-                                                        <strong>Best for:</strong> Technical specs, pricing, outages.
-                                                    </p>
-                                                </div>
-
-                                                <div class="p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/20">
-                                                    <div
-                                                        class="flex items-center gap-2 mb-2 text-indigo-600 dark:text-indigo-400 font-bold text-sm uppercase tracking-wider">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                                        </svg>
-                                                        Template
-                                                    </div>
-                                                    <p class="text-xs text-gray-600 dark:text-gray-400">
-                                                        <strong>Trigger:</strong> "Template Mode" ON.<br>
-                                                        <strong>Goal:</strong> Rigidly follow the structure of the most
-                                                        similar knowledge base entry.<br>
-                                                        <strong>Best for:</strong> Standardized forms, legal responses.
-                                                    </p>
-                                                </div>
-
-                                                <div
-                                                    class="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-                                                    <div
-                                                        class="flex items-center gap-2 mb-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm uppercase tracking-wider">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                        </svg>
-                                                        Standard
-                                                    </div>
-                                                    <p class="text-xs text-gray-600 dark:text-gray-400">
-                                                        <strong>Trigger:</strong> Both OFF.<br>
-                                                        <strong>Goal:</strong> Professional rephrasing and grammar
-                                                        correction using RAG context.<br>
-                                                        <strong>Best for:</strong> General support emails, polishing
-                                                        notes.
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <h4 class="font-bold text-gray-900 dark:text-gray-100 mt-8 mb-4">Fine-Tuning
-                                                Controls</h4>
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div>
-                                                    <h5
-                                                        class="font-semibold text-gray-800 dark:text-gray-200 mb-2 border-b border-gray-200/20 pb-1">
-                                                        Response Style</h5>
-                                                    <ul class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                                                        <li>
-                                                            <strong>Creativity (Temperature):</strong> Controls
-                                                            randomness.
-                                                            <div class="text-xs text-gray-400 pl-2 mt-1">
-                                                                • 0.0 – 0.3: Deterministic, factual, repetitive.<br>
-                                                                • 0.7 – 1.0: Creative, unpredictable, varied.
-                                                            </div>
-                                                        </li>
-                                                        <li>
-                                                            <strong>Response Length (Max Tokens):</strong> Sets limits
-                                                            on output size.
-                                                            <div class="text-xs text-gray-400 pl-2 mt-1">
-                                                                • 100 Tokens ≈ 75 words.<br>
-                                                                • Increase for detailed reports, decrease for summaries.
-                                                            </div>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-
-                                                <div>
-                                                    <h5
-                                                        class="font-semibold text-gray-800 dark:text-gray-200 mb-2 border-b border-gray-200/20 pb-1">
-                                                        Knowledge & Repetition</h5>
-                                                    <ul class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                                                        <li>
-                                                            <strong>Use Past Examples (RAG):</strong> How many previous
-                                                            answers to feed the AI.
-                                                            <div class="text-xs text-gray-400 pl-2 mt-1">
-                                                                • 0: Pure Model knowledge.<br>
-                                                                • 3-5: Strong adherence to your team's style.
-                                                            </div>
-                                                        </li>
-                                                        <li>
-                                                            <strong>Topic Repetition (Presence Penalty):</strong>
-                                                            Penalizes tokens that have already appeared.
-                                                            <div class="text-xs text-gray-400 pl-2 mt-1">
-                                                                • Increase (> 0.5) to force the AI to switch topics.
-                                                            </div>
-                                                        </li>
-                                                        <li>
-                                                            <strong>Word Repetition (Frequency Penalty):</strong>
-                                                            Penalizes tokens based on how many times they appear.
-                                                            <div class="text-xs text-gray-400 pl-2 mt-1">
-                                                                • Increase (> 0.5) to reduce redundant phrases.
-                                                            </div>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-
-                                            <div
-                                                class="mt-6 p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700">
-                                                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-2">Style
-                                                    Exclusions (Negative Prompt)</h5>
-                                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                                    Use the "Style Exclusions" text box to explicitly forbid certain
-                                                    behaviors.
-                                                    <br><span class="text-xs italic">Example: "no apologies, no jargon,
-                                                        do not mention 'AI'"</span>
-                                                </p>
-                                            </div>
-                                        </div>
+                        <!-- KB Stats -->
+                        <div>
+                            <h4 class="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                                Knowledge Base Status
+                            </h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div
+                                    class="p-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center flex flex-col items-center justify-center">
+                                    <div class="text-3xl font-bold text-emerald-500 mb-1"
+                                        x-text="kbStats.total_entries || 0"></div>
+                                    <div
+                                        class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold opacity-80">
+                                        Total Entries</div>
+                                </div>
+                                <div
+                                    class="p-6 rounded-xl bg-sky-500/10 border border-sky-500/20 text-center flex flex-col items-center justify-center">
+                                    <div class="text-lg font-mono text-sky-500 mb-1"
+                                        x-text="kbStats.last_updated ? new Date(kbStats.last_updated).toLocaleDateString() : 'Never'">
                                     </div>
-
-                                    <!-- TAB: MODELS & STATS -->
-                                    <div x-show="activeHelpTab === 'models'" class="space-y-8 animate-fade" x-cloak>
-
-                                        <!-- Stats -->
-                                        <div>
-                                            <h4
-                                                class="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-sky-500"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                                </svg>
-                                                Approval Rate Logic
-                                            </h4>
-                                            <div
-                                                class="p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700 mb-6">
-                                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                                    The system determines the "Preferred" model based on your approval
-                                                    history. Every time you click <strong>Approve</strong>, the model
-                                                    used is credited.
-                                                </p>
-
-                                                <!-- Leaderboard -->
-                                                <div class="mt-4">
-                                                    <template x-if="modelStats.length === 0">
-                                                        <div class="text-xs text-gray-500 italic">No approvals recorded
-                                                            locally yet.</div>
-                                                    </template>
-                                                    <table class="w-full text-sm text-left"
-                                                        x-show="modelStats.length > 0">
-                                                        <thead>
-                                                            <tr class="text-gray-400 border-b border-gray-200/10">
-                                                                <th class="pb-2">Model</th>
-                                                                <th class="pb-2 text-right">Approvals</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody class="divide-y divide-gray-200/10">
-                                                            <template x-for="stat in modelStats" :key="stat.name">
-                                                                <tr>
-                                                                    <td class="py-2 font-mono text-sky-500"
-                                                                        x-text="formatModelName(stat.name)"></td>
-                                                                    <td class="py-2 text-right font-bold text-emerald-500"
-                                                                        x-text="stat.count"></td>
-                                                                </tr>
-                                                            </template>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Dynamic Model Cards -->
-                                        <div>
-                                            <h4 class="font-bold text-gray-900 dark:text-gray-100 mb-4">Active Models
-                                            </h4>
-                                            <div class="grid grid-cols-1 gap-4">
-                                                <template x-for="model in availableModels" :key="model.id">
-                                                    <div
-                                                        class="glass-card p-4 border border-gray-200 dark:border-gray-700 flex flex-col gap-2">
-                                                        <div class="flex justify-between items-center">
-                                                            <h5 class="font-bold text-sky-500 font-mono text-sm"
-                                                                x-text="model.name"></h5>
-                                                            <span
-                                                                class="text-[10px] bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded"
-                                                                x-text="model.id"></span>
-                                                        </div>
-                                                        <p class="text-sm text-gray-600 dark:text-gray-400"
-                                                            x-text="getModelDescription(model.id)"></p>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </div>
-
-                                    </div>
+                                    <div
+                                        class="text-xs text-sky-600 dark:text-sky-400 uppercase tracking-wider font-bold opacity-80">
+                                        Last Updated</div>
                                 </div>
                             </div>
                         </div>
-                    </section>
 
-                    <!-- Section 3: Knowledge Base Management -->
-                    <section>
-                        <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-                            <span
-                                class="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-sm">3</span>
-                            Knowledge Base (KB) Management
-                        </h3>
-                        <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
-                            <p>The Knowledge Base is Paul's long-term memory. It allows the system to learn from your
-                                corrections and preferences over time.</p>
-                            <ul>
-                                <li><strong>Approve Button:</strong> Every time you click "Approve" on a generated
-                                    response, that specific Original Input + Rephrased Output pair is saved to the KB.
-                                </li>
-                                <li><strong>Category Tagging:</strong> Assign categories (e.g., "Outage", "Billing",
-                                    "Technical") to responses. You can then filter current generations to only use
-                                    context from a specific category.</li>
-                                <li><strong>Manual Entry:</strong> Open the "Knowledge Base Settings" at the bottom to
-                                    manually add training data or "Golden Samples" without generating them first.</li>
-                                <li><strong>Bulk Import:</strong> You can upload a CSV file to bulk-train the system.
-                                    Format: <code>original, rephrased, keywords, is_template, category</code>.</li>
-                            </ul>
+                        <!-- Active Models -->
+                        <div>
+                            <h4 class="font-bold text-gray-900 dark:text-gray-100 mb-4">Active Models</h4>
+                            <div class="grid grid-cols-1 gap-4">
+                                <template x-for="model in availableModels" :key="model.id">
+                                    <div
+                                        class="glass-card p-4 border border-gray-200 dark:border-gray-700 flex flex-col gap-2">
+                                        <div class="flex justify-between items-center">
+                                            <h5 class="font-bold text-sky-500 font-mono text-sm" x-text="model.name">
+                                            </h5>
+                                            <span class="text-[10px] bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded"
+                                                x-text="model.id"></span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400"
+                                            x-text="getModelDescription(model.id)"></p>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
-                    </section>
 
+                        <!-- Approval Logic -->
+                        <div>
+                            <h4 class="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                                Global Leaderboard
+                            </h4>
+                            <div
+                                class="p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700 mb-6">
+                                <div class="mt-2">
+                                    <template x-if="modelStats.length === 0">
+                                        <div class="text-xs text-gray-500 italic">No approvals recorded locally yet.
+                                        </div>
+                                    </template>
+                                    <table class="w-full text-sm text-left" x-show="modelStats.length > 0">
+                                        <thead>
+                                            <tr class="text-gray-400 border-b border-gray-200/10">
+                                                <th class="pb-2">Model</th>
+                                                <th class="pb-2 text-right">Approvals</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200/10">
+                                            <template x-for="stat in modelStats" :key="stat.name">
+                                                <tr>
+                                                    <td class="py-2 font-mono text-sky-500"
+                                                        x-text="formatModelName(stat.name)"></td>
+                                                    <td class="py-2 text-right font-bold text-emerald-500"
+                                                        x-text="stat.count"></td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
 
-
+                    </div>
                 </div>
 
                 <div class="p-6 pt-4 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 text-center">
@@ -1085,295 +1133,347 @@
             <div class="overflow-y-auto p-5 custom-scrollbar">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                    <!-- Left Column: User & Model -->
-                    <div class="space-y-8">
-                        <div>
-                            <h4 class="text-sm font-bold uppercase tracking-widest text-sky-500 mb-4">Core Model</h4>
-                            <div class="space-y-4">
-                                <div class="form-group">
-                                    <label class="label-text">Signature</label>
-                                    <input type="text" x-model="signature" placeholder="Paul"
-                                        class="form-input w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors">
-                                </div>
+                    <!-- Tab Navigation -->
+                    <div class="col-span-1 lg:col-span-2 border-b border-gray-200/10 mb-6 flex gap-6">
+                        <button @click="configTab = 'general'"
+                            class="pb-3 text-sm font-bold uppercase tracking-widest transition-colors border-b-2"
+                            :class="configTab === 'general' ? 'border-sky-500 text-sky-500' : 'border-transparent text-gray-400 hover:text-gray-200'">
+                            General
+                        </button>
+                        <button @click="configTab = 'roles'"
+                            class="pb-3 text-sm font-bold uppercase tracking-widest transition-colors border-b-2"
+                            :class="configTab === 'roles' ? 'border-sky-500 text-sky-500' : 'border-transparent text-gray-400 hover:text-gray-200'">
+                            Prompt Roles
+                        </button>
+                    </div>
 
-                                <div>
-                                    <label class="label-text mb-2 block flex justify-between items-center">
-                                        <span>Primary Model</span>
-                                        <button @click="fetchOllamaModels()"
-                                            class="text-xs text-sky-500 hover:underline flex items-center gap-1 transition-opacity"
-                                            :class="isRefreshingModels ? 'opacity-50 cursor-wait' : ''"
-                                            :disabled="isRefreshingModels">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
-                                                :class="isRefreshingModels ? 'animate-spin' : ''" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                            </svg>
-                                            <span x-text="isRefreshingModels ? 'Refreshing...' : 'Refresh'"></span>
-                                        </button>
-                                    </label>
-                                    <select x-model="modelA"
-                                        class="form-select w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700 mb-4 focus:ring-1 focus:ring-sky-500">
-                                        <option value="">Select Model...</option>
-                                        <template x-for="m in availableModels" :key="m.id">
-                                            <option :value="m.id" x-text="m.name" :selected="m.id === modelA"></option>
-                                        </template>
-                                    </select>
+                    <!-- General Tab Content -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 col-span-1 lg:col-span-2"
+                        x-show="configTab === 'general'">
+                        <!-- Left Column: User & Model -->
+                        <div class="space-y-8">
+                            <div>
+                                <h4 class="text-sm font-bold uppercase tracking-widest text-sky-500 mb-4">Core Model
+                                </h4>
+                                <div class="space-y-4">
+                                    <div class="form-group">
+                                        <label class="label-text">Signature</label>
+                                        <input type="text" x-model="signature" placeholder="Masha"
+                                            class="form-input w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors">
+                                    </div>
 
-                                    <!-- Dynamic Import List -->
-                                    <div
-                                        class="border border-gray-200/50 dark:border-gray-700/50 rounded-lg overflow-hidden flex flex-col h-40">
+                                    <div>
+                                        <label class="label-text mb-2 block flex justify-between items-center">
+                                            <span>Primary Model</span>
+                                            <button @click="fetchOllamaModels()"
+                                                class="text-xs text-sky-500 hover:underline flex items-center gap-1 transition-opacity"
+                                                :class="isRefreshingModels ? 'opacity-50 cursor-wait' : ''"
+                                                :disabled="isRefreshingModels">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
+                                                    :class="isRefreshingModels ? 'animate-spin' : ''" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                                <span x-text="isRefreshingModels ? 'Refreshing...' : 'Refresh'"></span>
+                                            </button>
+                                        </label>
+                                        <select x-model="modelA"
+                                            class="form-select w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700 mb-4 focus:ring-1 focus:ring-sky-500">
+                                            <option value="">Select Model...</option>
+                                            <template x-for="m in availableModels" :key="m.id">
+                                                <option :value="m.id" x-text="m.name" :selected="m.id === modelA">
+                                                </option>
+                                            </template>
+                                        </select>
+
+                                        <!-- Dynamic Import List -->
                                         <div
-                                            class="bg-gray-50 dark:bg-white/5 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 items-center flex justify-between">
-                                            <span>Detected in Ollama</span>
-                                            <span class="text-xs" x-show="ollamaModels.length > 0"
-                                                x-text="ollamaModels.length"></span>
-                                        </div>
-                                        <div class="flex-1 overflow-y-auto p-1 space-y-1 relative"
-                                            style="scrollbar-width: thin; scrollbar-color: rgba(156, 163, 175, 0.3) transparent;">
-                                            <template x-if="ollamaModels.length === 0 && !isRefreshingModels">
-                                                <div
-                                                    class="h-full flex flex-col items-center justify-center p-4 text-center opacity-50 space-y-2">
-                                                    <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24"
-                                                        stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="1.5"
-                                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                    </svg>
-                                                    <span class="text-xs">No models detected</span>
-                                                </div>
-                                            </template>
-                                            <template x-if="isRefreshingModels">
-                                                <div class="h-full flex items-center justify-center">
-                                                    <svg class="animate-spin h-5 w-5 text-sky-500"
-                                                        xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                        viewBox="0 0 24 24">
-                                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                            stroke="currentColor" stroke-width="4"></circle>
-                                                        <path class="opacity-75" fill="currentColor"
-                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                        </path>
-                                                    </svg>
-                                                </div>
-                                            </template>
-                                            <template x-for="modelName in ollamaModels" :key="modelName">
-                                                <div
-                                                    class="flex justify-between items-center p-2 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 group animate-fade">
-                                                    <div class="flex items-center gap-2 overflow-hidden">
-                                                        <div class="w-1.5 h-1.5 rounded-full"
-                                                            :class="isModelImported(modelName) ? 'bg-sky-400' : 'bg-gray-300 dark:bg-gray-600'">
-                                                        </div>
-                                                        <span x-text="modelName"
-                                                            class="text-xs font-mono truncate max-w-[160px]"
-                                                            :class="isModelImported(modelName) ? 'text-sky-500 font-medium' : 'text-gray-600 dark:text-gray-400'"></span>
+                                            class="border border-gray-200/50 dark:border-gray-700/50 rounded-lg overflow-hidden flex flex-col h-auto max-h-96">
+                                            <div
+                                                class="bg-gray-50 dark:bg-white/5 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 items-center flex justify-between">
+                                                <span>Detected in Ollama</span>
+                                                <span class="text-xs" x-show="ollamaModels.length > 0"
+                                                    x-text="ollamaModels.length"></span>
+                                            </div>
+                                            <div class="flex-1 overflow-y-auto p-1 space-y-1 relative"
+                                                style="scrollbar-width: thin; scrollbar-color: rgba(156, 163, 175, 0.3) transparent;">
+                                                <template x-if="ollamaModels.length === 0 && !isRefreshingModels">
+                                                    <div
+                                                        class="h-full flex flex-col items-center justify-center p-4 text-center opacity-50 space-y-2">
+                                                        <svg class="w-6 h-6 text-gray-400" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="1.5"
+                                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                        </svg>
+                                                        <span class="text-xs">No models detected</span>
                                                     </div>
-                                                    <button @click="toggleModelImport(modelName)"
-                                                        class="text-[10px] font-bold uppercase px-2 py-1 rounded transition-colors border shadow-sm opacity-80 group-hover:opacity-100"
-                                                        :class="isModelImported(modelName) 
+                                                </template>
+                                                <template x-if="isRefreshingModels">
+                                                    <div class="h-full flex items-center justify-center">
+                                                        <svg class="animate-spin h-5 w-5 text-sky-500"
+                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24">
+                                                            <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                                stroke="currentColor" stroke-width="4"></circle>
+                                                            <path class="opacity-75" fill="currentColor"
+                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                            </path>
+                                                        </svg>
+                                                    </div>
+                                                </template>
+                                                <template x-for="modelName in ollamaModels" :key="modelName">
+                                                    <div
+                                                        class="flex justify-between items-center p-2 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 group animate-fade">
+                                                        <div class="flex items-center gap-2 overflow-hidden">
+                                                            <div class="w-1.5 h-1.5 rounded-full"
+                                                                :class="isModelImported(modelName) ? 'bg-sky-400' : 'bg-gray-300 dark:bg-gray-600'">
+                                                            </div>
+                                                            <span x-text="modelName"
+                                                                class="text-xs font-mono truncate max-w-[160px]"
+                                                                :class="isModelImported(modelName) ? 'text-sky-500 font-medium' : 'text-gray-600 dark:text-gray-400'"></span>
+                                                        </div>
+                                                        <button @click="toggleModelImport(modelName)"
+                                                            class="text-[10px] font-bold uppercase px-2 py-1 rounded transition-colors border shadow-sm opacity-80 group-hover:opacity-100"
+                                                            :class="isModelImported(modelName) 
                                                             ? 'border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white' 
                                                             : 'border-emerald-500/30 text-emerald-500 hover:bg-emerald-500 hover:text-white'"
-                                                        x-text="isModelImported(modelName) ? 'Unlink' : 'Import'">
-                                                    </button>
-                                                </div>
-                                            </template>
+                                                            x-text="isModelImported(modelName) ? 'Unlink' : 'Import'">
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="flex gap-2 pt-2">
-                                    <button
-                                        class="flex-1 info-pill justify-center text-center cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors py-2"
-                                        @click="applyPreset('creative')">Creative</button>
-                                    <button
-                                        class="flex-1 info-pill justify-center text-center cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors py-2"
-                                        @click="applyPreset('technical')">Technical</button>
-                                    <button
-                                        class="flex-1 info-pill justify-center text-center cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors py-2"
-                                        @click="applyPreset('tldr')">Concise</button>
+                                    <div class="flex gap-2 pt-2">
+                                        <button
+                                            class="flex-1 info-pill justify-center text-center cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors py-2"
+                                            @click="applyPreset('creative')">Creative</button>
+                                        <button
+                                            class="flex-1 info-pill justify-center text-center cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors py-2"
+                                            @click="applyPreset('technical')">Technical</button>
+                                        <button
+                                            class="flex-1 info-pill justify-center text-center cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 transition-colors py-2"
+                                            @click="applyPreset('tldr')">Concise</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-sm font-bold uppercase tracking-widest text-indigo-500 mb-4">Context &
+                                    Category</h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="label-text">Select Category</label>
+                                        <select x-model="currentCategory"
+                                            class="form-select w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700">
+                                            <option value="">Full Knowledge Base</option>
+                                            <template x-for="cat in categories" :key="cat">
+                                                <option :value="cat" x-text="cat"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+
+
                                 </div>
                             </div>
                         </div>
 
-                        <div>
-                            <h4 class="text-sm font-bold uppercase tracking-widest text-indigo-500 mb-4">Context &
-                                Category</h4>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="label-text">Select Category</label>
-                                    <select x-model="currentCategory"
-                                        class="form-select w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700">
-                                        <option value="">Full Knowledge Base</option>
-                                        <template x-for="cat in categories" :key="cat">
-                                            <option :value="cat" x-text="cat"></option>
-                                        </template>
-                                    </select>
-                                </div>
-
-                                <!-- Keywords (Restored) -->
-                                <div>
-                                    <label class="label-text flex justify-between">
-                                        Keywords
-                                        <button @click="predictKeywords()"
-                                            class="text-sky-500 hover:underline text-xs flex items-center gap-1"
-                                            :disabled="!inputText || isPredictingKeywords">
-                                            <template x-if="isPredictingKeywords">
-                                                <svg class="animate-spin h-3 w-3 text-sky-500"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                        stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor"
-                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                    </path>
-                                                </svg>
-                                            </template>
-                                            <span
-                                                x-text="isPredictingKeywords ? 'Predicting...' : 'Auto-Predict'"></span>
-                                        </button>
-                                    </label>
-                                    <div class="relative">
-                                        <input type="text" x-model="searchKeywords" placeholder="firmware, latency..."
-                                            class="form-input w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700 pr-10">
-                                        <!-- Simple icon or loading state could go here -->
+                        <!-- Right Column: Fine Tuning & KB -->
+                        <div class="space-y-8">
+                            <div>
+                                <h4 class="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-4">Fine
+                                    Tuning
+                                </h4>
+                                <div
+                                    class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-6 space-y-6">
+                                    <!-- Creativity -->
+                                    <div>
+                                        <label class="label-text flex justify-between">
+                                            <span>Creativity</span> <span x-text="temperature"></span>
+                                        </label>
+                                        <input type="range" x-model="temperature" min="0" max="1" step="0.1"
+                                            class="w-full accent-sky-500 mt-2">
+                                        <div class="text-xs text-gray-400 mt-1">Low (0.2) for strict facts, High (0.8)
+                                            for
+                                            creative writing.</div>
                                     </div>
-                                    <div class="text-xs text-gray-400 mt-1">Tags to guide the AI's focus.</div>
-                                </div>
-
-                                <div class="space-y-3 pt-2">
-                                    <label
-                                        class="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                                        <input type="checkbox" x-model="showThinking"
-                                            class="rounded text-sky-500 focus:ring-sky-500 w-5 h-5">
-                                        <span class="font-medium">Show Thinking Process</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                                        <input type="checkbox" x-model="enableWebSearch"
-                                            class="rounded text-sky-500 focus:ring-sky-500 w-5 h-5">
-                                        <span class="font-medium">Online Research</span>
-                                    </label>
-                                    <label
-                                        class="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                                        <input type="checkbox" x-model="templateMode"
-                                            class="rounded text-sky-500 focus:ring-sky-500 w-5 h-5">
-                                        <span class="font-medium">Template Mode</span>
-                                    </label>
+                                    <!-- Past Examples -->
+                                    <div>
+                                        <label class="label-text flex justify-between">
+                                            <span>Use Past Examples</span> <span x-text="kbCount"></span>
+                                        </label>
+                                        <input type="range" x-model="kbCount" min="0" max="5" step="1"
+                                            class="w-full accent-emerald-500 mt-2">
+                                        <div class="text-xs text-gray-400 mt-1">Number of saved responses to use as
+                                            style
+                                            references.</div>
+                                    </div>
+                                    <!-- Response Length -->
+                                    <div>
+                                        <label class="label-text flex justify-between">
+                                            <span>Response Length</span> <span x-text="maxTokens"></span>
+                                        </label>
+                                        <input type="range" x-model="maxTokens" min="100" max="2048" step="100"
+                                            class="w-full accent-indigo-500 mt-2">
+                                        <div class="text-xs text-gray-400 mt-1">Max token limit (100 tokens ≈ 75 words).
+                                        </div>
+                                    </div>
+                                    <!-- Topic Repetition -->
+                                    <div>
+                                        <label class="label-text flex justify-between">
+                                            <span>Topic Repetition</span> <span x-text="presencePenalty"></span>
+                                        </label>
+                                        <input type="range" x-model="presencePenalty" min="-2" max="2" step="0.1"
+                                            class="w-full accent-purple-500 mt-2">
+                                        <div class="text-xs text-gray-400 mt-1">Increase to stop the AI from staying on
+                                            one
+                                            topic.</div>
+                                    </div>
+                                    <!-- Word Repetition -->
+                                    <div>
+                                        <label class="label-text flex justify-between">
+                                            <span>Word Repetition</span> <span x-text="frequencyPenalty"></span>
+                                        </label>
+                                        <input type="range" x-model="frequencyPenalty" min="-2" max="2" step="0.1"
+                                            class="w-full accent-pink-500 mt-2">
+                                        <div class="text-xs text-gray-400 mt-1">Increase to stop the AI from repeating
+                                            specific words.</div>
+                                    </div>
+                                    <!-- Style Exclusions -->
+                                    <div class="pt-2">
+                                        <label class="label-text flex justify-between items-center mb-2">
+                                            Style Exclusions
+                                            <button @click="negativePrompt = ''" x-show="negativePrompt"
+                                                class="text-xs text-red-400 hover:text-red-500">Clear</button>
+                                        </label>
+                                        <input type="text" x-model="negativePrompt"
+                                            placeholder="e.g. no jargon, no apologies"
+                                            class="w-full p-2 text-sm rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700 focus:ring-1 focus:ring-sky-500">
+                                    </div>
                                 </div>
                             </div>
+
+
+
                         </div>
                     </div>
+                </div> <!-- End General Tab Grid -->
 
-                    <!-- Right Column: Fine Tuning & KB -->
-                    <div class="space-y-8">
-                        <div>
-                            <h4 class="text-sm font-bold uppercase tracking-widest text-emerald-500 mb-4">Fine Tuning
-                            </h4>
-                            <div
-                                class="glass-card bg-transparent border border-gray-200/50 dark:border-gray-700/50 p-6 space-y-6">
-                                <!-- Creativity -->
-                                <div>
-                                    <label class="label-text flex justify-between">
-                                        <span>Creativity</span> <span x-text="temperature"></span>
-                                    </label>
-                                    <input type="range" x-model="temperature" min="0" max="1" step="0.1"
-                                        class="w-full accent-sky-500 mt-2">
-                                    <div class="text-xs text-gray-400 mt-1">Low (0.2) for strict facts, High (0.8) for
-                                        creative writing.</div>
-                                </div>
-                                <!-- Past Examples -->
-                                <div>
-                                    <label class="label-text flex justify-between">
-                                        <span>Use Past Examples</span> <span x-text="kbCount"></span>
-                                    </label>
-                                    <input type="range" x-model="kbCount" min="0" max="5" step="1"
-                                        class="w-full accent-emerald-500 mt-2">
-                                    <div class="text-xs text-gray-400 mt-1">Number of saved responses to use as style
-                                        references.</div>
-                                </div>
-                                <!-- Response Length -->
-                                <div>
-                                    <label class="label-text flex justify-between">
-                                        <span>Response Length</span> <span x-text="maxTokens"></span>
-                                    </label>
-                                    <input type="range" x-model="maxTokens" min="100" max="2048" step="100"
-                                        class="w-full accent-indigo-500 mt-2">
-                                    <div class="text-xs text-gray-400 mt-1">Max token limit (100 tokens ≈ 75 words).
-                                    </div>
-                                </div>
-                                <!-- Topic Repetition -->
-                                <div>
-                                    <label class="label-text flex justify-between">
-                                        <span>Topic Repetition</span> <span x-text="presencePenalty"></span>
-                                    </label>
-                                    <input type="range" x-model="presencePenalty" min="-2" max="2" step="0.1"
-                                        class="w-full accent-purple-500 mt-2">
-                                    <div class="text-xs text-gray-400 mt-1">Increase to stop the AI from staying on one
-                                        topic.</div>
-                                </div>
-                                <!-- Word Repetition -->
-                                <div>
-                                    <label class="label-text flex justify-between">
-                                        <span>Word Repetition</span> <span x-text="frequencyPenalty"></span>
-                                    </label>
-                                    <input type="range" x-model="frequencyPenalty" min="-2" max="2" step="0.1"
-                                        class="w-full accent-pink-500 mt-2">
-                                    <div class="text-xs text-gray-400 mt-1">Increase to stop the AI from repeating
-                                        specific words.</div>
-                                </div>
-                                <!-- Style Exclusions -->
-                                <div class="pt-2">
-                                    <label class="label-text flex justify-between items-center mb-2">
-                                        Style Exclusions
-                                        <button @click="negativePrompt = ''" x-show="negativePrompt"
-                                            class="text-xs text-red-400 hover:text-red-500">Clear</button>
-                                    </label>
-                                    <input type="text" x-model="negativePrompt"
-                                        placeholder="e.g. no jargon, no apologies"
-                                        class="w-full p-2 text-sm rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700 focus:ring-1 focus:ring-sky-500">
-                                </div>
-                            </div>
-                        </div>
+                <!-- Roles Tab Content -->
+                <div class="col-span-1 lg:col-span-2" x-show="configTab === 'roles'" x-cloak>
+                    <div class="flex flex-col h-full space-y-6">
 
-                        <!-- KB Widget Embedded -->
-                        <div>
-                            <h4 class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">Knowledge Base
-                            </h4>
-                            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center gap-2 group relative">
-                                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                        <span
-                                            class="text-sm font-medium cursor-help border-b border-dashed border-gray-400">Memory
-                                            Active</span>
-                                        <!-- Tooltip -->
-                                        <div
-                                            class="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black text-white text-xs rounded hidden group-hover:block z-50 shadow-xl">
-                                            New approved responses will be saved to the Knowledge Base.
+                        <!-- Roles List and Editor Grid -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                            <!-- Role List -->
+                            <div class="lg:col-span-1 space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <h4 class="text-sm font-bold uppercase tracking-widest text-sky-500">Defined Roles
+                                    </h4>
+                                    <button @click="createNewRole()" class="text-xs btn btn-ghost px-2 py-1">+ New
+                                        Role</button>
+                                </div>
+
+                                <div class="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <template x-for="role in promptRoles" :key="role.id">
+                                        <div @click="selectRole(role)"
+                                            class="p-3 rounded-xl border cursor-pointer transition-all hover:bg-white/5 relative group"
+                                            :class="currRole?.id === role.id ? 'bg-white/10 border-sky-500/50' : 'bg-transparent border-gray-200/20 dark:border-gray-700/50'">
+
+                                            <div class="flex justify-between items-start pt-1">
+                                                <div>
+                                                    <h5 class="font-bold text-sm text-gray-200" x-text="role.name"></h5>
+                                                    <span x-show="role.is_default"
+                                                        class="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider inline-block mt-1">Default</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <span class="info-pill bg-gray-100 dark:bg-gray-800"
-                                        x-text="auditLogs.length + ' Items'"></span>
-                                </div>
-                                <div class="flex gap-2">
-                                    <input type="file" @change="kbFile = $event.target.files[0]"
-                                        class="block w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-colors">
-                                    <button class="btn btn-ghost text-xs" @click="importKB()"
-                                        :disabled="!kbFile">Import</button>
+                                    </template>
                                 </div>
                             </div>
-                        </div>
 
+                            <!-- Role Editor -->
+                            <div class="lg:col-span-2 glass-card bg-black/20 p-6 min-h-[400px]">
+                                <template x-if="currRole">
+                                    <div class="space-y-4">
+                                        <div
+                                            class="flex justify-between items-center border-b border-gray-200/10 pb-4 mb-4">
+                                            <h4 class="font-bold text-gray-200">Edit Role</h4>
+                                            <div class="flex gap-2">
+                                                <button x-show="!currRole.is_default" @click="deleteRole(currRole.id)"
+                                                    class="text-xs text-red-400 hover:text-red-300 px-3 py-1.5 rounded hover:bg-red-500/10 transition-colors">Delete</button>
+                                                <button @click="saveRole()"
+                                                    class="btn btn-primary text-xs px-4 py-1.5">Save Changes</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="label-text mb-1">Role Name</label>
+                                                <input type="text" x-model="currRole.name"
+                                                    class="form-input w-full p-2 text-sm rounded-lg bg-black/20 border border-gray-700">
+                                            </div>
+                                            <div class="flex items-end pb-3">
+                                                <label class="flex items-center gap-2 cursor-pointer">
+                                                    <input type="checkbox" x-model="currRole.is_default"
+                                                        class="rounded text-emerald-500 focus:ring-emerald-500 bg-black/20 border-gray-700">
+                                                    <span class="text-sm font-medium text-gray-300">Set as Default
+                                                        Role</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="label-text mb-1">Identity (System Prompt Start)</label>
+                                            <input type="text" x-model="currRole.identity"
+                                                class="form-input w-full p-2 text-sm rounded-lg bg-black/20 border border-gray-700 placeholder-gray-500"
+                                                placeholder="You are {signature}...">
+                                            <p class="text-xs text-gray-500 mt-1">Use <code>{signature}</code>
+                                                placeholder.</p>
+                                        </div>
+
+                                        <div>
+                                            <label class="label-text mb-1">Protocol (Instructions)</label>
+                                            <textarea x-model="currRole.protocol" rows="4"
+                                                class="form-input w-full p-2 text-sm rounded-lg bg-black/20 border border-gray-700 font-mono text-xs text-gray-300"></textarea>
+                                        </div>
+
+                                        <div>
+                                            <label class="label-text mb-1">Response Format</label>
+                                            <textarea x-model="currRole.format" rows="6"
+                                                class="form-input w-full p-2 text-sm rounded-lg bg-black/20 border border-gray-700 font-mono text-xs text-gray-300"></textarea>
+                                        </div>
+
+                                    </div>
+                                </template>
+                                <template x-if="!currRole">
+                                    <div class="h-full flex items-center justify-center text-gray-500 flex-col gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 opacity-50" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <p>Select a role to edit or create a new one.</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Modal Footer -->
-            <div class="p-5 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3 z-10">
-                <button class="btn btn-primary px-8 py-3" @click="showConfigModal = false">
-                    Done
-                </button>
+                <!-- Modal Footer -->
+                <div class="p-5 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3 z-10">
+                    <button class="btn btn-primary px-8 py-3" @click="showConfigModal = false">
+                        Done
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 </body>
 
 </html>

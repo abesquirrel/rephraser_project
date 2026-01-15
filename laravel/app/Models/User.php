@@ -19,9 +19,20 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
+        'signature',
         'password',
+        'is_admin',
     ];
+
+    /**
+     * Get the sessions for the user.
+     */
+    public function sessions()
+    {
+        return $this->hasMany(UserSession::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

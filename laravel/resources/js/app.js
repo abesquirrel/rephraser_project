@@ -5,7 +5,7 @@ function rephraserApp() {
         inputText: '',
         rephrasedContent: '',
         status: '',
-        signature: Alpine.$persist('Paul').as('rephraser_sig'), // Kept persist for signature
+        signature: Alpine.$persist('Masha').as('rephraser_sig'), // Kept persist for signature
         enableWebSearch: true,
         templateMode: false,
         searchKeywords: '',
@@ -38,11 +38,14 @@ function rephraserApp() {
         negativePrompt: Alpine.$persist('').as('rephraser_negative_prompt'),
         modelSettings: Alpine.$persist({}).as('rephraser_model_settings'),
         
-        // Theme
-        theme: Alpine.$persist('dark').as('rephraser_theme'),
-        showGuide: false,
+        // Authentication
+        currentUser: null,
+        showLogin: false,
+        showRegister: false,
+        loginForm: { login: '', password: '' },
+        registerForm: { name: '', username: '', email: '', password: '' },
         
-        theme: Alpine.$persist('dark').as('rephraser_theme'),
+        // UI State
         showGuide: false,
         
         toast: { active: false, msg: '', type: 'info' },
@@ -55,6 +58,75 @@ function rephraserApp() {
         // KB
         kbFile: null,
         importing: false,
+        
+        // Config Tab
+        configTab: 'general',
+        promptRoles: [],
+        currRole: null, 
+        selectedRoleName: '', // Selected role for generation
+
+        
+        // Analytics
+        sessionId: Alpine.$persist(null).as('rephraser_session_id'),
+
+        async logAction(actionType, details = {}) {
+            if (!this.sessionId) return;
+            try {
+                await fetch('/api/log-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: this.sessionId,
+                        action_type: actionType,
+                        action_details: details
+                    })
+                });
+            } catch (e) {
+                console.error("Failed to log action:", e);
+            }
+        },
+
+        async regenerateResponse(item) {
+            // 1. Log negative feedback
+            await this.logAction('regenerate_negative', {
+                original_text: item.original,
+                previous_response: item.rephrased,
+                model: item.modelA
+            });
+
+            // 2. Set input and regenerate
+            this.inputText = item.original;
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Trigger generation
+            this.generateRephrase();
+        },
+
+        async startTracking() {
+             if (!this.sessionId) {
+                 this.sessionId = crypto.randomUUID();
+             }
+             
+             try {
+                 await fetch('/api/session/start', {
+                     method: 'POST',
+                     headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                     },
+                     body: JSON.stringify({
+                         session_id: this.sessionId,
+                         user_signature: this.currentUser?.signature || this.signature,
+                         theme: 'dark' // Fixed for now
+                     })
+                 });
+             } catch (e) {
+                 console.error('Session tracking failed', e);
+             }
+        },
+        kbStats: { total_entries: 0, last_updated: null, category_breakdown: [] }, // Added kbStats
         manualOrig: '',
         manualReph: '',
         manualKeywords: '',
@@ -122,6 +194,22 @@ function rephraserApp() {
              return name.replace(':latest', '').replace(':8b-instruct-q3_K_M', '');
         },
 
+        get friendlyStatus() {
+            const lastStatus = this.thinkingLines.length > 0 ? this.thinkingLines[this.thinkingLines.length - 1] : this.status;
+            // Guard clause if status or lastStatus is undefined
+            if (!lastStatus) return 'Ready';
+            
+            const lower = lastStatus.toLowerCase();
+            
+            if (lower.includes('connect')) return 'Handshaking with AI...';
+            if (lower.includes('predict')) return 'Understanding context...';
+            if (lower.includes('search')) return 'Consulting knowledge base...';
+            if (lower.includes('think')) return 'Analyzing best approach...';
+            if (lower.includes('generat')) return 'Drafting your response...';
+            if (lower.includes('queue')) return 'Waiting for availability...';
+            return 'Working on it...';
+        },
+
         init() {
             // Ensure data types are correct (safety check for persist)
             if (!Array.isArray(this.history)) this.history = [];
@@ -141,10 +229,13 @@ function rephraserApp() {
             // Load settings for initial model
             this.syncModelSettings();
 
-            // apply theme on init
-            this.applyTheme();
+            // Set dark mode by default (no toggle)
+            document.documentElement.classList.add('dark');
 
-            // Watch for model changes
+            // Check if user is authenticated
+            this.checkAuth().then(() => {
+                 this.startTracking();
+            });
             this.$watch('modelA', () => {
                 if (!this.modelA) return;
                 this.syncModelSettings();
@@ -155,13 +246,14 @@ function rephraserApp() {
             this.$watch('topP', (val) => this.saveModelSetting('topP', val));
             this.$watch('frequencyPenalty', (val) => this.saveModelSetting('frequencyPenalty', val));
             this.$watch('presencePenalty', (val) => this.saveModelSetting('presencePenalty', val));
-            
-            // Logic: Template Mode disables Web Search
+
+            // Template Mode disables Web Search
             this.$watch('templateMode', (val) => {
                 if (val) this.enableWebSearch = false;
             });
-            
-            this.$watch('theme', () => this.applyTheme());
+            this.$watch('enableWebSearch', (val) => {
+                if (val) this.templateMode = false;
+            });
 
             // Scroll Lock for Modal
             this.$watch('showConfigModal', (val) => {
@@ -171,8 +263,176 @@ function rephraserApp() {
                 document.body.style.overflow = val ? 'hidden' : '';
             });
             
-            // Initial fetch of models
+            // Initial fetch of models & Roles
             this.fetchOllamaModels();
+            this.fetchKbStats(); 
+            this.fetchRoles();
+        },
+        
+        // --- Role Management Methods ---
+        async fetchRoles() {
+            try {
+                const res = await fetch('/api/roles');
+                if(res.ok) {
+                    this.promptRoles = await res.json();
+                    // Auto-select the default role
+                    const def = this.promptRoles.find(r => r.is_default);
+                    if(def && !this.selectedRoleName) {
+                        this.selectedRoleName = def.name;
+                    }
+                }
+            } catch(e) {
+                console.error("Failed to fetch roles", e);
+            }
+        },
+
+        createNewRole() {
+            this.currRole = {
+                id: null,
+                name: 'New Custom Role',
+                identity: 'You are {signature}. Analytical Assistant.',
+                protocol: '### PROTOCOL\n1. Analyze request.\n2. Provide clear response.',
+                format: '{signature} reports:\n\n(Content)',
+                is_default: false
+            };
+        },
+
+        selectRole(role) {
+            // Deep copy to allow editing without immediate state reflection if cancelled (though we are binding directly now for simplicity)
+            this.currRole = { ...role };
+        },
+
+        async saveRole() {
+            if(!this.currRole) return;
+            try {
+                const res = await fetch('/api/roles', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify(this.currRole)
+                });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    this.triggerToast('Role Saved Successfully', 'success');
+                    await this.fetchRoles(); // Refresh list
+                    // Re-select to get updated ID if new
+                    this.currRole = { ...data.role };
+                } else {
+                    this.triggerToast('Error saving role: ' + (data.message || 'Unknown'), 'error');
+                }
+            } catch(e) {
+                this.triggerToast('Network Error saving role', 'error');
+            }
+        },
+
+        async deleteRole(id) {
+            if(!confirm('Are you sure you want to delete this role?')) return;
+            try {
+                const res = await fetch(`/api/roles/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    this.triggerToast('Role Deleted', 'info');
+                    this.currRole = null;
+                    await this.fetchRoles();
+                } else {
+                    this.triggerToast('Error: ' + data.message, 'error');
+                }
+            } catch(e) {
+                this.triggerToast('Network Error deleting role', 'error');
+            }
+        },
+
+
+        // Authentication Methods
+        async register() {
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(this.registerForm)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    this.currentUser = data.user;
+                    this.signature = data.user.signature; // Auto-set signature from username
+                    this.showRegister = false;
+                    this.triggerToast('Account created successfully!', 'success');
+                    this.registerForm = { name: '', username: '', email: '', password: '' };
+                } else {
+                    const errors = Object.values(data.errors || {}).flat().join(', ');
+                    this.triggerToast(errors || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                this.triggerToast('Registration error: ' + error.message, 'error');
+            }
+        },
+
+        async login() {
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(this.loginForm)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    this.currentUser = data.user;
+                    this.signature = data.user.signature; // Sync signature
+                    this.showLogin = false;
+                    this.triggerToast('Welcome back, ' + data.user.name + '!', 'success');
+                    this.loginForm = { login: '', password: '' };
+                } else {
+                    this.triggerToast(data.errors?.login?.[0] || 'Login failed', 'error');
+                }
+            } catch (error) {
+                this.triggerToast('Login error: ' + error.message, 'error');
+            }
+        },
+
+        async logout() {
+            try {
+                await fetch('/logout', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+
+                this.currentUser = null;
+                this.triggerToast('Logged out successfully', 'info');
+            } catch (error) {
+                this.triggerToast('Logout error: ' + error.message, 'error');
+            }
+        },
+
+        async checkAuth() {
+            try {
+                const response = await fetch('/user', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    this.currentUser = data.user;
+                    if (data.user.signature) {
+                        this.signature = data.user.signature;
+                    }
+                }
+            } catch (error) {
+                // User not authenticated, that's fine
+                this.currentUser = null;
+            }
         },
 
         // Dynamic Model Descriptions
@@ -218,32 +478,7 @@ function rephraserApp() {
              return name.replace(':latest', '').replace(':8b-instruct-q3_K_M', '');
         },
 
-        toggleTheme() {
-            this.theme = this.theme === 'light' ? 'dark' : 'light';
-        },
 
-        applyTheme() {
-            if (this.theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                // You might need to update CSS variables here if using raw CSS vars
-                // But generally class='dark' on html/body is enough if CSS supports it.
-                // Assuming we are swapping root vars or usage of 'dark:' classes
-                document.documentElement.style.setProperty('--bg-color', '#111827');
-                document.documentElement.style.setProperty('--card-bg', 'rgba(31, 41, 55, 0.7)');
-                document.documentElement.style.setProperty('--input-bg', 'rgba(17, 24, 39, 0.6)'); // Dark input bg
-                document.documentElement.style.setProperty('--text-main', '#f9fafb');
-                document.documentElement.style.setProperty('--text-dim', '#9ca3af');
-                document.documentElement.style.setProperty('--card-border', 'rgba(255, 255, 255, 0.1)');
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.documentElement.style.setProperty('--bg-color', '#f9fafb');
-                document.documentElement.style.setProperty('--card-bg', 'rgba(255, 255, 255, 0.75)');
-                document.documentElement.style.setProperty('--input-bg', '#ffffff'); // White input bg
-                document.documentElement.style.setProperty('--text-main', '#1f2937');
-                document.documentElement.style.setProperty('--text-dim', '#6b7280');
-                document.documentElement.style.setProperty('--card-border', 'rgba(0, 0, 0, 0.06)');
-            }
-        },
 
         syncModelSettings() {
             const settings = this.modelSettings[this.modelA];
@@ -355,8 +590,11 @@ function rephraserApp() {
             const runStream = async (model, targetKey) => {
                 const response = await fetch('/api/rephrase', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Session-ID': this.sessionId,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
                     body: JSON.stringify({
                         text: textToProcess,
                         signature: this.signature,
@@ -368,7 +606,10 @@ function rephraserApp() {
                         temperature: this.temperature,
                         max_tokens: finalTokens,
                         kb_count: this.kbCount,
-                        negative_prompt: this.negativePrompt
+                        max_tokens: finalTokens,
+                        kb_count: this.kbCount,
+                        negative_prompt: this.negativePrompt,
+                        role: this.selectedRoleName // Pass selected role
                     })
                 });
 
@@ -461,6 +702,17 @@ function rephraserApp() {
             } finally {
                 this.isGenerating = false;
                 this.status = 'Done.';
+            }
+        },
+
+        async fetchKbStats() {
+            try {
+                const response = await fetch('/api/kb-stats');
+                if (response.ok) {
+                    this.kbStats = await response.json();
+                }
+            } catch (e) {
+                console.error('Failed to fetch KB stats', e);
             }
         },
 
