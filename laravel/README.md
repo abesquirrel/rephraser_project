@@ -1,53 +1,22 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="300" alt="Laravel Logo">
-</p>
+# Masha Rephraser AI
 
-# Masha Rephraser AI 🐈‍⬛
+Masha is an intelligent rephrasing assistant designed to transform raw customer support notes into professional, empathetic, and structured responses. It learns from user corrections, maintains a searchable knowledge base, and adapts to different communication styles through configurable roles.
 
-> _"The lazy cat with the best ideas. In training — furballs may occur."_
+## Features
 
-**Masha** is an intelligent rephrasing assistant designed to transform raw customer support notes into professional, empathetic, and structured responses. She learns from your corrections, maintains a searchable Knowledge Base, and adapts to different roles.
-
-## ✨ Key Features
-
--   **Smart Rephrasing**: Turn bullet points into polished prose instantly.
--   **Context Awareness**: Retrieves similar past scenarios from the Knowledge Base (FAISS) to ensure consistency.
--   **Dynamic Roles**: Switch between "Tech Support" (analytical) and "Customer Support" (empathetic) personas.
+-   **Intelligent Rephrasing**: Converts bullet points, fragmented notes, or rough drafts into polished, professional text suitable for customer communication.
+-   **Context-Aware Responses**: Leverages a FAISS-based vector search to retrieve similar past interactions from a knowledge base, ensuring consistency and leveraging historical data.
+-   **Dynamic Roles**: Allows users to switch between different personas (e.g., "Tech Support," "Customer Support") to tailor the tone and structure of the generated response.
 -   **Knowledge Base Management**:
-    -   **Auto-Save**: Approving a response saves it for future learning.
-    -   **Edit & Refine**: Correct/update existing entries directly from the interface.
-    -   **Review & Prune**: Identify and remove unused or outdated entries with a safe review workflow.
-    -   **Optimization**: On-demand index rebuilding for lightning-fast search.
--   **Performance Analytics**: Track model latency, token usage, and leaderboard stats.
+    -   **Auto-Save**: Approved responses are automatically saved to the knowledge base for future reference.
+    -   **Edit & Refine**: Existing entries in the knowledge base can be edited and updated directly through the user interface.
+    -   **Review & Prune**: A dedicated interface allows for reviewing and removing outdated or low-usage entries from the knowledge base.
+    -   **Index Optimization**: Provides an on-demand mechanism to rebuild the FAISS index for optimal search performance.
+-   **Performance Analytics**: Tracks model latency, token usage, and provides a leaderboard to monitor the performance of different models.
 
-## 🚀 Getting Started
+## Architecture
 
-### Prerequisites
-
--   Docker & Docker Compose
-
-### Installation
-
-1. **Clone the repository**
-
-    ```bash
-    git clone <repo-url>
-    cd rephraser_project
-    ```
-
-2. **Start the services**
-
-    ```bash
-    docker-compose up -d --build
-    ```
-
-3. **Access the Application**
-    - **Frontend**: http://localhost:8000
-    - **Masha is ready!** 🐾
-
-## 🛠️ Architecture
-
-The system follows a microservices-based architecture to separate concerns between application logic and heavy AI processing.
+The system is designed with a microservices-based architecture to decouple the application logic from the AI processing workloads.
 
 ```mermaid
 graph TD
@@ -74,30 +43,43 @@ graph TD
 
 ### Component Breakdown
 
--   **Alpine.js Frontend**: Handles real-time user interaction, streaming updates, and state management (e.g., dark mode, history).
--   **Laravel Backend**: The orchestrator. It manages authentication, sanitizes inputs, and routes requests to the appropriate AI service.
--   **Python Embedding Service**: Converts text into mathematical vectors. It uses a high-speed FAISS index to "remember" past good responses.
--   **Python Inference Service**: The brain. It constructs the final prompt (injecting context from FAISS) and talks to the refined AI model (e.g., Qwen/Gemma).
--   **MariaDB**: Stores robust relational data (Users, Roles, History Logs).
--   **FAISS**: A specialized database that allows Masha to find "conceptually similar" past examples, even if the wording is different.
+-   **Alpine.js Frontend**: A lightweight, reactive frontend that handles user interactions, streams responses from the backend, and manages the application state.
+-   **Laravel Backend**: The central orchestrator of the application. It manages user authentication, handles API requests, and coordinates with the AI services.
+-   **Python Embedding Service**: Responsible for converting text into vector embeddings and searching the FAISS index for similar entries.
+-   **Python Inference Service**: Constructs the final prompt by injecting context from the FAISS search and interfaces with the language model (e.g., Qwen, Gemma) via Ollama.
+-   **MariaDB**: The primary relational database for storing user data, roles, and historical logs.
+-   **FAISS**: A vector database used for efficient similarity search, enabling the system to find conceptually similar past responses.
 
-## 🐱 Masha's Tips
+## Getting Started
 
--   **Review & Prune**: Use the "Rescan" button in the Prune modal to find entries that haven't been used in 30+ days.
--   **Golden Samples**: Manually add perfect examples to the KB to guide Masha's future style.
--   **Feedback**: If Masha gets it wrong, edit the text and hit "Approve" — she'll learn for next time.
+### Prerequisites
 
-## 📍 Roadmap
+-   Docker
+-   Docker Compose
 
-The following enhancements are planned for future updates:
+### Installation
 
--   **Bulk Edit**: Update multiple entries at once (e.g., bulk category changes).
--   **Advanced Filters**: Find candidates by keyword or template status.
--   **Export**: Export prune candidates to CSV for offline review.
--   **Scheduled Cleanup**: Automated background pruning for expired entries.
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd rephraser_project
+    ```
+2.  **Start the services:**
+    ```bash
+    docker-compose up -d --build
+    ```
+3.  **Access the application:**
+    -   **Frontend**: `http://localhost:8000`
 
----
+## Considerations & Limitations
 
-<p align="center">
-  Made with ❤️ and purrs.
-</p>
+-   **Cold Starts**: The AI services, particularly the inference service, may experience a "cold start" delay on the first request after a period of inactivity.
+-   **Resource Intensive**: Running multiple AI models and services requires a significant amount of RAM and CPU resources.
+-   **Vector Search Tuning**: The effectiveness of the context-aware responses is highly dependent on the quality of the data in the knowledge base and the tuning of the FAISS search parameters.
+
+## Roadmap
+
+-   **Bulk Editing**: Implement functionality to edit multiple knowledge base entries at once.
+-   **Advanced Filtering**: Add options to filter knowledge base entries by keyword or template status.
+-   **CSV Export**: Allow users to export prune candidates to a CSV file for offline review.
+-   **Scheduled Cleanup**: Implement an automated background process for pruning expired or low-usage entries from the knowledge base.
