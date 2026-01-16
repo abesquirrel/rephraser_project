@@ -12,8 +12,10 @@ class ModelGeneration extends Model
     protected $fillable = [
         'session_id',
         'model_id',
+        'model_display_name',
         'input_text_length',
         'output_text_length',
+        'prompt_tokens',
         'completion_tokens',
         'total_tokens',
         'generation_time_ms',

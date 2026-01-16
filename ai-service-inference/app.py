@@ -410,8 +410,18 @@ def handle_rephrase():
         char_count = len(response)
         est_tokens = char_count // 4
         
+        # Capture KB IDs for logging
+        kb_ids = [ex.get('id') for ex in examples_list if isinstance(ex, dict) and ex.get('id')]
+        
         logger.info(f"Final Response ({char_count} chars). Total Latency: {total_latency:.2f}s")
-        yield json.dumps({"data": response, "meta": {"latency": total_latency, "tokens": est_tokens}}) + "\n"
+        yield json.dumps({
+            "data": response, 
+            "meta": {
+                "latency": total_latency, 
+                "tokens": est_tokens,
+                "kb_ids": kb_ids
+            }
+        }) + "\n"
 
     return Response(stream_with_context(thinking_process_stream()), mimetype='application/json')
 

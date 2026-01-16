@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Http;
 use App\Models\KnowledgeBase;
 use App\Models\AuditLog;
 use Illuminate\Support\Facades\Log;
+use App\Models\ApiCall;
+use App\Models\KbUsage;
 
 class RephraseController extends Controller
 {
@@ -55,14 +57,20 @@ class RephraseController extends Controller
 
         // Resolve Session ID safely
         $sessionId = $request->header('X-Session-ID');
-        if (empty($sessionId) || $sessionId === 'null') {
+        if (empty($sessionId) || $sessionId === 'null' || !$sessionId) {
             $sessionId = session()->getId();
         }
 
         // Ensure the session ID actually exists in the DB to avoid FK errors (1452)
-        // If it doesn't exist, we fallback to null (which is allowed)
-        if ($sessionId && !\App\Models\UserSession::where('session_id', $sessionId)->exists()) {
-            $sessionId = null;
+        // Instead of nulling it, we create a stub if it doesn't exist yet
+        if ($sessionId) {
+            \App\Models\UserSession::firstOrCreate(
+                ['session_id' => $sessionId],
+                [
+                    'user_signature' => $request->input('signature') ?? 'Lazy Init',
+                    'last_active_at' => now()
+                ]
+            );
         }
 
         // 1. Create Log Record
@@ -75,17 +83,37 @@ class RephraseController extends Controller
             'kb_count' => $data['kb_count'] ?? null,
             'web_search_enabled' => $data['web_search_enabled'] ?? false,
             'template_mode' => $data['template_mode'] ?? false,
-            // 'prompt_tokens' - could assume from input length approx
+            'prompt_tokens' => (int) ($inputLength / 3), // Approx 3-4 chars per token
         ]);
 
         $startTime = microtime(true);
 
-        // Stream response from Python service
-        $response = $this->aiCall()
-            ->withOptions(['stream' => true])
-            ->post("{$this->inferenceServiceUrl}/rephrase", $data);
+        // 2. Log API Call Start
+        $apiCall = ApiCall::create([
+            'service' => 'inference',
+            'endpoint' => "{$this->inferenceServiceUrl}/rephrase",
+            'method' => 'POST',
+            'request_payload_size' => strlen(json_encode($data)),
+            'tokens_used' => (int) ($inputLength / 3),
+        ]);
 
-        return response()->stream(function () use ($response, $generationLog, $startTime) {
+        // Stream response from Python service
+        try {
+            $response = $this->aiCall()
+                ->withOptions(['stream' => true])
+                ->post("{$this->inferenceServiceUrl}/rephrase", $data);
+
+            $apiCall->update(['response_status' => $response->status()]);
+        } catch (\Exception $e) {
+            $apiCall->update([
+                'is_error' => true,
+                'error_type' => 'Connection Error',
+                'error_message' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+
+        return response()->stream(function () use ($response, $generationLog, $startTime, $apiCall) {
             $body = $response->toPsrResponse()->getBody();
             $accumulatedOutput = '';
 
@@ -100,14 +128,38 @@ class RephraseController extends Controller
 
             // 2. Update Log on Completion
             $duration = (microtime(true) - $startTime) * 1000;
-            $outputLength = strlen($accumulatedOutput);
+
+            // Fast parse for metadata
+            $lines = explode("\n", trim($accumulatedOutput));
+            $lastLine = end($lines);
+            $parsedMeta = json_decode($lastLine, true) ?? [];
+
+            $finalContent = $parsedMeta['data'] ?? '';
+            $kbIds = $parsedMeta['meta']['kb_ids'] ?? [];
+            $outputLength = strlen($finalContent);
 
             $generationLog->update([
                 'generation_time_ms' => (int) $duration,
                 'output_text_length' => $outputLength,
-                'completion_tokens' => (int) ($outputLength / 4), // Rough approx
-                'total_tokens' => (int) (($generationLog->input_text_length + $outputLength) / 4)
+                'completion_tokens' => (int) ($outputLength / 4),
+                'total_tokens' => (int) (($generationLog->input_text_length + $outputLength) / 4) + $generationLog->prompt_tokens
             ]);
+
+            $apiCall->update([
+                'response_time_ms' => (int) $duration,
+                'response_payload_size' => strlen($accumulatedOutput)
+            ]);
+
+            // 3. Log KB Usage
+            if (!empty($kbIds)) {
+                foreach ($kbIds as $kbId) {
+                    KbUsage::create([
+                        'generation_id' => $generationLog->id,
+                        'kb_entry_id' => $kbId,
+                        'was_used_in_prompt' => true
+                    ]);
+                }
+            }
 
         }, 200, [
             'Content-Type' => 'application/json',
@@ -211,6 +263,28 @@ class RephraseController extends Controller
             'presence_penalty' => $validated['presence_penalty'] ?? null,
             'user_name' => 'System' // Can be updated if auth is added later
         ]);
+
+        // Calculate Edit Distance
+        $editDist = 0;
+        if (!empty($validated['original_text']) && !empty($validated['rephrased_text'])) {
+            $editDist = levenshtein($validated['original_text'], $validated['rephrased_text']);
+        }
+
+        // Try to link back to the ModelGeneration to update metrics
+        $sessionId = $request->header('X-Session-ID') ?? session()->getId();
+
+        if ($sessionId) {
+            $latestGen = \App\Models\ModelGeneration::where('session_id', $sessionId)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($latestGen) {
+                $latestGen->update([
+                    'was_approved' => true,
+                    'edit_distance' => $editDist
+                ]);
+            }
+        }
 
         // 2. Notify AI Service to rebuild index
         $this->notifyAiRebuild();
