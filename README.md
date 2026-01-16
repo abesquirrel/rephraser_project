@@ -1,174 +1,103 @@
-# Masha: The Rephraser AI
+<p align="center">
+  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="300" alt="Laravel Logo">
+</p>
 
-A professional, microservice-based application for knowledge-aware text rephrasing interactions. This system leverages local LLMs (via Ollama) and a RAG (Retrieval-Augmented Generation) pipeline to provide consistent, high-quality responses based on your own historical data. It now features **Fact Checking** capability via live web search and a **Template Mode** for rigid structure adherence.
+# Masha Rephraser AI 🐈‍⬛
 
----
+> _"The lazy cat with the best ideas. In training — furballs may occur."_
 
-## 🏗 Architecture
+**Masha** is an intelligent rephrasing assistant designed to transform raw customer support notes into professional, empathetic, and structured responses. She learns from your corrections, maintains a searchable Knowledge Base, and adapts to different roles.
 
-The project is built on a containerized microservice architecture:
+## ✨ Key Features
+
+-   **Smart Rephrasing**: Turn bullet points into polished prose instantly.
+-   **Context Awareness**: Retrieves similar past scenarios from the Knowledge Base (FAISS) to ensure consistency.
+-   **Dynamic Roles**: Switch between "Tech Support" (analytical) and "Customer Support" (empathetic) personas.
+-   **Knowledge Base Management**:
+    -   **Auto-Save**: Approving a response saves it for future learning.
+    -   **Edit & Refine**: Correct/update existing entries directly from the interface.
+    -   **Review & Prune**: Identify and remove unused or outdated entries with a safe review workflow.
+    -   **Optimization**: On-demand index rebuilding for lightning-fast search.
+-   **Performance Analytics**: Track model latency, token usage, and leaderboard stats.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+-   Docker & Docker Compose
+
+### Installation
+
+1. **Clone the repository**
+
+    ```bash
+    git clone <repo-url>
+    cd rephraser_project
+    ```
+
+2. **Start the services**
+
+    ```bash
+    docker-compose up -d --build
+    ```
+
+3. **Access the Application**
+    - **Frontend**: http://localhost:8000
+    - **Masha is ready!** 🐾
+
+## 🛠️ Architecture
+
+The system follows a microservices-based architecture to separate concerns between application logic and heavy AI processing.
 
 ```mermaid
 graph TD
-    User["Web Browser"] -->|HTTP:8000| Nginx["Nginx Gateway"]
-    Nginx -->|Proxy| Laravel["Laravel App (Frontend/Backend)"]
-    Laravel -->|SQL| MariaDB[("MariaDB Database")]
-    Laravel -->|JSON/HTTP| AI_Inf["AI Inference Service :5001"]
-    Laravel -->|JSON/HTTP| AI_Emb["AI Embedding Service :5002"]
+    User([User]) -->|Input Text| Frontend[Alpine.js Frontend]
+    Frontend -->|API Request| Laravel[Laravel 11 Backend]
 
-    AI_Emb -->|Embedding Search| FAISS[("FAISS Vector Store")]
-    AI_Emb -->|SQL Index Build| MariaDB
-
-    AI_Inf -->|Inference| Ollama["Ollama (Host Machine :11434)"]
-    AI_Inf -->|Web Search| DDG["DuckDuckGo (Internet)"]
-    AI_Inf -->|Retrieve Context| AI_Emb
-
-    Laravel -->|Cache/Queue| Redis[("Redis")]
-```
-
-### Components
-
-- **Laravel (App)**: Handles the UI (Blade + Alpine.js), business logic, and database management. It acts as the primary orchestrator.
-- **AI Inference Service (Port 5001)**: The core intelligence layer.
-  - Handles `rephrase`, `suggest_keywords`, and `list_models` requests.
-  - Manages **Fact Checking** (Web Search) and **Template Mode** logic.
-  - Interacts with Ollama for text generation.
-- **AI Embedding Service (Port 5002)**: The memory layer.
-  - Manages the FAISS vector index.
-  - Handles `retrieve` (Vector Search) and `trigger_rebuild` requests.
-  - Periodically rebuilds the index from MariaDB.
-- **MariaDB**: The "Source of Truth" for all knowledge base entries and audit logs.
-- **Redis**: Caching and queue management.
-- **Ollama**: External LLM provider running on the host machine (accessed via `host.docker.internal`).
-
-### Workflow
-
-The following sequence details the lifecycle of a rephrasing request:
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant L as "Laravel (UI)"
-    participant I as "Inference Service"
-    participant E as "Embedding Service"
-    participant O as "Ollama (LLM)"
-    participant W as "Web Search"
-
-    U->>L: Submits "Notes" (Config: Search=True)
-    L->>I: POST /rephrase
-    activate I
-    I->>I: Extract Keywords
-
-    par Context Gathering
-        I->>E: POST /retrieve (Vector Search)
-        E-->>I: Returns Similar Examples
-    and Web Research
-        I->>W: Perform Search (Reddit/Apple/etc)
-        W-->>I: Returns Search Results
+    subgraph "Application Core"
+        Laravel -->|Auth Check| DB[(MariaDB)]
+        Laravel -->|Store History| DB
     end
 
-    I->>O: Generate Response (Prompt + Examples + Search Data)
-    activate O
-    O-->>I: Streamed Token Response
-    deactivate O
-    I-->>L: JSON Stream (Progress + Text)
-    deactivate I
-    L-->>U: Updates UI Live
+    subgraph "AI Capabilities"
+        Laravel -->|Text to Vector| PyEmbed[Python Embedding Service]
+        PyEmbed -->|Search| FAISS[(FAISS Vector DB)]
+
+        Laravel -->|Prompt + Context| PyInfer[Python Inference Service]
+        PyInfer -->|Generate| Ollama[[Ollama LLM]]
+    end
+
+    PyEmbed -.->|Cache Vectors| DB
+    FAISS -.->|Retrieve Similar| Laravel
+    Ollama -->|Stream Response| Frontend
 ```
+
+### Component Breakdown
+
+-   **Alpine.js Frontend**: Handles real-time user interaction, streaming updates, and state management (e.g., dark mode, history).
+-   **Laravel Backend**: The orchestrator. It manages authentication, sanitizes inputs, and routes requests to the appropriate AI service.
+-   **Python Embedding Service**: Converts text into mathematical vectors. It uses a high-speed FAISS index to "remember" past good responses.
+-   **Python Inference Service**: The brain. It constructs the final prompt (injecting context from FAISS) and talks to the refined AI model (e.g., Qwen/Gemma).
+-   **MariaDB**: Stores robust relational data (Users, Roles, History Logs).
+-   **FAISS**: A specialized database that allows Masha to find "conceptually similar" past examples, even if the wording is different.
+
+## 🐱 Masha's Tips
+
+-   **Review & Prune**: Use the "Rescan" button in the Prune modal to find entries that haven't been used in 30+ days.
+-   **Golden Samples**: Manually add perfect examples to the KB to guide Masha's future style.
+-   **Feedback**: If Masha gets it wrong, edit the text and hit "Approve" — she'll learn for next time.
+
+## 📍 Roadmap
+
+The following enhancements are planned for future updates:
+
+-   **Bulk Edit**: Update multiple entries at once (e.g., bulk category changes).
+-   **Advanced Filters**: Find candidates by keyword or template status.
+-   **Export**: Export prune candidates to CSV for offline review.
+-   **Scheduled Cleanup**: Automated background pruning for expired entries.
 
 ---
 
-## 🚀 Prerequisites
-
-Before deploying, ensure you have the following installed on your host machine:
-
-1.  **Docker Desktop** (or Docker Engine + Docker Compose).
-2.  **Ollama**: This application relies on local LLMs.
-    - [Download Ollama](https://ollama.com)
-    - **Pull Models**:
-      ```bash
-      ollama pull llama3:8b-instruct-q3_K_M
-      ollama pull gemma2:9b
-      ```
-    - **Start Ollama**: Ensure it is running (`ollama serve`).
-
----
-
-## 🛠 Deployment From Scratch
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd rephraser_project
-```
-
-### 2. Configure Environment
-
-```bash
-cp laravel/.env.example laravel/.env
-```
-
-**Key Configuration (`laravel/.env`)**:
-
-- `AI_INFERENCE_HOST`: `http://ai-inference:5001`
-- `AI_EMBEDDING_HOST`: `http://ai-embedding:5002`
-
-### 3. Start the Application
-
-```bash
-chmod +x start_docker.sh
-./start_docker.sh
-```
-
----
-
-## ⚙️ Advanced Configuration & Modes
-
-### Operational Modes (Mutually Exclusive)
-
-1.  **Fact Check Mode** (`enable_web_search=True`)
-
-    - **Goal:** Validate user notes against live web data.
-    - **Behavior:** Performs Google/Reddit searches using extracted keywords. Injects search results into the prompt. Forces the model to `VALIDATE` and `CORRECT`.
-    - **Constraint:** Disables Template Mode.
-
-2.  **Template Mode** (`template_mode=True`)
-
-    - **Goal:** Force strict adherence to a specific format.
-    - **Behavior:** Retrieves the most similar example and instructs the model to act as a `TEMPLATE ADAPTER`.
-    - **Constraint:** Disables Web Search.
-
-3.  **Standard Mode** (Both False)
-    - **Goal:** Professional rephrasing and grammar correction.
-    - **Behavior:** Standard RAG pipeline using knowledge base examples for tone matching.
-
-### Knowledge Base Persistence
-
-- **Automatic Learning:** When you click **Approve**, the response is saved.
-- **Metadata:** It now saves `is_template`, `keywords`, and `category` tags.
-- **Import Rules:**
-  - CSV/Bulk Import requires `original_text` and `rephrased_text`.
-  - Optional columns: `keywords`, `category`, `is_template`.
-
-### Model Insight & Statistics
-
-- **Approval Tracking:** The system tracks which model generates approved responses.
-- **Leaderboard:** View the "Models & Stats" tab in the Help Modal to see your most successful models.
-- **Dynamic Help:** The guide updates automatically based on the models you have loaded in Ollama.
-
----
-
-## 🔧 Troubleshooting
-
-### "Ollama Connection Failed"
-
-- **Fix**: Ensure Ollama is running (`ollama serve`). The architecture assumes `host.docker.internal` access.
-
-### Rebuilding After Changes
-
-If you modify Python code:
-
-```bash
-docker-compose up -d --build ai-inference ai-embedding
-```
+<p align="center">
+  Made with ❤️ and purrs.
+</p>
