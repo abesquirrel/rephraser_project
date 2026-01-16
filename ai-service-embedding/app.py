@@ -230,9 +230,10 @@ def retrieve():
     candidates = []
     found_ids = []
     
-    for idx_val in I[0]:
+    for i, idx_val in enumerate(I[0]):
         if 0 <= idx_val < len(knowledge_texts):
-            item = knowledge_texts[idx_val]
+            item = knowledge_texts[idx_val].copy()
+            item['score'] = float(D[0][i])
             candidates.append(item)
             found_ids.append(item['id'])
     

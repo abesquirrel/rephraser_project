@@ -194,42 +194,26 @@
 
 
 
-                <!-- Status Pill Container (Floating) -->
-                <!-- Centered Generation Feedback Overlay -->
+                <!-- Floating Loader (Non-blocking) -->
                 <div x-show="isGenerating" x-cloak
-                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity"
-                    x-transition:enter="duration-300 ease-out" x-transition:enter-start="opacity-0"
-                    x-transition:enter-end="opacity-100" x-transition:leave="duration-200 ease-in"
-                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                    class="fixed bottom-8 right-8 z-[60] flex items-center gap-4 bg-black/80 backdrop-blur-md p-4 rounded-2xl shadow-2xl border border-sky-500/30 animate-fade-in"
+                    x-transition:enter="duration-300 ease-out" x-transition:enter-start="opacity-0 translate-y-4"
+                    x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="duration-200 ease-in"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 translate-y-4">
 
-                    <div
-                        class="glass-card p-8 rounded-3xl flex flex-col items-center gap-6 shadow-2xl border border-sky-500/30 bg-black/80 max-w-sm w-full mx-4">
-                        <!-- Pulsing AI Brain / Spinner -->
-                        <div class="relative w-20 h-20 flex items-center justify-center">
-                            <div class="absolute inset-0 bg-sky-500/20 rounded-full animate-ping"></div>
-                            <div class="absolute inset-2 bg-indigo-500/20 rounded-full animate-pulse delay-75"></div>
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                class="w-10 h-10 text-sky-400 animate-pulse relative z-10" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-
-                        <div class="text-center space-y-2">
-                            <h3 class="text-xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-400"
-                                x-text="friendlyStatus">
-                            </h3>
-                            <p class="text-sm text-gray-400" x-text="status !== friendlyStatus ? status : ''"></p>
-                            <!-- Sub-text for tech details if different -->
-                        </div>
-
-                        <!-- Progress Bar (Fake but visual) -->
-                        <div class="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden relative">
-                            <div
-                                class="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-500 to-indigo-500 w-1/3 animate-[progress_2s_ease-in-out_infinite]">
-                            </div>
-                        </div>
+                    <div class="relative w-10 h-10 flex items-center justify-center">
+                        <div class="absolute inset-0 bg-sky-500/20 rounded-full animate-ping"></div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-sky-400 animate-pulse relative z-10"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div class="pr-2">
+                        <div class="text-sm font-bold text-white" x-text="friendlyStatus"></div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-widest"
+                            x-text="status !== friendlyStatus ? status : ''"></div>
                     </div>
                 </div>
             </section>
@@ -868,129 +852,242 @@
                     <!-- GUIDE TAB -->
                     <div x-show="activeHelpTab === 'guide'" class="space-y-12 animate-fade">
 
-                        <!-- Section 1: Core Workflow -->
+                        <!-- Section 1: The Masha Ecosystem -->
                         <section>
                             <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
                                 <span
-                                    class="w-8 h-8 rounded-full bg-sky-500/10 text-sky-600 flex items-center justify-center text-sm">1</span>
-                                The Core Workflow
+                                    class="w-8 h-8 rounded-full bg-sky-500/10 text-sky-600 flex items-center justify-center text-sm font-display">01</span>
+                                The Ecosystem
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-gray-200/10">
-                                    <h4 class="font-semibold mb-2 text-sky-500">1. Compose</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">Dump your raw thoughts, bullet
-                                        points, or rough drafts into the <strong>Compose Rephrasing</strong> area. Masha
-                                        will handle the grammar and tone.</p>
+                                <div
+                                    class="p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-gray-200/10 hover:border-sky-500/30 transition-colors">
+                                    <h4 class="font-bold mb-2 text-sky-500 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                        Drafting
+                                    </h4>
+                                    <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-400">Input raw
+                                        diagnostic notes or fragmented thoughts. Masha utilizes <strong>real-time token
+                                            streaming</strong> to begin drafting your response word-by-word instantly.
+                                    </p>
                                 </div>
-                                <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-gray-200/10">
-                                    <h4 class="font-semibold mb-2 text-indigo-500">2. Configure</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">Use the Settings or dropdowns to
-                                        adjust the Target Role, Creativity, or enable Web Search.</p>
+                                <div
+                                    class="p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-gray-200/10 hover:border-indigo-500/30 transition-colors">
+                                    <h4 class="font-bold mb-2 text-indigo-500 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.364-6.364l-.707-.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                        Intelligence
+                                    </h4>
+                                    <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-400">Switch roles
+                                        between <strong>Tech Support</strong> or <strong>Customer Care</strong>. Enable
+                                        <strong>Research Mode</strong> to cross-reference data against live web sources.
+                                    </p>
                                 </div>
-                                <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-gray-200/10">
-                                    <h4 class="font-semibold mb-2 text-emerald-500">3. Refine & Save</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">Generate the response. Edit if
-                                        needed, then click <strong>Approve</strong> to save it to Masha's Knowledge
-                                        Base.</p>
+                                <div
+                                    class="p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-gray-200/10 hover:border-emerald-500/30 transition-colors">
+                                    <h4 class="font-bold mb-2 text-emerald-500 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Memory
+                                    </h4>
+                                    <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-400">Clicking
+                                        <strong>Approve</strong> commits the pair to the Knowledge Base. Masha learns
+                                        your stylistic preferences and technical corrections for future requests.
+                                    </p>
                                 </div>
                             </div>
                         </section>
 
-                        <!-- Section 2: Task Modes -->
+                        <!-- Section 2: Pro Optimization -->
                         <section>
                             <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
                                 <span
-                                    class="w-8 h-8 rounded-full bg-indigo-500/10 text-indigo-600 flex items-center justify-center text-sm">2</span>
-                                Task Modes
+                                    class="w-8 h-8 rounded-full bg-indigo-500/10 text-indigo-600 flex items-center justify-center text-sm font-display">02</span>
+                                Performance Latency & Optimization
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="p-5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20">
+                                    <div class="flex items-start gap-4">
+                                        <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-500 shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-gray-800 dark:text-gray-200 text-sm mb-1">
+                                                Technical Fast-Path (Regex)</h4>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Masha proactively scans
+                                                for <strong>IMEIs, MSISDNs, and Error Codes</strong>. If detected, she
+                                                bypasses the keyword extraction sub-call, cutting startup latency by ~1s
+                                                and ensuring technical accuracy in KB retrieval.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-5 rounded-2xl bg-sky-500/5 border border-sky-500/20">
+                                    <div class="flex items-start gap-4">
+                                        <div class="p-2 bg-sky-500/10 rounded-lg text-sky-500 shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-gray-800 dark:text-gray-200 text-sm mb-1">Resource
+                                                Profiles (Auto-Limiting)</h4>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">To maintain system
+                                                stability on local hardware, Masha classifies models into tiers (e.g.,
+                                                Llama-3 vs Phi-3). Parameters like <strong>Response Length</strong> and
+                                                <strong>KB Breadth</strong> are automatically capped/adjusted when you
+                                                switch models.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Section 3: Specialized Task Modes -->
+                        <section>
+                            <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                                <span
+                                    class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center text-sm font-display">03</span>
+                                Inference Tasks
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div
-                                    class="p-4 rounded-xl bg-sky-50 dark:bg-sky-900/10 border border-sky-100 dark:border-sky-800">
+                                    class="p-4 rounded-2xl bg-sky-50 dark:bg-sky-900/10 border border-sky-100 dark:border-sky-800">
                                     <h4 class="font-bold text-sky-600 dark:text-sky-400 mb-2 flex items-center gap-2">
-                                        Fact Check Mode
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        Live Research
                                     </h4>
-                                    <p class="text-xs text-gray-600 dark:text-gray-300">
-                                        <strong>Trigger:</strong> Enable "Online Research".<br>
-                                        <strong>Goal:</strong> Validate claims against live web data (Reddit, Apple,
-                                        etc.).
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                        <strong>Utility:</strong> Aggregates technical data from Apple, Samsung, and
+                                        carrier
+                                        forums. Designed for real-time validation of emerging connectivity issues.
                                     </p>
                                 </div>
                                 <div
-                                    class="p-4 rounded-xl bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800">
+                                    class="p-4 rounded-2xl bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800">
                                     <h4
                                         class="font-bold text-purple-600 dark:text-purple-400 mb-2 flex items-center gap-2">
-                                        Template Mode
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        Template Injection
                                     </h4>
-                                    <p class="text-xs text-gray-600 dark:text-gray-300">
-                                        <strong>Trigger:</strong> Enable "Template Mode".<br>
-                                        <strong>Goal:</strong> Rigidly follow the structure of similar KB entries. Ideal
-                                        for forms.
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                        <strong>Utility:</strong> Enforces strict inheritance of KB structures. Mirrors
+                                        the
+                                        standardized format of your chosen "Golden Samples" for ticket consistency.
                                     </p>
                                 </div>
                                 <div
-                                    class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+                                    class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
                                     <h4 class="font-bold text-gray-600 dark:text-gray-400 mb-2 flex items-center gap-2">
-                                        Standard Mode
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                        Heuristic Mode
                                     </h4>
-                                    <p class="text-xs text-gray-600 dark:text-gray-300">
-                                        <strong>Trigger:</strong> Both OFF.<br>
-                                        <strong>Goal:</strong> Professional rephrasing based on your Target Role.
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                        <strong>Utility:</strong> Balanced RAG-assisted rephrasing focused on the active
+                                        Role profile. Best suited for fluid, high-volume log documentation.
                                     </p>
                                 </div>
                             </div>
                         </section>
-
-                        <!-- Section 3: Dynamic Roles (NEW) -->
-                        <section>
-                            <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-                                <span
-                                    class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center text-sm">3</span>
-                                Dynamic Roles
-                            </h3>
-                            <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
-                                <p>Masha can adopt different personas to suit your audience. Use the <strong>Target
-                                        Role</strong> dropdown to switch contexts instantly.</p>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                    <div class="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200/10">
-                                        <strong class="text-sky-500 block mb-1">Tech Support (Default)</strong>
-                                        <div class="text-xs">Produces structured analysis: <span
-                                                class="font-mono text-gray-400">Observations</span>, <span
-                                                class="font-mono text-gray-400">Actions Taken</span>, <span
-                                                class="font-mono text-gray-400">Recommendations</span>. Ideal for
-                                            internal tickets and detailed logs.</div>
-                                    </div>
-                                    <div class="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200/10">
-                                        <strong class="text-indigo-500 block mb-1">Customer Support</strong>
-                                        <div class="text-xs">Drafts professional, empathetic emails with clear Subject
-                                            lines and salutations. Ideal for direct customer communication.</div>
-                                    </div>
+                        <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
+                            <p>Masha optimizes her response profile based on the selected <strong>Professional
+                                    Persona</strong>. This determines the structural output and tone.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div class="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200/10">
+                                    <strong class="text-sky-500 block mb-1">Technical Support</strong>
+                                    <div class="text-xs leading-relaxed">Produces highly structured diagnostic logs:
+                                        <span class="font-mono text-gray-400">Observations</span>, <span
+                                            class="font-mono text-gray-400">Actions Taken</span>, <span
+                                            class="font-mono text-gray-400">Recommendations</span>. Optimized for
+                                        internal ticketing systems.</div>
                                 </div>
-                                <p class="mt-4 text-xs bg-sky-500/10 text-sky-400 p-2 rounded inline-block">
-                                    <strong>Tip:</strong> Create custom roles in the Configuration menu!
-                                </p>
+                                <div class="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200/10">
+                                    <strong class="text-indigo-500 block mb-1">Customer Liaison</strong>
+                                    <div class="text-xs leading-relaxed">Drafts direct, empathetic correspondence.
+                                        Includes professional
+                                        Subject lines and appropriate salutations for external communication.</div>
+                                </div>
                             </div>
+                            <p class="mt-4 text-xs bg-sky-500/10 text-sky-400 p-2 rounded inline-block">
+                                <strong>System Tip:</strong> You can define and extend these roles via the Configuration
+                                menu.
+                            </p>
+                        </div>
                         </section>
 
-                        <!-- Section 4: KB Management -->
+                        <!-- Section 4: Lifecycle Management -->
                         <section>
                             <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
                                 <span
-                                    class="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-sm">4</span>
-                                Knowledge Base (KB)
+                                    class="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-sm font-display">04</span>
+                                Knowledge Lifecycle
                             </h3>
                             <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
-                                <p>The Knowledge Base is Masha's long-term memory. It allows her to learn from your
-                                    corrections and get smarter over time.</p>
-                                <ul>
-                                    <li><strong>Approve Button:</strong> Saves the "Original + Rephrased" pair to the
-                                        KB. Masha will use this as a reference for similar future requests.</li>
-                                    <li><strong>Review & Prune:</strong> Keep Masha sharp! Use the "Prune Low Usage"
-                                        tool to find and remove entries that haven't been helpful recently.</li>
-                                    <li><strong>Edit & Refine:</strong> Spotted a typo in an old entry? Open the Prune
-                                        list and click <strong>Edit</strong> to fix the text, update the category, or
-                                        change the role instantly.</li>
-                                    <li><strong>Optimize Index:</strong> If Masha feels a bit slow retrieving memories,
-                                        click "Optimize Index" to reorganize her vector database.</li>
+                                <p>Masha's long-term utility depends on the quality of her Knowledge Base (KB). This is
+                                    not just a search log, but a <strong>curated training set</strong> for the local
+                                    model.</p>
+                                <ul class="space-y-4 list-none pl-0">
+                                    <li class="flex gap-4">
+                                        <div class="p-1 bg-emerald-500/10 rounded text-emerald-500 h-fit mt-1"><svg
+                                                xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7" />
+                                            </svg></div>
+                                        <div><strong>Curation:</strong> By editing and approving a response, you are
+                                            providing a "Golden Sample." Masha prioritizes these samples during future
+                                            semantic searches.</div>
+                                    </li>
+                                    <li class="flex gap-4">
+                                        <div class="p-1 bg-sky-500/10 rounded text-sky-500 h-fit mt-1"><svg
+                                                xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg></div>
+                                        <div><strong>Maintenance (Pruning):</strong> Use the <strong>Review &
+                                                Prune</strong> workflow to identify entries that are no longer accurate
+                                            or have low retrieval utility.</div>
+                                    </li>
+                                    <li class="flex gap-4">
+                                        <div class="p-1 bg-indigo-500/10 rounded text-indigo-500 h-fit mt-1"><svg
+                                                xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg></div>
+                                        <div><strong>Indexing:</strong> Periodically "Optimize Index" to rebuild the
+                                            FAISS vector cache. This ensures semantic search remains performant as your
+                                            dataset grows.</div>
+                                    </li>
                                 </ul>
                             </div>
 
@@ -1075,7 +1172,8 @@
 
                         <!-- Active Models -->
                         <div>
-                            <h4 class="font-bold text-gray-900 dark:text-gray-100 mb-4">Active Models</h4>
+                            <h4 class="font-bold text-gray-900 dark:text-gray-100 mb-4">Active Models & Resource
+                                Profiles</h4>
                             <div class="grid grid-cols-1 gap-4">
                                 <template x-for="model in availableModels" :key="model.id">
                                     <div

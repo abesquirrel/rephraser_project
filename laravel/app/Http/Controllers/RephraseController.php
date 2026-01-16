@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Http;
 use App\Models\KnowledgeBase;
 use App\Models\AuditLog;
 use Illuminate\Support\Facades\Log;
+use App\Models\ApiCall;
+use App\Models\KbUsage;
 
 class RephraseController extends Controller
 {
@@ -17,7 +19,7 @@ class RephraseController extends Controller
     {
         return Http::withHeaders([
             'X-AI-KEY' => config('rephraser.ai_key', 'default_secret_key')
-        ]);
+        ])->timeout(300);
     }
 
     private function sanitize($text)
@@ -53,50 +55,157 @@ class RephraseController extends Controller
             $data['role'] = $roleConfig->name;
         }
 
+        // Resolve Session ID safely
+        $sessionId = $request->header('X-Session-ID');
+        if (empty($sessionId) || $sessionId === 'null' || !$sessionId) {
+            $sessionId = session()->getId();
+        }
+
+        // Ensure the session ID actually exists in the DB to avoid FK errors (1452)
+        // Instead of nulling it, we create a stub if it doesn't exist yet
+        if ($sessionId) {
+            \App\Models\UserSession::firstOrCreate(
+                ['session_id' => $sessionId],
+                [
+                    'user_signature' => $request->input('signature') ?? 'Lazy Init',
+                    'last_active_at' => now()
+                ]
+            );
+        }
+
         // 1. Create Log Record
         $generationLog = \App\Models\ModelGeneration::create([
-            'session_id' => $request->header('X-Session-ID') ?? session()->getId(),
+            'session_id' => $sessionId,
             'model_id' => $data['model'] ?? 'unknown',
+            'model_display_name' => $this->formatModelName($data['model'] ?? 'unknown'),
             'input_text_length' => $inputLength,
             'temperature' => $data['temperature'] ?? null,
             'max_tokens' => $data['max_tokens'] ?? null,
             'kb_count' => $data['kb_count'] ?? null,
             'web_search_enabled' => $data['web_search_enabled'] ?? false,
             'template_mode' => $data['template_mode'] ?? false,
-            // 'prompt_tokens' - could assume from input length approx
+            'prompt_tokens' => (int) ($inputLength / 3), // Approx 3-4 chars per token
         ]);
 
         $startTime = microtime(true);
 
+        // 2. Log API Call Start
+        $apiCall = ApiCall::create([
+            'service' => 'inference',
+            'endpoint' => "{$this->inferenceServiceUrl}/rephrase",
+            'method' => 'POST',
+            'request_payload_size' => strlen(json_encode($data)),
+            'tokens_used' => (int) ($inputLength / 3),
+        ]);
+
         // Stream response from Python service
-        $response = $this->aiCall()
-            ->withOptions(['stream' => true])
-            ->post("{$this->inferenceServiceUrl}/rephrase", $data);
+        try {
+            $response = $this->aiCall()
+                ->withOptions(['stream' => true])
+                ->post("{$this->inferenceServiceUrl}/rephrase", $data);
 
-        return response()->stream(function () use ($response, $generationLog, $startTime) {
-            $body = $response->toPsrResponse()->getBody();
-            $accumulatedOutput = '';
-
-            while (!$body->eof()) {
-                $chunk = $body->read(1024);
-                $accumulatedOutput .= $chunk;
-                echo $chunk;
-                if (ob_get_level() > 0)
-                    ob_flush();
-                flush();
-            }
-
-            // 2. Update Log on Completion
-            $duration = (microtime(true) - $startTime) * 1000;
-            $outputLength = strlen($accumulatedOutput);
-
-            $generationLog->update([
-                'generation_time_ms' => (int) $duration,
-                'output_text_length' => $outputLength,
-                'completion_tokens' => (int) ($outputLength / 4), // Rough approx
-                'total_tokens' => (int) (($generationLog->input_text_length + $outputLength) / 4)
+            $apiCall->update(['response_status' => $response->status()]);
+        } catch (\Exception $e) {
+            $apiCall->update([
+                'is_error' => true,
+                'error_type' => 'Connection Error',
+                'error_message' => $e->getMessage()
             ]);
+            throw $e;
+        }
 
+        return response()->stream(function () use ($response, $generationLog, $startTime, $apiCall) {
+            try {
+                $body = $response->toPsrResponse()->getBody();
+                $accumulatedOutput = '';
+
+                while (!$body->eof()) {
+                    $chunk = $body->read(1024);
+                    if (empty($chunk))
+                        continue;
+
+                    $accumulatedOutput .= $chunk;
+                    echo $chunk;
+
+                    if (ob_get_level() > 0)
+                        ob_flush();
+                    flush();
+                }
+
+                // 2. Update Log on Completion
+                $duration = (microtime(true) - $startTime) * 1000;
+
+                // Search backwards for the metadata line
+                $lines = explode("\n", trim($accumulatedOutput));
+                $parsedMeta = [];
+                for ($i = count($lines) - 1; $i >= 0; $i--) {
+                    $line = trim($lines[$i]);
+                    if (empty($line))
+                        continue;
+
+                    $p = json_decode($line, true);
+                    if (isset($p['meta']) || isset($p['data'])) {
+                        $parsedMeta = $p;
+                        break;
+                    }
+                }
+
+                $finalContent = $parsedMeta['data'] ?? '';
+                $kbUsageData = $parsedMeta['meta']['kb_usage'] ?? [];
+                $kbIds = $parsedMeta['meta']['kb_ids'] ?? []; // Fallback
+                $actualTokens = $parsedMeta['meta']['tokens'] ?? 0;
+                $promptTokens = $parsedMeta['meta']['prompt_tokens'] ?? 0;
+                $outputLength = strlen($finalContent);
+
+                $generationLog->update([
+                    'generation_time_ms' => (int) $duration,
+                    'output_text_length' => $outputLength,
+                    'prompt_tokens' => $promptTokens ?: $generationLog->prompt_tokens,
+                    'completion_tokens' => $actualTokens ?: (int) ($outputLength / 4),
+                    'total_tokens' => ($promptTokens && $actualTokens)
+                        ? ($promptTokens + $actualTokens)
+                        : (($actualTokens ?: (int) ($outputLength / 4)) + ($promptTokens ?: ($generationLog->prompt_tokens ?? 0)))
+                ]);
+
+                $apiCall->update([
+                    'response_time_ms' => (int) $duration,
+                    'response_payload_size' => strlen($accumulatedOutput),
+                    'tokens_used' => ($promptTokens + $actualTokens) ?: $apiCall->tokens_used
+                ]);
+
+                // 3. Log KB Usage
+                if (!empty($kbUsageData)) {
+                    foreach ($kbUsageData as $kbInfo) {
+                        try {
+                            KbUsage::create([
+                                'generation_id' => $generationLog->id,
+                                'kb_entry_id' => $kbInfo['id'],
+                                'similarity_score' => $kbInfo['score'] ?? null,
+                                'rank_position' => $kbInfo['rank'] ?? null,
+                                'was_used_in_prompt' => true
+                            ]);
+                        } catch (\Exception $kbEx) {
+                            Log::error("Failed to log KB usage for entry " . ($kbInfo['id'] ?? '?') . ": " . $kbEx->getMessage());
+                        }
+                    }
+                } elseif (!empty($kbIds)) {
+                    // Fallback for older metadata format if needed
+                    foreach ($kbIds as $kbId) {
+                        KbUsage::create([
+                            'generation_id' => $generationLog->id,
+                            'kb_entry_id' => $kbId,
+                            'was_used_in_prompt' => true
+                        ]);
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error("Stream processing error: " . $e->getMessage());
+                // Silently fail to avoid sending HTML error page into the JSON stream
+                $apiCall->update([
+                    'is_error' => true,
+                    'error_message' => 'Stream Interrupted: ' . $e->getMessage()
+                ]);
+            }
         }, 200, [
             'Content-Type' => 'application/json',
             'Cache-Control' => 'no-cache',
@@ -199,6 +308,28 @@ class RephraseController extends Controller
             'presence_penalty' => $validated['presence_penalty'] ?? null,
             'user_name' => 'System' // Can be updated if auth is added later
         ]);
+
+        // Calculate Edit Distance
+        $editDist = 0;
+        if (!empty($validated['original_text']) && !empty($validated['rephrased_text'])) {
+            $editDist = levenshtein($validated['original_text'], $validated['rephrased_text']);
+        }
+
+        // Try to link back to the ModelGeneration to update metrics
+        $sessionId = $request->header('X-Session-ID') ?? session()->getId();
+
+        if ($sessionId) {
+            $latestGen = \App\Models\ModelGeneration::where('session_id', $sessionId)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($latestGen) {
+                $latestGen->update([
+                    'was_approved' => true,
+                    'edit_distance' => $editDist
+                ]);
+            }
+        }
 
         // 2. Notify AI Service to rebuild index
         $this->notifyAiRebuild();
@@ -451,5 +582,12 @@ class RephraseController extends Controller
             Log::error("Failed to cleanup KB: " . $e->getMessage());
             return response()->json(['error' => 'Cleanup Failed'], 500);
         }
+    }
+
+    private function formatModelName($name)
+    {
+        if (!$name)
+            return 'Unknown Model';
+        return str_replace([':latest', ':8b-instruct-q3_K_M', '-instruct-q3_K_M'], '', $name);
     }
 }

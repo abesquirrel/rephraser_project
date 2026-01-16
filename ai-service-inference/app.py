@@ -5,6 +5,7 @@ import json
 import time
 import re
 import requests
+import threading
 from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 from duckduckgo_search import DDGS
@@ -83,6 +84,7 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
         "model": target_model,
         "messages": messages,
         "stream": False,
+        "keep_alive": "5m",
         "options": {"temperature": float(temperature), "num_predict": int(max_tokens)}
     }
     
@@ -96,8 +98,49 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
         logger.error(f"LLM Call failed for model {target_model}: {e}")
         return f"Error with {target_model}: Generate failed."
 
+def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None):
+    default_model = os.environ.get("OLLAMA_MODEL", "llama3:8b-instruct-q3_K_M")
+    target_model = model if model else default_model
+    url = "http://host.docker.internal:11434/api/chat"
+    
+    payload = {
+        "model": target_model,
+        "messages": messages,
+        "stream": True,
+        "keep_alive": "5m",
+        "options": {"temperature": float(temperature), "num_predict": int(max_tokens)}
+    }
+    
+    try:
+        with requests.post(url, json=payload, stream=True, timeout=120) as r:
+            r.raise_for_status()
+            for line in r.iter_lines():
+                if line:
+                    chunk = json.loads(line)
+                    if 'message' in chunk and 'content' in chunk['message']:
+                        yield {"token": chunk['message']['content']}
+                    if chunk.get('done'):
+                        yield {"done_meta": {
+                            "prompt_tokens": chunk.get("prompt_eval_count", 0),
+                            "completion_tokens": chunk.get("eval_count", 0)
+                        }}
+                        break
+    except Exception as e:
+        logger.error(f"LLM Stream failed for model {target_model}: {e}")
+        yield f"\n[Error with {target_model}]"
+
 def extract_keywords(text):
-    # Specialized prompt for Mobile/MVNO context
+    # Fast path: Extract common identifiers via Regex
+    # IMEI: 15 digits, MSISDN: 10-12 digits, Error Codes: uppercase + digits
+    imeis = re.findall(r'\b\d{15}\b', text)
+    msisdns = re.findall(r'\b\d{10,12}\b', text)
+    error_codes = re.findall(r'\b[A-Z0-9]{5,15}\b', text)
+    
+    technical_hits = imeis + msisdns + error_codes
+    if len(technical_hits) >= 2:
+        return " ".join(technical_hits[:5])
+
+    # LLM fallback only if no clear technical markers found
     prompt = (
         "Context: Mobile Telecommunications, US MVNOs, eSIM, Device Compatibility (Apple/Google/Samsung), Network Settings.\n"
         "Task: Extract 3-5 specific technical search keywords from the notes. Focus on device models, specific error messages, or carrier names.\n"
@@ -343,37 +386,46 @@ def handle_rephrase():
         yield stream_event(f"Resource Profile: {max_tokens} tokens | {kb_count} context hits")
         overall_start = time.time()
         
-        web_context = ""
-        examples_list = []
+        # Parallel Task Results
+        results = {"web": "", "kb": []}
+        
+        def run_kb_search():
+            t_start = time.time()
+            res = retrieve_examples_remote(input_text, k=kb_count, prefer_templates=template_mode, category=category)
+            results["kb"] = res
+            logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
 
-        if template_mode:
-            yield stream_event("Searching Prioritized Templates (Remote)...")
+        def run_web_search():
+            if not enable_web_search: return
             t_start = time.time()
-            examples_list = retrieve_examples_remote(input_text, k=kb_count, prefer_templates=True, category=category)
-            logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
-            yield stream_event(f"Found {len(examples_list)} relevant patterns.")
-        else:
-            if enable_web_search:
-                if search_keywords:
-                    yield stream_event(f"Searching: {search_keywords}...")
-                    web_context = web_search_tool(search_keywords)
+            kw = search_keywords
+            if not kw:
+                # Fast path keyword extraction or LLM fallback
+                if len(input_text) < 100:
+                    kw = input_text
                 else:
-                    yield stream_event("Extracting keywords...")
                     kw = extract_keywords(input_text)
-                    yield stream_event(f"Searching: {kw}...")
-                    web_context = web_search_tool(kw)
-            
-            yield stream_event("Checking Knowledge Base (Remote)...")
-            t_start = time.time()
-            examples_list = retrieve_examples_remote(input_text, k=kb_count, category=category)
-            logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
-            yield stream_event(f"Found {len(examples_list)} examples.")
+            results["web"] = web_search_tool(kw)
+            logger.info(f"Web Search took {time.time() - t_start:.3f}s")
+
+        # Start background threads
+        yield stream_event("Gathering context (Parallel)...")
+        t1 = threading.Thread(target=run_kb_search)
+        t2 = threading.Thread(target=run_web_search)
+        t1.start()
+        t2.start()
+        
+        # Wait for both
+        t1.join()
+        t2.join()
+        
+        examples_list = results["kb"]
+        web_context = results["web"]
+        
+        yield stream_event(f"Context Ready: {len(examples_list)} KB hits | {'Web search applied' if web_context else 'Local only'}")
         
         instruction_match = re.search(r'<(.*?)>', input_text)
         direct_instruction = instruction_match.group(1) if instruction_match else None
-        
-        if direct_instruction:
-            yield stream_event(f"Applying Instruction: {direct_instruction[:30]}...")
         
         formatted_examples = ""
         for i, ex in enumerate(examples_list):
@@ -383,12 +435,6 @@ def handle_rephrase():
 
         yield stream_event("Synthesizing...")
         
-        # Diagnostic Logging
-        logger.info(f"Target Model: {target_model}")
-        logger.info(f"Context Examples Found: {len(examples_list)}")
-        if examples_list:
-            logger.info(f"First Example Preview: {str(examples_list[0])[:100]}...")
-
         messages = build_structured_prompt(
             input_text, 
             formatted_examples, 
@@ -401,17 +447,42 @@ def handle_rephrase():
             role_config=role_config
         )
 
+        full_response = ""
         l_start = time.time()
-        response = call_llm(messages, temperature=temperature, max_tokens=max_tokens, model=target_model)
+        
+        # Stream the tokens
+        actual_metrics = {"prompt_tokens": 0, "completion_tokens": 0}
+        for chunk in call_llm_stream(messages, temperature=temperature, max_tokens=max_tokens, model=target_model):
+            if "token" in chunk:
+                token = chunk["token"]
+                full_response += token
+                # Yield token for frontend
+                yield json.dumps({"token": token}) + "\n"
+            elif "done_meta" in chunk:
+                actual_metrics = chunk["done_meta"]
+        
         logger.info(f"LLM Synthesis took {time.time() - l_start:.3f}s")
-        response = strip_markdown(response)
         
         total_latency = time.time() - overall_start
-        char_count = len(response)
-        est_tokens = char_count // 4
+        kb_info = []
+        for i, ex in enumerate(examples_list):
+            if isinstance(ex, dict) and ex.get('id'):
+                kb_info.append({
+                    'id': ex.get('id'),
+                    'score': ex.get('score', 0),
+                    'rank': i + 1
+                })
         
-        logger.info(f"Final Response ({char_count} chars). Total Latency: {total_latency:.2f}s")
-        yield json.dumps({"data": response, "meta": {"latency": total_latency, "tokens": est_tokens}}) + "\n"
+        yield json.dumps({
+            "data": full_response, # Final full text for consistency
+            "meta": {
+                "latency": total_latency, 
+                "tokens": actual_metrics.get("completion_tokens", 0),
+                "prompt_tokens": actual_metrics.get("prompt_tokens", 0),
+                "kb_usage": kb_info,
+                "kb_ids": [info['id'] for info in kb_info] # Keep for backward compatibility
+            }
+        }) + "\n"
 
     return Response(stream_with_context(thinking_process_stream()), mimetype='application/json')
 
