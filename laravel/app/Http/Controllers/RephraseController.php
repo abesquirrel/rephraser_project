@@ -151,23 +151,48 @@ class RephraseController extends Controller
                 }
 
                 $finalContent = $parsedMeta['data'] ?? '';
-                $kbIds = $parsedMeta['meta']['kb_ids'] ?? [];
+                $kbUsageData = $parsedMeta['meta']['kb_usage'] ?? [];
+                $kbIds = $parsedMeta['meta']['kb_ids'] ?? []; // Fallback
+                $actualTokens = $parsedMeta['meta']['tokens'] ?? 0;
                 $outputLength = strlen($finalContent);
+
+                Log::info("Stream completed. KB hits found: " . (count($kbUsageData) ?: count($kbIds)), [
+                    'gen_id' => $generationLog->id,
+                    'tokens' => $actualTokens
+                ]);
 
                 $generationLog->update([
                     'generation_time_ms' => (int) $duration,
                     'output_text_length' => $outputLength,
-                    'completion_tokens' => (int) ($outputLength / 4),
-                    'total_tokens' => (int) ($outputLength / 4) + ($generationLog->prompt_tokens ?? 0)
+                    'completion_tokens' => $actualTokens ?: (int) ($outputLength / 4),
+                    'total_tokens' => $actualTokens
+                        ? ($actualTokens + ($generationLog->prompt_tokens ?? 0))
+                        : ((int) ($outputLength / 4) + ($generationLog->prompt_tokens ?? 0))
                 ]);
 
                 $apiCall->update([
                     'response_time_ms' => (int) $duration,
-                    'response_payload_size' => strlen($accumulatedOutput)
+                    'response_payload_size' => strlen($accumulatedOutput),
+                    'tokens_used' => $actualTokens ?: $apiCall->tokens_used
                 ]);
 
                 // 3. Log KB Usage
-                if (!empty($kbIds)) {
+                if (!empty($kbUsageData)) {
+                    foreach ($kbUsageData as $kbInfo) {
+                        try {
+                            KbUsage::create([
+                                'generation_id' => $generationLog->id,
+                                'kb_entry_id' => $kbInfo['id'],
+                                'similarity_score' => $kbInfo['score'] ?? null,
+                                'rank_position' => $kbInfo['rank'] ?? null,
+                                'was_used_in_prompt' => true
+                            ]);
+                        } catch (\Exception $kbEx) {
+                            Log::error("Failed to log KB usage for entry " . ($kbInfo['id'] ?? '?') . ": " . $kbEx->getMessage());
+                        }
+                    }
+                } elseif (!empty($kbIds)) {
+                    // Fallback for older metadata format if needed
                     foreach ($kbIds as $kbId) {
                         KbUsage::create([
                             'generation_id' => $generationLog->id,

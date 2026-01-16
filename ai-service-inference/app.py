@@ -457,14 +457,22 @@ def handle_rephrase():
         logger.info(f"LLM Synthesis took {time.time() - l_start:.3f}s")
         
         total_latency = time.time() - overall_start
-        kb_ids = [ex.get('id') for ex in examples_list if isinstance(ex, dict) and ex.get('id')]
+        kb_info = []
+        for i, ex in enumerate(examples_list):
+            if isinstance(ex, dict) and ex.get('id'):
+                kb_info.append({
+                    'id': ex.get('id'),
+                    'score': ex.get('score', 0),
+                    'rank': i + 1
+                })
         
         yield json.dumps({
             "data": full_response, # Final full text for consistency
             "meta": {
                 "latency": total_latency, 
                 "tokens": token_count,
-                "kb_ids": kb_ids
+                "kb_usage": kb_info,
+                "kb_ids": [info['id'] for info in kb_info] # Keep for backward compatibility
             }
         }) + "\n"
 
