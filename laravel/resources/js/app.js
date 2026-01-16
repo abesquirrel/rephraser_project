@@ -266,6 +266,11 @@ function rephraserApp() {
             
             // Initial fetch of models & Roles
             this.fetchOllamaModels();
+            // 6. Migrate History for missing fields
+            this.history.forEach(h => {
+                if (typeof h.approved === 'undefined') h.approved = false;
+                if (typeof h.id === 'undefined') h.id = null;
+            });
             this.fetchKbStats(); 
             this.fetchRoles();
         },

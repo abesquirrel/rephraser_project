@@ -1,59 +1,103 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="300" alt="Laravel Logo">
 </p>
 
-## About Laravel
+# Masha Rephraser AI 🐈‍⬛
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+> _"The lazy cat with the best ideas. In training — furballs may occur."_
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**Masha** is an intelligent rephrasing assistant designed to transform raw customer support notes into professional, empathetic, and structured responses. She learns from your corrections, maintains a searchable Knowledge Base, and adapts to different roles.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ✨ Key Features
 
-## Learning Laravel
+-   **Smart Rephrasing**: Turn bullet points into polished prose instantly.
+-   **Context Awareness**: Retrieves similar past scenarios from the Knowledge Base (FAISS) to ensure consistency.
+-   **Dynamic Roles**: Switch between "Tech Support" (analytical) and "Customer Support" (empathetic) personas.
+-   **Knowledge Base Management**:
+    -   **Auto-Save**: Approving a response saves it for future learning.
+    -   **Edit & Refine**: Correct/update existing entries directly from the interface.
+    -   **Review & Prune**: Identify and remove unused or outdated entries with a safe review workflow.
+    -   **Optimization**: On-demand index rebuilding for lightning-fast search.
+-   **Performance Analytics**: Track model latency, token usage, and leaderboard stats.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🚀 Getting Started
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Prerequisites
 
-## Laravel Sponsors
+-   Docker & Docker Compose
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Installation
 
-### Premium Partners
+1. **Clone the repository**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+    ```bash
+    git clone <repo-url>
+    cd rephraser_project
+    ```
 
-## Contributing
+2. **Start the services**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    ```bash
+    docker-compose up -d --build
+    ```
 
-## Code of Conduct
+3. **Access the Application**
+    - **Frontend**: http://localhost:8000
+    - **Masha is ready!** 🐾
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🛠️ Architecture
 
-## Security Vulnerabilities
+The system follows a microservices-based architecture to separate concerns between application logic and heavy AI processing.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```mermaid
+graph TD
+    User([User]) -->|Input Text| Frontend[Alpine.js Frontend]
+    Frontend -->|API Request| Laravel[Laravel 11 Backend]
 
-## License
+    subgraph "Application Core"
+        Laravel -->|Auth Check| DB[(MariaDB)]
+        Laravel -->|Store History| DB
+    end
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+    subgraph "AI Capabilities"
+        Laravel -->|Text to Vector| PyEmbed[Python Embedding Service]
+        PyEmbed -->|Search| FAISS[(FAISS Vector DB)]
+
+        Laravel -->|Prompt + Context| PyInfer[Python Inference Service]
+        PyInfer -->|Generate| Ollama[[Ollama LLM]]
+    end
+
+    PyEmbed -.->|Cache Vectors| DB
+    FAISS -.->|Retrieve Similar| Laravel
+    Ollama -->|Stream Response| Frontend
+```
+
+### Component Breakdown
+
+-   **Alpine.js Frontend**: Handles real-time user interaction, streaming updates, and state management (e.g., dark mode, history).
+-   **Laravel Backend**: The orchestrator. It manages authentication, sanitizes inputs, and routes requests to the appropriate AI service.
+-   **Python Embedding Service**: Converts text into mathematical vectors. It uses a high-speed FAISS index to "remember" past good responses.
+-   **Python Inference Service**: The brain. It constructs the final prompt (injecting context from FAISS) and talks to the refined AI model (e.g., Qwen/Gemma).
+-   **MariaDB**: Stores robust relational data (Users, Roles, History Logs).
+-   **FAISS**: A specialized database that allows Masha to find "conceptually similar" past examples, even if the wording is different.
+
+## 🐱 Masha's Tips
+
+-   **Review & Prune**: Use the "Rescan" button in the Prune modal to find entries that haven't been used in 30+ days.
+-   **Golden Samples**: Manually add perfect examples to the KB to guide Masha's future style.
+-   **Feedback**: If Masha gets it wrong, edit the text and hit "Approve" — she'll learn for next time.
+
+## 📍 Roadmap
+
+The following enhancements are planned for future updates:
+
+-   **Bulk Edit**: Update multiple entries at once (e.g., bulk category changes).
+-   **Advanced Filters**: Find candidates by keyword or template status.
+-   **Export**: Export prune candidates to CSV for offline review.
+-   **Scheduled Cleanup**: Automated background pruning for expired entries.
+
+---
+
+<p align="center">
+  Made with ❤️ and purrs.
+</p>

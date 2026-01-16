@@ -255,7 +255,9 @@
                                     <div class="glass-card p-6 mb-4 relative">
                                         <div class="flex justify-between mb-4">
                                             <span class="label-text m-0">Original</span>
-                                            <span class="approved-badge" x-show="item.approved">Saved</span>
+                                            <span
+                                                class="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-emerald-500/20 flex items-center justify-center min-w-[45px]"
+                                                x-show="item.approved">Saved</span>
                                         </div>
                                         <div class="bubble bubble-original text-sm p-3 border-l-4 border-indigo-500"
                                             x-text="item.original"></div>
@@ -977,16 +979,18 @@
                                 Knowledge Base (KB)
                             </h3>
                             <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
-                                <p>The Knowledge Base is Masha's long-term memory. It allows the system to learn from
-                                    your corrections.</p>
+                                <p>The Knowledge Base is Masha's long-term memory. It allows her to learn from your
+                                    corrections and get smarter over time.</p>
                                 <ul>
                                     <li><strong>Approve Button:</strong> Saves the "Original + Rephrased" pair to the
-                                        KB.</li>
-                                    <li><strong>Category Tagging:</strong> Assign categories (e.g., "Outage", "Billing")
-                                        to filter context later.</li>
-                                    <li><strong>Manual Entry:</strong> Manually add "Golden Samples" via the Settings
-                                        menu.</li>
-                                    <li><strong>Bulk Import:</strong> Upload CSVs to bulk-train the system.</li>
+                                        KB. Masha will use this as a reference for similar future requests.</li>
+                                    <li><strong>Review & Prune:</strong> Keep Masha sharp! Use the "Prune Low Usage"
+                                        tool to find and remove entries that haven't been helpful recently.</li>
+                                    <li><strong>Edit & Refine:</strong> Spotted a typo in an old entry? Open the Prune
+                                        list and click <strong>Edit</strong> to fix the text, update the category, or
+                                        change the role instantly.</li>
+                                    <li><strong>Optimize Index:</strong> If Masha feels a bit slow retrieving memories,
+                                        click "Optimize Index" to reorganize her vector database.</li>
                                 </ul>
                             </div>
 
@@ -998,14 +1002,25 @@
                                 </h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <button @click="optimizeIndex()"
-                                            class="w-full btn bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-700 hover:border-sky-500 text-gray-700 dark:text-gray-200 px-4 py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-500"
+                                        <button @click="optimizeIndex()" :disabled="status === 'Optimizing Index...'"
+                                            class="w-full btn bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-700 hover:border-sky-500 text-gray-700 dark:text-gray-200 px-4 py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <svg x-show="status !== 'Optimizing Index...'"
+                                                xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-500"
                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M13 10V3L4 14h7v7l9-11h-7z" />
                                             </svg>
-                                            Optimize Index
+                                            <svg x-show="status === 'Optimizing Index...'"
+                                                class="animate-spin w-4 h-4 text-sky-500"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                    stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                </path>
+                                            </svg>
+                                            <span
+                                                x-text="status === 'Optimizing Index...' ? 'Optimizing...' : 'Optimize Index'"></span>
                                         </button>
                                         <p class="text-[10px] text-gray-500 mt-2 text-center">Rebuilds vector cache.
                                             Run if search feels slow.</p>
@@ -1134,7 +1149,7 @@
             x-transition:enter-end="opacity-100" x-transition:leave="duration-200 ease-in"
             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
 
-        <div class="glass-card relative w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl ring-1 ring-white/10"
+        <div class="glass-card relative w-full max-w-[98%] max-h-[90vh] overflow-hidden flex flex-col shadow-2xl ring-1 ring-white/10"
             x-show="showPruneModal" x-transition:enter="duration-300 ease-out"
             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
             x-transition:leave="duration-200 ease-in" x-transition:leave-start="opacity-100 scale-100"
@@ -1173,14 +1188,22 @@
                         <input type="number" x-model.number="pruneDays" @change="fetchPruneCandidates()"
                             class="form-input w-20 p-2 text-sm rounded-lg bg-black/20 border border-gray-700 text-center">
                     </div>
-                    <button @click="fetchPruneCandidates()"
-                        class="text-xs text-sky-500 hover:text-sky-600 hover:underline transition-colors flex items-center gap-1.5 mt-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                    <button @click="fetchPruneCandidates()" :disabled="status === 'Scanning usage data...'"
+                        class="text-xs text-sky-500 hover:text-sky-600 hover:underline transition-colors flex items-center gap-1.5 mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg x-show="status !== 'Scanning usage data...'" xmlns="http://www.w3.org/2000/svg"
+                            class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        Rescan
+                        <svg x-show="status === 'Scanning usage data...'" class="animate-spin w-3.5 h-3.5"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        <span x-text="status === 'Scanning usage data...' ? 'Scanning...' : 'Rescan'"></span>
                     </button>
                 </div>
                 <div class="text-right">
@@ -1202,7 +1225,7 @@
                             <th class="p-4">Content Preview</th>
                             <th class="p-4 w-24 text-center">Hits</th>
                             <th class="p-4 w-32 text-center">Age (Days)</th>
-                            <th class="p-4 w-32 text-right">Actions</th>
+                            <th class="p-4 w-40 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-800">
@@ -1234,10 +1257,16 @@
                                         x-text="Math.floor((new Date() - new Date(candidate.created_at)) / (1000 * 60 * 60 * 24))"></span>
                                 </td>
                                 <td class="p-4 text-right">
-                                    <button @click="openEditKbModal(candidate)"
-                                        class="text-sky-500 hover:text-sky-400 text-xs font-bold uppercase hover:underline px-2 py-1 mr-2">Edit</button>
-                                    <button @click="keepEntry(candidate.id)"
-                                        class="text-emerald-500 hover:text-emerald-400 text-xs font-bold uppercase hover:underline px-2 py-1">Keep</button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button type="button" @click.stop="openEditKbModal(candidate)"
+                                            class="px-3 py-1.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 hover:bg-sky-500 hover:text-white transition-all text-xs font-bold uppercase tracking-wider">
+                                            Edit
+                                        </button>
+                                        <button type="button" @click.stop="keepEntry(candidate.id)"
+                                            class="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all text-xs font-bold uppercase tracking-wider">
+                                            Keep
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </template>
@@ -1246,10 +1275,10 @@
             </div>
 
             <!-- Footer -->
-            <div
-                class="p-5 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-between items-center z-10">
-                <div class="text-sm text-gray-400">
-                    <span x-text="selectedPruneIds.length"></span> entries selected
+            <div class="p-5 border-t border-gray-700/30 bg-[#1a1b26]/50 flex justify-between items-center z-10">
+                <div class="text-xs text-gray-500">
+                    <span x-text="selectedPruneIds.length"></span> selected <span class="mx-1 opacity-50">|</span> <span
+                        x-text="pruneCandidates.length"></span> candidates found
                 </div>
                 <div class="flex gap-3">
                     <button class="btn btn-ghost px-6 py-2" @click="showPruneModal = false">Cancel</button>
@@ -1302,8 +1331,14 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
-                        <input type="text" x-model="editionKbEntry.category"
-                            class="w-full bg-black/20 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors">
+                        <input type="text" list="categoryOptions" x-model="editionKbEntry.category"
+                            class="w-full bg-black/20 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
+                            placeholder="Select or type custom...">
+                        <datalist id="categoryOptions">
+                            <template x-for="cat in categories" :key="cat">
+                                <option :value="cat"></option>
+                            </template>
+                        </datalist>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Role</label>
@@ -1312,8 +1347,6 @@
                             <template x-for="role in promptRoles" :key="role.name">
                                 <option :value="role.name" x-text="role.name"></option>
                             </template>
-                            <option value="Tech Support">Tech Support</option>
-                            <option value="Customer Support">Customer Support</option>
                         </select>
                     </div>
                 </div>
@@ -1332,11 +1365,28 @@
                         class="w-full bg-emerald-500/5 border border-emerald-500/30 rounded-lg p-3 text-sm text-emerald-100 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-colors font-mono custom-scrollbar"></textarea>
                 </div>
 
-                <!-- Keywords -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Keywords</label>
-                    <input type="text" x-model="editionKbEntry.keywords"
-                        class="w-full bg-black/20 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors">
+                <!-- Keywords & Model -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Keywords</label>
+                        <input type="text" x-model="editionKbEntry.keywords"
+                            class="w-full bg-black/20 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Model Used</label>
+                        <select x-model="editionKbEntry.model_used"
+                            class="w-full bg-black/20 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors appearance-none">
+                            <template
+                                x-if="editionKbEntry.model_used && availableModels && !availableModels.find(m => m.id === editionKbEntry.model_used)">
+                                <option :value="editionKbEntry.model_used"
+                                    x-text="editionKbEntry.model_used + ' (Original)'"></option>
+                            </template>
+                            <option value="">Select Model</option>
+                            <template x-for="model in availableModels" :key="model.id">
+                                <option :value="model.id" x-text="model.name"></option>
+                            </template>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Template Toggle -->

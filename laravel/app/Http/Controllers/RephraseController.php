@@ -405,6 +405,7 @@ class RephraseController extends Controller
             'is_template',
             'category',
             'role',
+            'model_used',
             'hits',
             'created_at',
             'last_used_at'
