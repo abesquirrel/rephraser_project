@@ -47,6 +47,7 @@ function rephraserApp() {
         
         // UI State
         showGuide: false,
+        activeHelpTab: 'guide', // guide, stats
         
         toast: { active: false, msg: '', type: 'info' },
         showSuccessModal: false,
@@ -716,6 +717,194 @@ function rephraserApp() {
             }
         },
 
+        async optimizeIndex() {
+            if(!confirm('This will update the DB cache for all entries and rebuild the in-memory index. It acts as a "hard refresh". Continue?')) return;
+            this.status = 'Optimizing Index...';
+            try {
+                const res = await fetch('/api/trigger-rebuild', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                if(res.ok) {
+                    this.triggerToast('Optimization Started. It may take a few seconds.', 'info');
+                } else {
+                    this.triggerToast('Optimization Failed', 'error');
+                }
+            } catch(e) {
+                this.triggerToast('Network Error', 'error');
+            } finally {
+                this.status = 'Done';
+            }
+        },
+
+        // --- Prune Feature State ---
+        showPruneModal: false,
+        pruneCandidates: [],
+        pruneThreshold: 5,
+        pruneDays: 30, // Default to 30 days old to be safe
+        selectedPruneIds: [],
+        
+        async openPruneModal() {
+            this.showGuide = false; // Close Guide modal first
+            this.showPruneModal = true;
+            await this.fetchPruneCandidates();
+        },
+
+        async fetchPruneCandidates() {
+            this.status = 'Scanning usage data...';
+            try {
+                // Query string
+                const params = new URLSearchParams({
+                    threshold_hits: this.pruneThreshold,
+                    days_old: this.pruneDays
+                });
+                
+                const res = await fetch(`/api/prune-candidates?${params}`);
+                if(res.ok) {
+                    this.pruneCandidates = await res.json();
+                    // Auto-select all by default? No, let user select. Or maybe specific ones.
+                    // Let's just default to empty selection for safety.
+                    this.selectedPruneIds = [];
+                } else {
+                    this.triggerToast('Failed to scan candidates', 'error');
+                }
+            } catch(e) {
+                console.error(e);
+                this.triggerToast('Network Error', 'error');
+            } finally {
+                this.status = 'Done';
+            }
+        },
+
+        togglePruneSelection(id) {
+            if(this.selectedPruneIds.includes(id)) {
+                this.selectedPruneIds = this.selectedPruneIds.filter(i => i !== id);
+            } else {
+                this.selectedPruneIds.push(id);
+            }
+        },
+        
+        toggleAllPrune() {
+            if(this.selectedPruneIds.length === this.pruneCandidates.length) {
+                this.selectedPruneIds = [];
+            } else {
+                this.selectedPruneIds = this.pruneCandidates.map(c => c.id);
+            }
+        },
+
+        async keepEntry(id) {
+            try {
+                const res = await fetch('/api/keep-entry', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
+                    },
+                    body: JSON.stringify({ id })
+                });
+                if(res.ok) {
+                    this.triggerToast('Entry marked as Safe', 'success');
+                    // Remove from list locally
+                    this.pruneCandidates = this.pruneCandidates.filter(c => c.id !== id);
+                    this.selectedPruneIds = this.selectedPruneIds.filter(i => i !== id);
+                }
+            } catch(e) {
+                this.triggerToast('Failed to update entry', 'error');
+            }
+        },
+
+        async confirmPrune() {
+            if(this.selectedPruneIds.length === 0) {
+                 this.triggerToast('No entries selected for deletion', 'warning');
+                 return;
+            }
+            if(!confirm(`Are you sure you want to PERMANENTLY DELETE ${this.selectedPruneIds.length} entries?`)) return;
+
+             this.status = 'Pruning...';
+             try {
+                 const res = await fetch('/api/cleanup-kb', { 
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
+                    },
+                    body: JSON.stringify({ ids: this.selectedPruneIds })
+                 });
+                 const data = await res.json();
+                 if(data.status === 'success') {
+                     this.triggerToast(`Deleted ${data.deleted} entries.`, 'success');
+                     this.pruneCandidates = this.pruneCandidates.filter(c => !this.selectedPruneIds.includes(c.id));
+                     this.selectedPruneIds = [];
+                     
+                     // Helper: if empty, maybe close modal?
+                     if (this.pruneCandidates.length === 0) {
+                         this.showPruneModal = false;
+                     }
+                     
+                     this.fetchKbStats(); 
+                 } else {
+                     this.triggerToast('Cleanup Failed: ' + data.error, 'error');
+                 }
+             } catch(e) {
+                 this.triggerToast('Network Error', 'error');
+             } finally {
+                 this.status = 'Done';
+             }
+        },
+
+        // --- KB Edit Feature ---
+        showEditKbModal: false,
+        editionKbEntry: {
+            id: null,
+            original_text: '',
+            rephrased_text: '',
+            keywords: '',
+            category: '',
+            role: '',
+            is_template: false,
+            model_used: ''
+        },
+
+        openEditKbModal(entry) {
+            this.editionKbEntry = {
+                id: entry.id,
+                original_text: entry.original_text || '',
+                rephrased_text: entry.rephrased_text || '',
+                keywords: entry.keywords || '',
+                category: entry.category || '',
+                role: entry.role || 'Tech Support',
+                is_template: !!entry.is_template,
+                model_used: entry.model_used || ''
+            };
+            this.showEditKbModal = true;
+        },
+
+        async saveKbEdit() {
+            this.status = 'Saving changes...';
+            try {
+                const res = await fetch('/api/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(this.editionKbEntry)
+                });
+                
+                if (res.ok) {
+                    this.triggerToast('Entry updated successfully', 'success');
+                    this.showEditKbModal = false;
+                    if (this.showPruneModal) await this.fetchPruneCandidates();
+                    await this.fetchKbStats();
+                } else {
+                    const data = await res.json();
+                    this.triggerToast('Failed: ' + (data.message || 'Unknown error'), 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                this.triggerToast('Error saving changes', 'error');
+            } finally {
+                this.status = '';
+            }
+        },
+
         async predictKeywords() {
             const text = this.inputText || this.manualOrig;
             if (!text) return;
@@ -803,6 +992,7 @@ function rephraserApp() {
                         keywords: this.searchKeywords,
                         is_template: this.templateMode,
                         category: this.currentCategory,
+                        role: this.selectedRoleName || 'Tech Support', // Add role
                         model_used: this.modelA,
                         // Performance Data
                         latency_ms: isNaN(latest?.duration) ? null : Math.round(latest.duration),
@@ -876,20 +1066,20 @@ function rephraserApp() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        id: item.id || undefined,
                         original_text: item.original,
-                        rephrased_text: content,
-                        keywords: item.keywords,
-                        is_template: item.is_template,
-                        category: item.category,
-                        model_used: item.modelA_name,
-                        id: item.id || undefined, // Support updating existing
-                        // Performance Data from item snapshot
-                        latency_ms: isNaN(item.duration) ? null : Math.round(item.duration),
-                        temperature: item.config?.temperature,
-                        max_tokens: item.config?.maxTokens,
-                        top_p: item.config?.topP,
-                        frequency_penalty: item.config?.frequencyPenalty,
-                        presence_penalty: item.config?.presencePenalty
+                        rephrased_text: item.rephrased,
+                        keywords: item.keywords || '',
+                        is_template: item.is_template || false,
+                        category: item.category || '',
+                        role: this.selectedRoleName || 'Tech Support', // Add role
+                        model_used: item.modelA_name || '', // Changed from item.model to item.modelA_name to match original
+                        latency_ms: item.duration ? Math.round(item.duration) : null,
+                        temperature: item.config?.temperature ?? null,
+                        max_tokens: item.config?.maxTokens ?? null,
+                        top_p: item.config?.topP ?? null,
+                        frequency_penalty: item.config?.frequencyPenalty ?? null,
+                        presence_penalty: item.config?.presencePenalty ?? null
                     })
                 });
                 

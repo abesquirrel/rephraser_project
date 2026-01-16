@@ -18,6 +18,10 @@ class KnowledgeBase extends Model
         'max_tokens',
         'top_p',
         'frequency_penalty',
-        'presence_penalty'
+        'presence_penalty',
+        'hits',
+        'last_used_at',
+        'embedding',
+        'role'
     ];
 }
