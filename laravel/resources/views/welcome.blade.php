@@ -36,18 +36,18 @@
 
         <!-- Header -->
         <header class="header animate-fade mb-4 flex flex-col md:flex-row justify-between items-center gap-4 px-2">
-        <div class="text-left">
-            <h1
-                class="text-2xl font-bold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
-                Masha: The Rephraser
-            </h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-                The lazy cat with the best ideas.<br>
-                <i>
-                    In training — furballs may occur.
-                </i>
-            </p>
-        </div>
+            <div class="text-left">
+                <h1
+                    class="text-2xl font-bold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
+                    Masha: The Rephraser
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    The lazy cat with the best ideas.<br>
+                    <i>
+                        In training — furballs may occur.
+                    </i>
+                </p>
+            </div>
 
             <div class="flex items-center gap-4">
 
@@ -255,7 +255,9 @@
                                     <div class="glass-card p-6 mb-4 relative">
                                         <div class="flex justify-between mb-4">
                                             <span class="label-text m-0">Original</span>
-                                            <span class="approved-badge" x-show="item.approved">Saved</span>
+                                            <span
+                                                class="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-emerald-500/20 flex items-center justify-center min-w-[45px]"
+                                                x-show="item.approved">Saved</span>
                                         </div>
                                         <div class="bubble bubble-original text-sm p-3 border-l-4 border-indigo-500"
                                             x-text="item.original"></div>
@@ -817,20 +819,19 @@
                 x-transition:enter-end="opacity-100" x-transition:leave="duration-200 ease-in"
                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
 
-            <div class="glass-card relative w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl ring-1 ring-white/10"
-                x-show="showGuide" x-transition:enter="duration-300 ease-out"
+            <div class="glass-card relative w-full h-full max-w-5xl overflow-hidden flex flex-col shadow-2xl ring-1 ring-white/10"
+                @click.stop x-show="showGuide" x-transition:enter="duration-300 ease-out"
                 x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                 x-transition:leave="duration-200 ease-in" x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95">
 
-                <!-- Modal Header -->
-                <div class="flex justify-between items-center p-6 pb-4 border-b border-gray-200/10">
-                    <div>
+                <!-- Header -->
+                <div class="flex justify-between items-center p-6 border-b border-gray-700/30 bg-[#1a1b26]/50 shrink-0">
+                    <div class="flex items-center gap-4">
                         <h2
-                            class="text-2xl font-bold font-display bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500">
-                            Mastering Masha</h2>
-                        <p class="text-gray-500 dark:text-gray-400 mt-1">The complete guide to AI-powered support
-                            analysis.</p>
+                            class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-400">
+                            Help &amp; Documentation
+                        </h2>
                     </div>
                     <button @click="showGuide = false"
                         class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
@@ -843,19 +844,24 @@
                 </div>
 
                 <!-- Modal Content -->
-                <div class="overflow-y-auto p-6 custom-scrollbar h-full" x-data="{ activeHelpTab: 'guide' }">
+                <div class="overflow-y-auto p-6 custom-scrollbar h-full">
 
                     <!-- Tab Navigation -->
-                    <div class="flex gap-6 border-b border-gray-200/10 mb-8 sticky top-0 bg-[#0f1115] z-10 pt-2">
+                    <div
+                        class="flex gap-8 border-b border-gray-700/30 mb-8 sticky top-0 bg-gradient-to-b from-[#0f1115] via-[#0f1115] to-transparent backdrop-blur-sm z-10 pt-2 pb-1">
                         <button @click="activeHelpTab = 'guide'"
-                            class="pb-3 text-sm font-bold uppercase tracking-widest transition-colors border-b-2"
-                            :class="activeHelpTab === 'guide' ? 'border-sky-500 text-sky-500' : 'border-transparent text-gray-400 hover:text-gray-200'">
-                            User Guide
+                            class="pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-all duration-300 border-b-2 relative group"
+                            :class="activeHelpTab === 'guide' ? 'border-sky-400 text-sky-400' : 'border-transparent text-gray-500 hover:text-gray-300'">
+                            <span class="relative z-10">User Guide</span>
+                            <span x-show="activeHelpTab === 'guide'"
+                                class="absolute inset-0 bg-sky-500/5 blur-xl rounded-lg -z-10"></span>
                         </button>
                         <button @click="activeHelpTab = 'stats'"
-                            class="pb-3 text-sm font-bold uppercase tracking-widest transition-colors border-b-2"
-                            :class="activeHelpTab === 'stats' ? 'border-sky-500 text-sky-500' : 'border-transparent text-gray-400 hover:text-gray-200'">
-                            Stats & Models
+                            class="pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-all duration-300 border-b-2 relative group"
+                            :class="activeHelpTab === 'stats' ? 'border-purple-400 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'">
+                            <span class="relative z-10">Stats &amp; Models</span>
+                            <span x-show="activeHelpTab === 'stats'"
+                                class="absolute inset-0 bg-purple-500/5 blur-xl rounded-lg -z-10"></span>
                         </button>
                     </div>
 
@@ -973,17 +979,66 @@
                                 Knowledge Base (KB)
                             </h3>
                             <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
-                                <p>The Knowledge Base is Masha's long-term memory. It allows the system to learn from
-                                    your corrections.</p>
+                                <p>The Knowledge Base is Masha's long-term memory. It allows her to learn from your
+                                    corrections and get smarter over time.</p>
                                 <ul>
                                     <li><strong>Approve Button:</strong> Saves the "Original + Rephrased" pair to the
-                                        KB.</li>
-                                    <li><strong>Category Tagging:</strong> Assign categories (e.g., "Outage", "Billing")
-                                        to filter context later.</li>
-                                    <li><strong>Manual Entry:</strong> Manually add "Golden Samples" via the Settings
-                                        menu.</li>
-                                    <li><strong>Bulk Import:</strong> Upload CSVs to bulk-train the system.</li>
+                                        KB. Masha will use this as a reference for similar future requests.</li>
+                                    <li><strong>Review & Prune:</strong> Keep Masha sharp! Use the "Prune Low Usage"
+                                        tool to find and remove entries that haven't been helpful recently.</li>
+                                    <li><strong>Edit & Refine:</strong> Spotted a typo in an old entry? Open the Prune
+                                        list and click <strong>Edit</strong> to fix the text, update the category, or
+                                        change the role instantly.</li>
+                                    <li><strong>Optimize Index:</strong> If Masha feels a bit slow retrieving memories,
+                                        click "Optimize Index" to reorganize her vector database.</li>
                                 </ul>
+                            </div>
+
+                            <!-- Maintenance Section -->
+                            <div
+                                class="mt-8 p-6 rounded-xl bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800">
+                                <h4 class="font-bold text-orange-800 dark:text-orange-400 mb-4 flex items-center gap-2">
+                                    System Maintenance
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <button @click="optimizeIndex()" :disabled="status === 'Optimizing Index...'"
+                                            class="w-full btn bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-700 hover:border-sky-500 text-gray-700 dark:text-gray-200 px-4 py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <svg x-show="status !== 'Optimizing Index...'"
+                                                xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-500"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                            <svg x-show="status === 'Optimizing Index...'"
+                                                class="animate-spin w-4 h-4 text-sky-500"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                    stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                </path>
+                                            </svg>
+                                            <span
+                                                x-text="status === 'Optimizing Index...' ? 'Optimizing...' : 'Optimize Index'"></span>
+                                        </button>
+                                        <p class="text-[10px] text-gray-500 mt-2 text-center">Rebuilds vector cache.
+                                            Run if search feels slow.</p>
+                                    </div>
+                                    <div>
+                                        <button @click="openPruneModal()"
+                                            class="w-full btn bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-700 hover:border-red-500 text-gray-700 dark:text-gray-200 px-4 py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Review & Prune
+                                        </button>
+                                        <p class="text-[10px] text-gray-500 mt-2 text-center">Review and delete old,
+                                            unused entries.</p>
+                                    </div>
+                                </div>
                             </div>
                         </section>
                     </div>
@@ -1000,7 +1055,8 @@
                                 <div
                                     class="p-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center flex flex-col items-center justify-center">
                                     <div class="text-3xl font-bold text-emerald-500 mb-1"
-                                        x-text="kbStats.total_entries || 0"></div>
+                                        x-text="kbStats.total_entries || 0">
+                                    </div>
                                     <div
                                         class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold opacity-80">
                                         Total Entries</div>
@@ -1031,7 +1087,8 @@
                                                 x-text="model.id"></span>
                                         </div>
                                         <p class="text-sm text-gray-600 dark:text-gray-400"
-                                            x-text="getModelDescription(model.id)"></p>
+                                            x-text="getModelDescription(model.id)">
+                                        </p>
                                     </div>
                                 </template>
                             </div>
@@ -1060,9 +1117,11 @@
                                             <template x-for="stat in modelStats" :key="stat.name">
                                                 <tr>
                                                     <td class="py-2 font-mono text-sky-500"
-                                                        x-text="formatModelName(stat.name)"></td>
+                                                        x-text="formatModelName(stat.name)">
+                                                    </td>
                                                     <td class="py-2 text-right font-bold text-emerald-500"
-                                                        x-text="stat.count"></td>
+                                                        x-text="stat.count">
+                                                    </td>
                                                 </tr>
                                             </template>
                                         </tbody>
@@ -1082,6 +1141,279 @@
             </div>
         </div>
     </div>
+
+    <!-- Prune Review Modal -->
+    <div x-show="showPruneModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4" x-cloak>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" @click="showPruneModal = false"
+            x-show="showPruneModal" x-transition:enter="duration-300 ease-out" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="duration-200 ease-in"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+
+        <div class="glass-card relative w-full max-w-[98%] max-h-[90vh] overflow-hidden flex flex-col shadow-2xl ring-1 ring-white/10"
+            x-show="showPruneModal" x-transition:enter="duration-300 ease-out"
+            x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="duration-200 ease-in" x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95">
+
+            <!-- Header -->
+            <div class="flex justify-between items-center p-6 border-b border-gray-700/30 bg-[#1a1b26]/50">
+                <h3 class="text-xl font-bold text-red-400 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Review &amp; Prune
+                </h3>
+                <button @click="showPruneModal = false"
+                    class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Filters / Stats -->
+            <div class="p-6 border-b border-gray-200/10 bg-black/20 flex flex-wrap gap-4 items-center justify-between">
+                <div class="flex gap-4 items-center">
+                    <div>
+                        <label class="text-xs text-gray-500 block mb-1">Max Hits Threshold</label>
+                        <input type="number" x-model.number="pruneThreshold" @change="fetchPruneCandidates()"
+                            class="form-input w-20 p-2 text-sm rounded-lg bg-black/20 border border-gray-700 text-center">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 block mb-1">Older Than (Days)</label>
+                        <input type="number" x-model.number="pruneDays" @change="fetchPruneCandidates()"
+                            class="form-input w-20 p-2 text-sm rounded-lg bg-black/20 border border-gray-700 text-center">
+                    </div>
+                    <button @click="fetchPruneCandidates()" :disabled="status === 'Scanning usage data...'"
+                        class="text-xs text-sky-500 hover:text-sky-600 hover:underline transition-colors flex items-center gap-1.5 mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg x-show="status !== 'Scanning usage data...'" xmlns="http://www.w3.org/2000/svg"
+                            class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <svg x-show="status === 'Scanning usage data...'" class="animate-spin w-3.5 h-3.5"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        <span x-text="status === 'Scanning usage data...' ? 'Scanning...' : 'Rescan'"></span>
+                    </button>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-red-400" x-text="pruneCandidates.length"></div>
+                    <div class="text-xs text-gray-500 uppercase font-bold">Candidates Found</div>
+                </div>
+            </div>
+
+            <!-- List -->
+            <div class="flex-1 overflow-y-auto p-0 custom-scrollbar relative">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-[#1a1b26]/80 text-gray-400 font-bold sticky top-0 backdrop-blur-md z-10">
+                        <tr>
+                            <th class="p-4 w-12 text-center">
+                                <input type="checkbox" @click="toggleAllPrune()"
+                                    :checked="selectedPruneIds.length === pruneCandidates.length && pruneCandidates.length > 0"
+                                    class="rounded border-gray-700 bg-black/20 text-red-500 focus:ring-red-500">
+                            </th>
+                            <th class="p-4">Content Preview</th>
+                            <th class="p-4 w-24 text-center">Hits</th>
+                            <th class="p-4 w-32 text-center">Age (Days)</th>
+                            <th class="p-4 w-40 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-800">
+                        <template x-if="pruneCandidates.length === 0">
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-gray-500 italic">No candidates found
+                                    matching
+                                    criteria.</td>
+                            </tr>
+                        </template>
+                        <template x-for="candidate in pruneCandidates" :key="candidate.id">
+                            <tr class="hover:bg-white/5 transition-colors group"
+                                :class="selectedPruneIds.includes(candidate.id) ? 'bg-red-500/10' : ''">
+                                <td class="p-4 text-center">
+                                    <input type="checkbox" :checked="selectedPruneIds.includes(candidate.id)"
+                                        @change="togglePruneSelection(candidate.id)"
+                                        class="rounded border-gray-700 bg-black/20 text-red-500 focus:ring-red-500">
+                                </td>
+                                <td class="p-4">
+                                    <div class="line-clamp-2 text-gray-300 font-medium"
+                                        x-text="candidate.rephrased_text || candidate.original_text"></div>
+                                    <div class="text-xs text-gray-500 mt-1"
+                                        x-text="(candidate.keywords || 'No keywords')">
+                                    </div>
+                                </td>
+                                <td class="p-4 text-center font-mono text-gray-400" x-text="candidate.hits"></td>
+                                <td class="p-4 text-center text-gray-400">
+                                    <span
+                                        x-text="Math.floor((new Date() - new Date(candidate.created_at)) / (1000 * 60 * 60 * 24))"></span>
+                                </td>
+                                <td class="p-4 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button type="button" @click.stop="openEditKbModal(candidate)"
+                                            class="px-3 py-1.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 hover:bg-sky-500 hover:text-white transition-all text-xs font-bold uppercase tracking-wider">
+                                            Edit
+                                        </button>
+                                        <button type="button" @click.stop="keepEntry(candidate.id)"
+                                            class="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all text-xs font-bold uppercase tracking-wider">
+                                            Keep
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-5 border-t border-gray-700/30 bg-[#1a1b26]/50 flex justify-between items-center z-10">
+                <div class="text-xs text-gray-500">
+                    <span x-text="selectedPruneIds.length"></span> selected <span class="mx-1 opacity-50">|</span> <span
+                        x-text="pruneCandidates.length"></span> candidates found
+                </div>
+                <div class="flex gap-3">
+                    <button class="btn btn-ghost px-6 py-2" @click="showPruneModal = false">Cancel</button>
+                    <button
+                        class="btn bg-red-500 hover:bg-red-600 text-white font-bold px-8 py-2 rounded-xl shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                        @click="confirmPrune()" :disabled="selectedPruneIds.length === 0">
+                        Delete Selected
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit KB Entry Modal -->
+    <div x-show="showEditKbModal" class="fixed inset-0 z-[120] flex items-center justify-center p-4" x-cloak>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" @click="showEditKbModal = false"
+            x-show="showEditKbModal" x-transition:enter="duration-300 ease-out" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="duration-200 ease-in"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+
+        <div class="glass-card relative w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl ring-1 ring-white/10"
+            x-show="showEditKbModal" x-transition:enter="duration-300 ease-out"
+            x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="duration-200 ease-in" x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95">
+
+            <!-- Header -->
+            <div class="flex justify-between items-center p-6 border-b border-gray-700/30 bg-[#1a1b26]/50">
+                <h3 class="text-xl font-bold text-sky-400 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit Entry
+                </h3>
+                <button @click="showEditKbModal = false" class="text-gray-400 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 space-y-4 overflow-y-auto custom-scrollbar">
+
+                <!-- Category & Role -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
+                        <input type="text" list="categoryOptions" x-model="editionKbEntry.category"
+                            class="w-full bg-black/20 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
+                            placeholder="Select or type custom...">
+                        <datalist id="categoryOptions">
+                            <template x-for="cat in categories" :key="cat">
+                                <option :value="cat"></option>
+                            </template>
+                        </datalist>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Role</label>
+                        <select x-model="editionKbEntry.role"
+                            class="w-full bg-black/20 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors appearance-none">
+                            <template x-for="role in promptRoles" :key="role.name">
+                                <option :value="role.name" x-text="role.name"></option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Original -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Original Text</label>
+                    <textarea x-model="editionKbEntry.original_text" rows="3"
+                        class="w-full bg-black/20 border border-gray-700 rounded-lg p-3 text-sm text-gray-300 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors font-mono custom-scrollbar"></textarea>
+                </div>
+
+                <!-- Rephrased -->
+                <div>
+                    <label class="block text-xs font-bold text-emerald-500/80 uppercase mb-1">Rephrased Text</label>
+                    <textarea x-model="editionKbEntry.rephrased_text" rows="4"
+                        class="w-full bg-emerald-500/5 border border-emerald-500/30 rounded-lg p-3 text-sm text-emerald-100 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-colors font-mono custom-scrollbar"></textarea>
+                </div>
+
+                <!-- Keywords & Model -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Keywords</label>
+                        <input type="text" x-model="editionKbEntry.keywords"
+                            class="w-full bg-black/20 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Model Used</label>
+                        <select x-model="editionKbEntry.model_used"
+                            class="w-full bg-black/20 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors appearance-none">
+                            <template
+                                x-if="editionKbEntry.model_used && availableModels && !availableModels.find(m => m.id === editionKbEntry.model_used)">
+                                <option :value="editionKbEntry.model_used"
+                                    x-text="editionKbEntry.model_used + ' (Original)'"></option>
+                            </template>
+                            <option value="">Select Model</option>
+                            <template x-for="model in availableModels" :key="model.id">
+                                <option :value="model.id" x-text="model.name"></option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Template Toggle -->
+                <div class="flex items-center gap-3 pt-2">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="editionKbEntry.is_template" class="sr-only peer">
+                        <div
+                            class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-sky-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500">
+                        </div>
+                        <span class="ml-3 text-sm font-medium text-gray-300">Save as Template</span>
+                    </label>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="p-5 border-t border-gray-700/30 bg-[#1a1b26]/50 flex justify-end gap-3">
+                <button class="btn btn-ghost px-6 py-2" @click="showEditKbModal = false">Cancel</button>
+                <button
+                    class="btn bg-sky-500 hover:bg-sky-600 text-white font-bold px-8 py-2 rounded-xl shadow-lg shadow-sky-500/20"
+                    @click="saveKbEdit()">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Success Alert Modal -->
     <div x-show="showSuccessModal" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"

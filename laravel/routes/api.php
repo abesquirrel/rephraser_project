@@ -33,3 +33,9 @@ Route::get('/roles', [RephraseController::class, 'getRoles']);
 Route::post('/roles', [RephraseController::class, 'saveRole']);
 Route::delete('/roles/{id}', [RephraseController::class, 'deleteRole']);
 
+// KB Optimization
+Route::post('/trigger-rebuild', [RephraseController::class, 'triggerRebuild']);
+Route::get('/prune-candidates', [RephraseController::class, 'getPruneCandidates']);
+Route::post('/keep-entry', [RephraseController::class, 'keepEntry']);
+Route::post('/cleanup-kb', [RephraseController::class, 'cleanupKb']);
+

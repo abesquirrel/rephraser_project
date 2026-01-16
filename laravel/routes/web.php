@@ -15,11 +15,11 @@ Route::post('/api/session/start', [RephraseController::class, 'startSession']);
 Route::get('/api/kb-stats', [RephraseController::class, 'getKbStats']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::get('/user', [AuthController::class, 'user']);
 
 // Protected routes
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/user', [AuthController::class, 'user']);
 
     // Admin Routes
     Route::prefix('admin')->group(function () {

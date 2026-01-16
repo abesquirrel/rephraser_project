@@ -165,6 +165,7 @@ class RephraseController extends Controller
             'keywords' => 'nullable|string',
             'is_template' => 'nullable|boolean',
             'category' => 'nullable|string',
+            'role' => 'nullable|string|max:100',
             'model_used' => 'nullable|string',
             'latency_ms' => 'nullable|integer',
             'temperature' => 'nullable|numeric',
@@ -200,7 +201,7 @@ class RephraseController extends Controller
         ]);
 
         // 2. Notify AI Service to rebuild index
-        $this->triggerRebuild();
+        $this->notifyAiRebuild();
 
         return response()->json(['status' => 'success', 'id' => $entry->id]);
     }
@@ -262,7 +263,8 @@ class RephraseController extends Controller
         }
 
         // Notify AI
-        $this->triggerRebuild();
+        // Notify AI
+        $this->notifyAiRebuild();
 
         return response()->json(['status' => 'success']);
     }
@@ -302,7 +304,7 @@ class RephraseController extends Controller
     public function getKbStats()
     {
         $total = KnowledgeBase::count();
-        $latest = KnowledgeBase::latest()->first();
+        $latest = KnowledgeBase::select('updated_at')->latest()->first();
 
         $byCategory = KnowledgeBase::whereNotNull('category')
             ->where('category', '!=', '')
@@ -369,12 +371,85 @@ class RephraseController extends Controller
         }
     }
 
-    private function triggerRebuild()
+    private function notifyAiRebuild()
     {
         try {
             $this->aiCall()->post("{$this->embeddingServiceUrl}/trigger_rebuild");
         } catch (\Exception $e) {
             Log::error("Failed to notify AI service: " . $e->getMessage());
+        }
+    }
+    // --- Optimization Endpoints ---
+
+    public function triggerRebuild(Request $request)
+    {
+        try {
+            $response = $this->aiCall()->post("{$this->embeddingServiceUrl}/trigger_rebuild");
+            return $response->json();
+        } catch (\Exception $e) {
+            Log::error("Failed to trigger rebuild: " . $e->getMessage());
+            return response()->json(['error' => 'Service Unavailable'], 503);
+        }
+    }
+
+    public function getPruneCandidates(Request $request)
+    {
+        $hitsThreshold = $request->input('threshold_hits', 5);
+        $daysOld = $request->input('days_old', 7); // Default 7 days buffer
+
+        $candidates = KnowledgeBase::select([
+            'id',
+            'original_text',
+            'rephrased_text',
+            'keywords',
+            'is_template',
+            'category',
+            'role',
+            'model_used',
+            'hits',
+            'created_at',
+            'last_used_at'
+        ])
+            ->where('hits', '<', $hitsThreshold)
+            ->where('created_at', '<', now()->subDays($daysOld))
+            ->get();
+
+        return response()->json($candidates);
+    }
+
+    public function keepEntry(Request $request)
+    {
+        $request->validate(['id' => 'required|exists:knowledge_bases,id']);
+
+        $entry = KnowledgeBase::find($request->id);
+        // "Reset" the entry so it survives the next prune cycle
+        // Set hits to a safe number (e.g. 5) or update last_used_at
+        // Let's bump hits to 5 (or whatever the default threshold usually is + 1) to be safe
+        $entry->hits = 10;
+        $entry->last_used_at = now();
+        $entry->save();
+
+        return response()->json(['status' => 'success']);
+    }
+
+    public function cleanupKb(Request $request)
+    {
+        // Now accepts explicit IDs
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:knowledge_bases,id'
+        ]);
+
+        try {
+            KnowledgeBase::destroy($validated['ids']);
+
+            // Trigger rebuild in AI service to sync index
+            $this->notifyAiRebuild();
+
+            return response()->json(['status' => 'success', 'deleted' => count($validated['ids'])]);
+        } catch (\Exception $e) {
+            Log::error("Failed to cleanup KB: " . $e->getMessage());
+            return response()->json(['error' => 'Cleanup Failed'], 500);
         }
     }
 }
