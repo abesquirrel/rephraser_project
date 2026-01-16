@@ -936,8 +936,29 @@ function rephraserApp() {
         },
 
         copyText(text) {
-            navigator.clipboard.writeText(text);
-            this.triggerToast('Copied to Clipboard');
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    this.triggerToast('Copied to Clipboard');
+                }).catch(() => {
+                    this.triggerToast('Failed to copy', 'error');
+                });
+            } else {
+                // Fallback for non-secure contexts (HTTP)
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";  // Avoid scrolling to bottom
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    this.triggerToast('Copied to Clipboard');
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                    this.triggerToast('Failed to copy', 'error');
+                }
+                document.body.removeChild(textArea);
+            }
         },
 
         clearUnsaved() {

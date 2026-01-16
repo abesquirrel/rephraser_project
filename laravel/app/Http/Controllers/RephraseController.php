@@ -53,9 +53,21 @@ class RephraseController extends Controller
             $data['role'] = $roleConfig->name;
         }
 
+        // Resolve Session ID safely
+        $sessionId = $request->header('X-Session-ID');
+        if (empty($sessionId) || $sessionId === 'null') {
+            $sessionId = session()->getId();
+        }
+
+        // Ensure the session ID actually exists in the DB to avoid FK errors (1452)
+        // If it doesn't exist, we fallback to null (which is allowed)
+        if ($sessionId && !\App\Models\UserSession::where('session_id', $sessionId)->exists()) {
+            $sessionId = null;
+        }
+
         // 1. Create Log Record
         $generationLog = \App\Models\ModelGeneration::create([
-            'session_id' => $request->header('X-Session-ID') ?? session()->getId(),
+            'session_id' => $sessionId,
             'model_id' => $data['model'] ?? 'unknown',
             'input_text_length' => $inputLength,
             'temperature' => $data['temperature'] ?? null,
