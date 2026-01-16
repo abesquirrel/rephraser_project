@@ -19,7 +19,7 @@ class RephraseController extends Controller
     {
         return Http::withHeaders([
             'X-AI-KEY' => config('rephraser.ai_key', 'default_secret_key')
-        ]);
+        ])->timeout(300);
     }
 
     private function sanitize($text)
@@ -77,6 +77,7 @@ class RephraseController extends Controller
         $generationLog = \App\Models\ModelGeneration::create([
             'session_id' => $sessionId,
             'model_id' => $data['model'] ?? 'unknown',
+            'model_display_name' => $this->formatModelName($data['model'] ?? 'unknown'),
             'input_text_length' => $inputLength,
             'temperature' => $data['temperature'] ?? null,
             'max_tokens' => $data['max_tokens'] ?? null,
@@ -114,53 +115,75 @@ class RephraseController extends Controller
         }
 
         return response()->stream(function () use ($response, $generationLog, $startTime, $apiCall) {
-            $body = $response->toPsrResponse()->getBody();
-            $accumulatedOutput = '';
+            try {
+                $body = $response->toPsrResponse()->getBody();
+                $accumulatedOutput = '';
 
-            while (!$body->eof()) {
-                $chunk = $body->read(1024);
-                $accumulatedOutput .= $chunk;
-                echo $chunk;
-                if (ob_get_level() > 0)
-                    ob_flush();
-                flush();
-            }
+                while (!$body->eof()) {
+                    $chunk = $body->read(1024);
+                    if (empty($chunk))
+                        continue;
 
-            // 2. Update Log on Completion
-            $duration = (microtime(true) - $startTime) * 1000;
+                    $accumulatedOutput .= $chunk;
+                    echo $chunk;
 
-            // Fast parse for metadata
-            $lines = explode("\n", trim($accumulatedOutput));
-            $lastLine = end($lines);
-            $parsedMeta = json_decode($lastLine, true) ?? [];
-
-            $finalContent = $parsedMeta['data'] ?? '';
-            $kbIds = $parsedMeta['meta']['kb_ids'] ?? [];
-            $outputLength = strlen($finalContent);
-
-            $generationLog->update([
-                'generation_time_ms' => (int) $duration,
-                'output_text_length' => $outputLength,
-                'completion_tokens' => (int) ($outputLength / 4),
-                'total_tokens' => (int) (($generationLog->input_text_length + $outputLength) / 4) + $generationLog->prompt_tokens
-            ]);
-
-            $apiCall->update([
-                'response_time_ms' => (int) $duration,
-                'response_payload_size' => strlen($accumulatedOutput)
-            ]);
-
-            // 3. Log KB Usage
-            if (!empty($kbIds)) {
-                foreach ($kbIds as $kbId) {
-                    KbUsage::create([
-                        'generation_id' => $generationLog->id,
-                        'kb_entry_id' => $kbId,
-                        'was_used_in_prompt' => true
-                    ]);
+                    if (ob_get_level() > 0)
+                        ob_flush();
+                    flush();
                 }
-            }
 
+                // 2. Update Log on Completion
+                $duration = (microtime(true) - $startTime) * 1000;
+
+                // Search backwards for the metadata line
+                $lines = explode("\n", trim($accumulatedOutput));
+                $parsedMeta = [];
+                for ($i = count($lines) - 1; $i >= 0; $i--) {
+                    $line = trim($lines[$i]);
+                    if (empty($line))
+                        continue;
+
+                    $p = json_decode($line, true);
+                    if (isset($p['meta']) || isset($p['data'])) {
+                        $parsedMeta = $p;
+                        break;
+                    }
+                }
+
+                $finalContent = $parsedMeta['data'] ?? '';
+                $kbIds = $parsedMeta['meta']['kb_ids'] ?? [];
+                $outputLength = strlen($finalContent);
+
+                $generationLog->update([
+                    'generation_time_ms' => (int) $duration,
+                    'output_text_length' => $outputLength,
+                    'completion_tokens' => (int) ($outputLength / 4),
+                    'total_tokens' => (int) ($outputLength / 4) + ($generationLog->prompt_tokens ?? 0)
+                ]);
+
+                $apiCall->update([
+                    'response_time_ms' => (int) $duration,
+                    'response_payload_size' => strlen($accumulatedOutput)
+                ]);
+
+                // 3. Log KB Usage
+                if (!empty($kbIds)) {
+                    foreach ($kbIds as $kbId) {
+                        KbUsage::create([
+                            'generation_id' => $generationLog->id,
+                            'kb_entry_id' => $kbId,
+                            'was_used_in_prompt' => true
+                        ]);
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error("Stream processing error: " . $e->getMessage());
+                // Silently fail to avoid sending HTML error page into the JSON stream
+                $apiCall->update([
+                    'is_error' => true,
+                    'error_message' => 'Stream Interrupted: ' . $e->getMessage()
+                ]);
+            }
         }, 200, [
             'Content-Type' => 'application/json',
             'Cache-Control' => 'no-cache',
@@ -537,5 +560,12 @@ class RephraseController extends Controller
             Log::error("Failed to cleanup KB: " . $e->getMessage());
             return response()->json(['error' => 'Cleanup Failed'], 500);
         }
+    }
+
+    private function formatModelName($name)
+    {
+        if (!$name)
+            return 'Unknown Model';
+        return str_replace([':latest', ':8b-instruct-q3_K_M', '-instruct-q3_K_M'], '', $name);
     }
 }

@@ -106,8 +106,12 @@ function rephraserApp() {
         },
 
         async startTracking() {
-             if (!this.sessionId) {
-                 this.sessionId = crypto.randomUUID();
+             if (!this.sessionId || this.sessionId === 'null') {
+                 if (window.crypto && crypto.randomUUID) {
+                     this.sessionId = crypto.randomUUID();
+                 } else {
+                     this.sessionId = 'sess_' + Math.random().toString(36).substr(2, 9);
+                 }
              }
              
              try {
@@ -192,7 +196,19 @@ function rephraserApp() {
 
         // Helper to format model name display
         formatModelName(name) {
-             return name.replace(':latest', '').replace(':8b-instruct-q3_K_M', '');
+             if (!name) return 'Unknown Model';
+             return name.replace(':latest', '').replace(':8b-instruct-q3_K_M', '').replace('-instruct-q3_K_M', '');
+        },
+
+        stripMarkdown(text) {
+            if (!text) return '';
+            return text
+                .replace(/(\*\*|__)/g, '')
+                .replace(/(\*|_)/g, '')
+                .replace(/^#+\s*/gm, '')
+                .replace(/```.*?```/gs, '')
+                .replace(/`/g, '')
+                .trim();
         },
 
         get friendlyStatus() {
@@ -486,30 +502,53 @@ function rephraserApp() {
 
 
 
-        syncModelSettings() {
-            const settings = this.modelSettings[this.modelA];
-            if (settings) {
-                this.temperature = settings.temperature ?? 0.5;
-                this.maxTokens = settings.maxTokens ?? 600;
-                this.kbCount = settings.kbCount ?? 3;
-                this.topP = settings.topP ?? 0.9;
-                this.frequencyPenalty = settings.frequencyPenalty ?? 0.0;
-                this.presencePenalty = settings.presencePenalty ?? 0.0;
-            } else {
-                // Initialize with defaults if never set
-                this.temperature = 0.5;
-                this.maxTokens = 600;
-                this.kbCount = 3;
+        getModelCapabilities(modelName) {
+            if (!modelName) return { maxTokens: 600, kbCount: 2, temperature: 0.4 };
+            const name = modelName.toLowerCase();
+            
+            // Tier 1: Powerful (Usually 7B+ parameters)
+            if (name.includes('llama3') || name.includes('gemma:9b') || name.includes('gemma2:9b') || 
+                name.includes('mistral') || name.includes('qwen:7b') || name.includes('mixtral') || name.includes('command-r')) {
+                return { maxTokens: 2048, kbCount: 5, temperature: 0.7 };
             }
+            
+            // Tier 2: Lightweight
+            if (name.includes('phi3') || name.includes('gemma:2b') || name.includes('gemma2:2b') || 
+                name.includes('qwen:1.5b') || name.includes('tinyllama') || name.includes('phi')) {
+                return { maxTokens: 1024, kbCount: 3, temperature: 0.5 };
+            }
+            
+            // Tier 3: Default/Safe fallback
+            return { maxTokens: 600, kbCount: 2, temperature: 0.4 };
+        },
+
+        syncModelSettings() {
+            if (!this.modelA) return;
+            
+            const caps = this.getModelCapabilities(this.modelA);
+            const settings = this.modelSettings[this.modelA] || {};
+            
+            // Apply settings, but clamp maxTokens and kbCount to model capabilities
+            this.temperature = settings.temperature ?? caps.temperature;
+            this.maxTokens = Math.min(settings.maxTokens ?? caps.maxTokens, caps.maxTokens);
+            this.kbCount = Math.min(settings.kbCount ?? caps.kbCount, caps.kbCount);
+            this.topP = settings.topP ?? 0.9;
+            this.frequencyPenalty = settings.frequencyPenalty ?? 0.0;
+            this.presencePenalty = settings.presencePenalty ?? 0.0;
+            
+            // Update saved state if clamping occurred or if it was empty
+            this.saveModelSetting('maxTokens', this.maxTokens);
+            this.saveModelSetting('kbCount', this.kbCount);
         },
 
         saveModelSetting(key, value) {
             if (!this.modelA) return;
             if (!this.modelSettings[this.modelA]) {
+                const caps = this.getModelCapabilities(this.modelA);
                 this.modelSettings[this.modelA] = { 
-                    temperature: 0.5, 
-                    maxTokens: 600, 
-                    kbCount: 3,
+                    temperature: caps.temperature, 
+                    maxTokens: caps.maxTokens, 
+                    kbCount: caps.kbCount,
                     topP: 0.9,
                     frequencyPenalty: 0.0,
                     presencePenalty: 0.0
@@ -517,7 +556,6 @@ function rephraserApp() {
             }
             this.modelSettings[this.modelA][key] = value;
             this.modelSettings = { ...this.modelSettings }; // Force persist trigger
-            // Persistence is handled by $persist on modelSettings
         },
 
         applyPreset(type) {
@@ -623,6 +661,9 @@ function rephraserApp() {
                 const decoder = new TextDecoder();
                 let buffer = '';
 
+                // Link stream to history item if provided
+                const historyItem = this.history[0];
+
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
@@ -631,7 +672,9 @@ function rephraserApp() {
                     buffer = lines.pop(); // Keep the last line in the buffer as it might be incomplete
 
                     for (const line of lines) {
-                        if (!line.trim()) continue;
+                        const trimmedLine = line.trim();
+                        if (!trimmedLine || trimmedLine.startsWith('<') || trimmedLine.startsWith('<!')) continue;
+                        
                         try {
                             const parsed = JSON.parse(line);
                             if (parsed.status) {
@@ -642,7 +685,20 @@ function rephraserApp() {
                                     if (container) container.scrollTop = container.scrollHeight;
                                 });
                             }
-                            if (parsed.data) this[targetKey] = parsed.data;
+                            if (parsed.token) {
+                                // Append token in real-time
+                                this.rephrasedContent += parsed.token;
+                                if (historyItem) {
+                                    historyItem.rephrased = this.rephrasedContent;
+                                }
+                            }
+                            if (parsed.data) {
+                                // Final full data (ensure sync and strip markdown)
+                                this.rephrasedContent = this.stripMarkdown(parsed.data);
+                                if (historyItem) {
+                                    historyItem.rephrased = this.rephrasedContent;
+                                }
+                            }
                         } catch (e) {
                             console.warn('JSON Parse error on line:', line, e);
                         }
@@ -657,35 +713,37 @@ function rephraserApp() {
                 }
             };
 
+            // Collapse previous items
+            this.history.forEach((h) => h.expanded = false);
+
+            // Add stub to history immediately
+            this.history.unshift({
+                original: textToProcess,
+                rephrased: '...', // Visual indicator that it's starting
+                keywords: this.searchKeywords,
+                is_template: this.templateMode,
+                category: this.currentCategory,
+                approved: false,
+                expanded: true,
+                modelA_name: this.formatModelName(this.modelA),
+                isEditing: false, 
+                timestamp: new Date().toISOString(),
+                duration: 0,
+                config: {
+                    temperature: this.temperature,
+                    maxTokens: this.maxTokens,
+                }
+            });
+
             try {
                 await runStream(this.modelA, 'rephrasedContent');
 
-                // Collapse previous items and add to history after generation
-                this.history.forEach((h, i) => {
-                    if (i !== 0) h.expanded = false;
-                });
+                // Finalize history entry
+                if (this.history[0]) {
+                    this.history[0].duration = performance.now() - startTime;
+                    this.history[0].rephrased = this.rephrasedContent;
+                }
 
-                this.history.unshift({
-                    original: textToProcess,
-                    rephrased: this.decodeEntities(this.rephrasedContent), // Store model A's output as primary
-                    keywords: this.searchKeywords,
-                    is_template: this.templateMode,
-                    category: this.currentCategory,
-                    approved: false,
-                    expanded: true,
-                    modelA_name: this.modelA || 'llama3:8b-instruct-q3_K_M',
-                    isEditing: false, 
-                    timestamp: new Date().toISOString(),
-                    duration: performance.now() - startTime,
-                    // Snapshot config for accurate data collection
-                    config: {
-                        temperature: this.temperature,
-                        maxTokens: this.maxTokens,
-                        topP: this.topP,
-                        frequencyPenalty: this.frequencyPenalty,
-                        presencePenalty: this.presencePenalty
-                    }
-                });
                 // Keep history manageable
                 if (this.history.length > 50) this.history.pop();
                 this.triggerToast('Synthesis Complete', 'success');
