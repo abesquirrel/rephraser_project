@@ -118,8 +118,12 @@ def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None):
                 if line:
                     chunk = json.loads(line)
                     if 'message' in chunk and 'content' in chunk['message']:
-                        yield chunk['message']['content']
+                        yield {"token": chunk['message']['content']}
                     if chunk.get('done'):
+                        yield {"done_meta": {
+                            "prompt_tokens": chunk.get("prompt_eval_count", 0),
+                            "completion_tokens": chunk.get("eval_count", 0)
+                        }}
                         break
     except Exception as e:
         logger.error(f"LLM Stream failed for model {target_model}: {e}")
@@ -447,12 +451,15 @@ def handle_rephrase():
         l_start = time.time()
         
         # Stream the tokens
-        token_count = 0
-        for token in call_llm_stream(messages, temperature=temperature, max_tokens=max_tokens, model=target_model):
-            full_response += token
-            token_count += 1
-            # Yield token for frontend
-            yield json.dumps({"token": token}) + "\n"
+        actual_metrics = {"prompt_tokens": 0, "completion_tokens": 0}
+        for chunk in call_llm_stream(messages, temperature=temperature, max_tokens=max_tokens, model=target_model):
+            if "token" in chunk:
+                token = chunk["token"]
+                full_response += token
+                # Yield token for frontend
+                yield json.dumps({"token": token}) + "\n"
+            elif "done_meta" in chunk:
+                actual_metrics = chunk["done_meta"]
         
         logger.info(f"LLM Synthesis took {time.time() - l_start:.3f}s")
         
@@ -470,7 +477,8 @@ def handle_rephrase():
             "data": full_response, # Final full text for consistency
             "meta": {
                 "latency": total_latency, 
-                "tokens": token_count,
+                "tokens": actual_metrics.get("completion_tokens", 0),
+                "prompt_tokens": actual_metrics.get("prompt_tokens", 0),
                 "kb_usage": kb_info,
                 "kb_ids": [info['id'] for info in kb_info] # Keep for backward compatibility
             }

@@ -959,7 +959,7 @@
                             </div>
                         </section>
 
-                        <!-- Section 3: Task Modes -->
+                        <!-- Section 3: Specialized Task Modes -->
                         <section>
                             <h3 class="flex items-center gap-3 text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
                                 <span
@@ -975,11 +975,12 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                         </svg>
-                                        Research
+                                        Live Research
                                     </h4>
-                                    <p class="text-xs text-gray-600 dark:text-gray-300">
-                                        <strong>Action:</strong> Validates claims against Apple, Samsung, Reddit, and
-                                        Carrier forums. Best for troubleshooting unknown devices.
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                        <strong>Utility:</strong> Aggregates technical data from Apple, Samsung, and
+                                        carrier
+                                        forums. Designed for real-time validation of emerging connectivity issues.
                                     </p>
                                 </div>
                                 <div
@@ -991,11 +992,12 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
-                                        Template
+                                        Template Injection
                                     </h4>
-                                    <p class="text-xs text-gray-600 dark:text-gray-300">
-                                        <strong>Action:</strong> Forces the AI to strictly inherit the structure of
-                                        existing KB entries. Best for ticket-system compatibility.
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                        <strong>Utility:</strong> Enforces strict inheritance of KB structures. Mirrors
+                                        the
+                                        standardized format of your chosen "Golden Samples" for ticket consistency.
                                     </p>
                                 </div>
                                 <div
@@ -1006,35 +1008,37 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M13 10V3L4 14h7v7l9-11h-7z" />
                                         </svg>
-                                        Standard
+                                        Heuristic Mode
                                     </h4>
-                                    <p class="text-xs text-gray-600 dark:text-gray-300">
-                                        <strong>Action:</strong> Balanced rephrasing focused on the selected Target
-                                        Role. Best for daily communication.
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                        <strong>Utility:</strong> Balanced RAG-assisted rephrasing focused on the active
+                                        Role profile. Best suited for fluid, high-volume log documentation.
                                     </p>
                                 </div>
                             </div>
                         </section>
                         <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
-                            <p>Masha can adopt different personas to suit your audience. Use the <strong>Target
-                                    Role</strong> dropdown to switch contexts instantly.</p>
+                            <p>Masha optimizes her response profile based on the selected <strong>Professional
+                                    Persona</strong>. This determines the structural output and tone.</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 <div class="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200/10">
-                                    <strong class="text-sky-500 block mb-1">Tech Support (Default)</strong>
-                                    <div class="text-xs">Produces structured analysis: <span
-                                            class="font-mono text-gray-400">Observations</span>, <span
+                                    <strong class="text-sky-500 block mb-1">Technical Support</strong>
+                                    <div class="text-xs leading-relaxed">Produces highly structured diagnostic logs:
+                                        <span class="font-mono text-gray-400">Observations</span>, <span
                                             class="font-mono text-gray-400">Actions Taken</span>, <span
-                                            class="font-mono text-gray-400">Recommendations</span>. Ideal for
-                                        internal tickets and detailed logs.</div>
+                                            class="font-mono text-gray-400">Recommendations</span>. Optimized for
+                                        internal ticketing systems.</div>
                                 </div>
                                 <div class="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200/10">
-                                    <strong class="text-indigo-500 block mb-1">Customer Support</strong>
-                                    <div class="text-xs">Drafts professional, empathetic emails with clear Subject
-                                        lines and salutations. Ideal for direct customer communication.</div>
+                                    <strong class="text-indigo-500 block mb-1">Customer Liaison</strong>
+                                    <div class="text-xs leading-relaxed">Drafts direct, empathetic correspondence.
+                                        Includes professional
+                                        Subject lines and appropriate salutations for external communication.</div>
                                 </div>
                             </div>
                             <p class="mt-4 text-xs bg-sky-500/10 text-sky-400 p-2 rounded inline-block">
-                                <strong>Tip:</strong> Create custom roles in the Configuration menu!
+                                <strong>System Tip:</strong> You can define and extend these roles via the Configuration
+                                menu.
                             </p>
                         </div>
                         </section>

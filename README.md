@@ -2,7 +2,7 @@
 
 > _"Precision in every purr. Efficiency in every response."_
 
-**Masha** is a premium, professional-grade rephrasing ecosystem designed for high-performance Technical Support Agents and Support Analysts. In an environment where one agent often handles the workload of many, Masha streamlines the transition from fragmented internal technical notes to client-ready professionalism.
+**Masha** is a professional-grade rephrasing ecosystem designed for high-performance Technical Support Agents and Support Analysts. In an environment where one agent often handles the workload of many, Masha streamlines the transition from fragmented internal technical notes to client-ready professionalism.
 
 ---
 

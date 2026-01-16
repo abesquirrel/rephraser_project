@@ -154,26 +154,23 @@ class RephraseController extends Controller
                 $kbUsageData = $parsedMeta['meta']['kb_usage'] ?? [];
                 $kbIds = $parsedMeta['meta']['kb_ids'] ?? []; // Fallback
                 $actualTokens = $parsedMeta['meta']['tokens'] ?? 0;
+                $promptTokens = $parsedMeta['meta']['prompt_tokens'] ?? 0;
                 $outputLength = strlen($finalContent);
-
-                Log::info("Stream completed. KB hits found: " . (count($kbUsageData) ?: count($kbIds)), [
-                    'gen_id' => $generationLog->id,
-                    'tokens' => $actualTokens
-                ]);
 
                 $generationLog->update([
                     'generation_time_ms' => (int) $duration,
                     'output_text_length' => $outputLength,
+                    'prompt_tokens' => $promptTokens ?: $generationLog->prompt_tokens,
                     'completion_tokens' => $actualTokens ?: (int) ($outputLength / 4),
-                    'total_tokens' => $actualTokens
-                        ? ($actualTokens + ($generationLog->prompt_tokens ?? 0))
-                        : ((int) ($outputLength / 4) + ($generationLog->prompt_tokens ?? 0))
+                    'total_tokens' => ($promptTokens && $actualTokens)
+                        ? ($promptTokens + $actualTokens)
+                        : (($actualTokens ?: (int) ($outputLength / 4)) + ($promptTokens ?: ($generationLog->prompt_tokens ?? 0)))
                 ]);
 
                 $apiCall->update([
                     'response_time_ms' => (int) $duration,
                     'response_payload_size' => strlen($accumulatedOutput),
-                    'tokens_used' => $actualTokens ?: $apiCall->tokens_used
+                    'tokens_used' => ($promptTokens + $actualTokens) ?: $apiCall->tokens_used
                 ]);
 
                 // 3. Log KB Usage
