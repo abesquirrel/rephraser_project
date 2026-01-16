@@ -10,7 +10,15 @@
 
 This ecosystem was developed to address the unique challenges of **high-volume technical support triage.**
 
-As a support analyst, the pressure to maintain quality while managing complex technical debt and a constant ticket queue is immense. Masha acts as a cognitive force-multiplier, allowing you to:
+-   **Smart Rephrasing**: Turn bullet points into polished prose instantly.
+-   **Context Awareness**: Retrieves similar past scenarios from the Knowledge Base (FAISS) to ensure consistency.
+-   **Dynamic Roles**: Switch between "Tech Support" (analytical) and "Customer Support" (empathetic) personas, but open to adquire more identities.
+-   **Knowledge Base Management**:
+    -   **Auto-Save**: Approving a response saves it for future learning.
+    -   **Edit & Refine**: Correct/update existing entries directly from the interface.
+    -   **Review & Prune**: Identify and remove unused or outdated entries with a safe review workflow.
+    -   **Optimization**: On-demand index rebuilding for lightning-fast search.
+-   **Performance Analytics**: Track model latency, token usage, and leaderboard stats.
 
 - **Normalize Technical Data**: Instantly transform rough identifiers (MSISDN, IMEI, EID) or technician shorthand into structured, readable reports.
 - **Maintain Empathy at Scale**: Automatically inject professional empathy into responses without manual phrasing overhead.
@@ -95,9 +103,3 @@ graph TD
 - **Consistency is King**: Always click "Approve" when Masha produces a perfect response. This "rewards" the system and populates the Knowledge Base for future users.
 - **Pruning**: Use the "Prune Low Usage" tool monthly to remove logic that is no longer relevant to your current support procedures.
 - **Scaling**: For complex investigations, enable "Online Research" to cross-reference your internal notes with current public documentation (Apple, Samsung, Carrier Forums).
-
----
-
-<p align="center">
-  <i>Developed for professionals who demand more from their tools.</i>
-</p>
