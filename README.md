@@ -12,7 +12,7 @@
 
 -   **Smart Rephrasing**: Turn bullet points into polished prose instantly.
 -   **Context Awareness**: Retrieves similar past scenarios from the Knowledge Base (FAISS) to ensure consistency.
--   **Dynamic Roles**: Switch between "Tech Support" (analytical) and "Customer Support" (empathetic) personas.
+-   **Dynamic Roles**: Switch between "Tech Support" (analytical) and "Customer Support" (empathetic) personas, but open to adquire more identities.
 -   **Knowledge Base Management**:
     -   **Auto-Save**: Approving a response saves it for future learning.
     -   **Edit & Refine**: Correct/update existing entries directly from the interface.
@@ -99,5 +99,5 @@ The following enhancements are planned for future updates:
 ---
 
 <p align="center">
-  Made with ❤️ and purrs.
+  Made with a bossy cat and purrs.
 </p>
