@@ -64,7 +64,7 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 gap-4 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-8 items-start">
 
             <!-- LEFT COLUMN: Input & Config -->
             <section class="flex flex-col gap-8" aria-label="Input Configuration">
@@ -95,8 +95,14 @@
                                     <button @click="predictKeywords()"
                                         class="text-sky-500 hover:text-sky-600 hover:underline text-xs flex items-center gap-1.5 transition-colors"
                                         :disabled="!inputText || isPredictingKeywords">
-                                        <span x-show="isPredictingKeywords"
-                                            class="animate-spin h-3 w-3 border-2 border-sky-500 border-t-transparent rounded-full"></span>
+                                        <svg x-show="isPredictingKeywords" class="animate-spin h-3 w-3 text-sky-500"
+                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                            </path>
+                                        </svg>
                                         <span
                                             x-text="isPredictingKeywords ? 'Analyzing...' : 'Auto-Predict Tags'"></span>
                                     </button>
@@ -332,7 +338,7 @@
 
                                 <div class="flex items-center gap-2">
                                     <button @click="refreshArchive()"
-                                        class="text-xs text-gray-500 hover:text-sky-500 font-medium flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
+                                        class="btn btn-ghost text-xs text-gray-500 hover:text-sky-500 font-medium flex items-center gap-1 transition-colors">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
                                             :class="isRefreshingArchive ? 'animate-spin' : ''" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
@@ -342,7 +348,7 @@
                                         <span x-text="isRefreshingArchive ? 'Refreshing...' : 'Refresh'"></span>
                                     </button>
                                     <button @click="clearUnsaved()"
-                                        class="text-xs text-red-400 hover:text-red-500 font-medium flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10">
+                                        class="btn btn-ghost text-xs text-red-400 hover:text-red-500 font-medium flex items-center gap-1 transition-colors hover:bg-red-500/10">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -670,11 +676,11 @@
 
                         <div class="flex gap-3 mt-6">
                             <button type="submit"
-                                class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-sky-500/50">
+                                class="flex-1 btn btn-primary py-3 px-6 shadow-lg">
                                 Login
                             </button>
                             <button type="button" @click="showLogin = false"
-                                class="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all">
+                                class="btn px-6 py-3 bg-white/5 hover:bg-white/10 text-white">
                                 Cancel
                             </button>
                         </div>
@@ -732,11 +738,11 @@
 
                         <div class="flex gap-3 mt-6">
                             <button type="submit"
-                                class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-emerald-500/50">
+                                class="flex-1 btn bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-6 shadow-lg hover:shadow-emerald-500/50">
                                 Register
                             </button>
                             <button type="button" @click="showRegister = false"
-                                class="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all">
+                                class="btn px-6 py-3 bg-white/5 hover:bg-white/10 text-white">
                                 Cancel
                             </button>
                         </div>
@@ -1381,7 +1387,7 @@
                 <div class="flex gap-3">
                     <button class="btn btn-ghost px-6 py-2" @click="showPruneModal = false">Cancel</button>
                     <button
-                        class="btn bg-red-500 hover:bg-red-600 text-white font-bold px-8 py-2 rounded-xl shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="btn bg-red-500 hover:bg-red-600 text-white font-bold px-8 py-2 shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                         @click="confirmPrune()" :disabled="selectedPruneIds.length === 0">
                         Delete Selected
                     </button>
@@ -1504,7 +1510,7 @@
             <div class="p-5 border-t border-gray-700/30 bg-[#1a1b26]/50 flex justify-end gap-3">
                 <button class="btn btn-ghost px-6 py-2" @click="showEditKbModal = false">Cancel</button>
                 <button
-                    class="btn bg-sky-500 hover:bg-sky-600 text-white font-bold px-8 py-2 rounded-xl shadow-lg shadow-sky-500/20"
+                    class="btn btn-primary font-bold px-8 py-2 shadow-lg"
                     @click="saveKbEdit()">
                     Save Changes
                 </button>
