@@ -1,8 +1,0 @@
-flask
-flask-cors
-sentence-transformers
-duckduckgo-search
-faiss-cpu
-numpy
-mysql-connector-python
-requests

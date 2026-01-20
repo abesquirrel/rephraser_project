@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Laravel
+laravel/.env
+laravel/vendor/
+laravel/node_modules/
+laravel/public/storage
+laravel/public/build
+laravel/storage/*.key
+laravel/.phpunit.result.cache
+
+# Docker
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+backup.sql
+output.txt
+*.numbers

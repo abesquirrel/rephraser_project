@@ -5,7 +5,7 @@ function rephraserApp() {
         inputText: '',
         rephrasedContent: '',
         status: '',
-        signature: Alpine.$persist('Masha').as('rephraser_sig'), // Kept persist for signature
+        signature: Alpine.$persist('Paul').as('rephraser_sig'), // Kept persist for signature
         enableWebSearch: true,
         templateMode: false,
         searchKeywords: '',
@@ -770,13 +770,17 @@ function rephraserApp() {
         },
 
         async fetchKbStats() {
+            this.status = 'Refreshing stats...';
             try {
                 const response = await fetch('/api/kb-stats');
                 if (response.ok) {
                     this.kbStats = await response.json();
+                    this.triggerToast('Knowledge Base Stats Updated', 'success');
                 }
             } catch (e) {
                 console.error('Failed to fetch KB stats', e);
+            } finally {
+                this.status = 'Done';
             }
         },
 
@@ -789,7 +793,7 @@ function rephraserApp() {
                     headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
                 });
                 if(res.ok) {
-                    this.triggerToast('Optimization Started. It may take a few seconds.', 'info');
+                    this.showModalAlert('Index Optimized Successfully. All entries have been refreshed.');
                 } else {
                     this.triggerToast('Optimization Failed', 'error');
                 }
@@ -805,7 +809,32 @@ function rephraserApp() {
         pruneCandidates: [],
         pruneThreshold: 5,
         pruneDays: 30, // Default to 30 days old to be safe
+        sortPruneBy: 'hits',
+        sortPruneOrder: 'asc',
         selectedPruneIds: [],
+        
+        sortPrune(key) {
+            if (this.sortPruneBy === key) {
+                this.sortPruneOrder = this.sortPruneOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortPruneBy = key;
+                this.sortPruneOrder = 'asc';
+            }
+            
+            this.pruneCandidates.sort((a, b) => {
+                let valA, valB;
+                if (key === 'age') {
+                    valA = new Date() - new Date(a.created_at);
+                    valB = new Date() - new Date(b.created_at);
+                } else {
+                    valA = a[key];
+                    valB = b[key];
+                }
+                
+                if (this.sortPruneOrder === 'asc') return valA - valB;
+                return valB - valA;
+            });
+        },
         
         async openPruneModal() {
             this.showGuide = false; // Close Guide modal first
@@ -825,6 +854,7 @@ function rephraserApp() {
                 const res = await fetch(`/api/prune-candidates?${params}`);
                 if(res.ok) {
                     this.pruneCandidates = await res.json();
+                    this.sortPrune(this.sortPruneBy); // Apply current sort
                     // Auto-select all by default? No, let user select. Or maybe specific ones.
                     // Let's just default to empty selection for safety.
                     this.selectedPruneIds = [];
@@ -893,21 +923,21 @@ function rephraserApp() {
                     },
                     body: JSON.stringify({ ids: this.selectedPruneIds })
                  });
-                 const data = await res.json();
-                 if(data.status === 'success') {
-                     this.triggerToast(`Deleted ${data.deleted} entries.`, 'success');
-                     this.pruneCandidates = this.pruneCandidates.filter(c => !this.selectedPruneIds.includes(c.id));
-                     this.selectedPruneIds = [];
-                     
-                     // Helper: if empty, maybe close modal?
-                     if (this.pruneCandidates.length === 0) {
-                         this.showPruneModal = false;
-                     }
-                     
-                     this.fetchKbStats(); 
-                 } else {
-                     this.triggerToast('Cleanup Failed: ' + data.error, 'error');
-                 }
+                const data = await res.json();
+                if(res.ok) {
+                    this.showModalAlert(`Deleted ${data.deleted || this.selectedPruneIds.length} entries successfully.`);
+                    this.pruneCandidates = this.pruneCandidates.filter(c => !this.selectedPruneIds.includes(c.id));
+                    this.selectedPruneIds = [];
+                    
+                    // Helper: if empty, maybe close modal?
+                    if (this.pruneCandidates.length === 0) {
+                        this.showPruneModal = false;
+                    }
+                    
+                    this.fetchKbStats(); 
+                } else {
+                    this.triggerToast('Cleanup Failed: ' + (data.error || 'Unknown'), 'error');
+                }
              } catch(e) {
                  this.triggerToast('Network Error', 'error');
              } finally {
@@ -952,11 +982,12 @@ function rephraserApp() {
                 });
                 
                 if (res.ok) {
-                    this.triggerToast('Entry updated successfully', 'success');
+                    this.showModalAlert('Entry Updated Successfully');
                     this.showEditKbModal = false;
                     if (this.showPruneModal) await this.fetchPruneCandidates();
                     await this.fetchKbStats();
-                } else {
+                }
+ else {
                     const data = await res.json();
                     this.triggerToast('Failed: ' + (data.message || 'Unknown error'), 'error');
                 }
@@ -1230,10 +1261,11 @@ function rephraserApp() {
                 const res = await fetch('/api/upload_kb', { method: 'POST', body: fd });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    this.triggerToast('Corpus Ingested', 'success');
+                    this.showModalAlert('Corpus Ingested Successfully');
                     this.kbFile = null;
-                    document.getElementById('kbFileInput').value = '';
-                } else {
+                    document.getElementById('bulkImport').value = '';
+                }
+ else {
                     this.triggerToast('❌ Import Failed: ' + (data.error || 'Unknown'), 'error');
                 }
             } catch (e) {
@@ -1298,6 +1330,8 @@ function rephraserApp() {
                     }
                     if (this.ollamaModels.length === 0) {
                         this.triggerToast('No models found in Ollama', 'info');
+                    } else {
+                        this.triggerToast('Model Roster Synchronized', 'success');
                     }
                 } else if (data.error) {
                      this.triggerToast('Ollama Error: ' + data.error, 'error');
