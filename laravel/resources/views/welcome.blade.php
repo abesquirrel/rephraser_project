@@ -594,8 +594,15 @@
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Knowledge Base Insights
                             </h3>
-                            <button class="btn btn-ghost text-xs" @click="fetchKbStats()">
-                                Refresh
+                            <button
+                                class="btn btn-ghost p-2 rounded-lg hover:bg-sky-500/10 hover:text-sky-500 transition-all group"
+                                @click="fetchKbStats()" :disabled="status.includes('stats')" title="Refresh Stats">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
+                                    :class="status.includes('stats') ? 'animate-spin text-sky-500' : 'text-gray-500 group-hover:text-sky-500'"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
                             </button>
                         </div>
                         <div class="bg-black/5 dark:bg-white/5 rounded-lg p-4">
@@ -662,14 +669,15 @@
                     <form @submit.prevent="login" class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Username or Email</label>
-                            <input type="text" x-model="loginForm.login" required
+                            <input type="text" x-model="loginForm.login" name="login" autocomplete="username" required
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="Enter username or email">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                            <input type="password" x-model="loginForm.password" required
+                            <input type="password" x-model="loginForm.password" name="password"
+                                autocomplete="current-password" required
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="Enter password">
                         </div>
@@ -709,14 +717,15 @@
                     <form @submit.prevent="register" class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
-                            <input type="text" x-model="registerForm.name" required
+                            <input type="text" x-model="registerForm.name" name="name" autocomplete="name" required
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="John Doe">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
-                            <input type="text" x-model="registerForm.username" required
+                            <input type="text" x-model="registerForm.username" name="username" autocomplete="username"
+                                required
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="johndoe">
                             <p class="text-xs text-gray-500 mt-1">Will be used as your default signature</p>
@@ -724,14 +733,15 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                            <input type="email" x-model="registerForm.email" required
+                            <input type="email" x-model="registerForm.email" name="email" autocomplete="email" required
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="john@example.com">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                            <input type="password" x-model="registerForm.password" required minlength="8"
+                            <input type="password" x-model="registerForm.password" name="password"
+                                autocomplete="new-password" required minlength="8"
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="At least 8 characters">
                         </div>
@@ -837,21 +847,16 @@
                 <div class="overflow-y-auto p-6 custom-scrollbar h-full">
 
                     <!-- Tab Navigation -->
-                    <div
-                        class="flex gap-8 border-b border-gray-700/30 mb-8 sticky top-0 bg-gradient-to-b from-[#0f1115] via-[#0f1115] to-transparent backdrop-blur-sm z-10 pt-2 pb-1">
+                    <div class="flex gap-8 border-b border-gray-700/30 mb-8 pt-2 pb-0 select-none">
                         <button @click="activeHelpTab = 'guide'"
-                            class="pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-all duration-300 border-b-2 relative group"
+                            class="pb-4 px-1 text-xs font-bold uppercase tracking-widest transition-all duration-300 border-b-2 relative group outline-none"
                             :class="activeHelpTab === 'guide' ? 'border-sky-400 text-sky-400' : 'border-transparent text-gray-500 hover:text-gray-300'">
-                            <span class="relative z-10">User Guide</span>
-                            <span x-show="activeHelpTab === 'guide'"
-                                class="absolute inset-0 bg-sky-500/5 blur-xl rounded-lg -z-10"></span>
+                            User Guide
                         </button>
                         <button @click="activeHelpTab = 'stats'"
-                            class="pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-all duration-300 border-b-2 relative group"
+                            class="pb-4 px-1 text-xs font-bold uppercase tracking-widest transition-all duration-300 border-b-2 relative group outline-none"
                             :class="activeHelpTab === 'stats' ? 'border-purple-400 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'">
-                            <span class="relative z-10">Stats &amp; Models</span>
-                            <span x-show="activeHelpTab === 'stats'"
-                                class="absolute inset-0 bg-purple-500/5 blur-xl rounded-lg -z-10"></span>
+                            Stats &amp; Models
                         </button>
                     </div>
 
@@ -1033,7 +1038,8 @@
                                         <span class="font-mono text-gray-400">Observations</span>, <span
                                             class="font-mono text-gray-400">Actions Taken</span>, <span
                                             class="font-mono text-gray-400">Recommendations</span>. Optimized for
-                                        internal ticketing systems.</div>
+                                        internal ticketing systems.
+                                    </div>
                                 </div>
                                 <div class="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200/10">
                                     <strong class="text-indigo-500 block mb-1">Customer Liaison</strong>
@@ -1327,8 +1333,32 @@
                                     class="rounded border-gray-700 bg-black/20 text-red-500 focus:ring-red-500">
                             </th>
                             <th class="p-4">Content Preview</th>
-                            <th class="p-4 w-24 text-center">Hits</th>
-                            <th class="p-4 w-32 text-center">Age (Days)</th>
+                            <th class="p-4 cursor-pointer hover:bg-white/5 transition-colors group"
+                                @click="sortPrune('hits')">
+                                <div class="flex items-center justify-center gap-2">
+                                    <span>Hits</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform"
+                                        :class="sortPruneBy === 'hits' ? (sortPruneOrder === 'asc' ? 'rotate-180 text-red-500' : 'text-red-500') : 'text-gray-600 opacity-0 group-hover:opacity-100'"
+                                        viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </th>
+                            <th class="p-4 cursor-pointer hover:bg-white/5 transition-colors group"
+                                @click="sortPrune('age')">
+                                <div class="flex items-center justify-center gap-2">
+                                    <span>Age (Days)</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform"
+                                        :class="sortPruneBy === 'age' ? (sortPruneOrder === 'asc' ? 'rotate-180 text-red-500' : 'text-red-500') : 'text-gray-600 opacity-0 group-hover:opacity-100'"
+                                        viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </th>
                             <th class="p-4 w-40 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -1379,6 +1409,24 @@
             </div>
 
             <!-- Footer -->
+            <div class="flex items-center gap-4 text-xs">
+                <div
+                    class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-emerald-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>Tip: Use <b>Optimize Index</b> after large prunes to rebuild the search cache.</span>
+                    <button @click="optimizeIndex()" :disabled="isOptimizing"
+                        class="ml-2 text-emerald-400 hover:text-emerald-300 underline font-bold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+                        <span x-show="isOptimizing"
+                            class="animate-spin h-3 w-3 border-2 border-emerald-400 border-t-transparent rounded-full"></span>
+                        <span x-text="isOptimizing ? 'Optimizing...' : 'Optimize Now'"></span>
+                    </button>
+                </div>
+            </div>
+
             <div class="p-5 border-t border-gray-700/30 bg-[#1a1b26]/50 flex justify-between items-center z-10">
                 <div class="text-xs text-gray-500">
                     <span x-text="selectedPruneIds.length"></span> selected <span class="mx-1 opacity-50">|</span> <span
@@ -1907,8 +1955,9 @@
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="p-5 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3 z-10">
-                    <button class="btn btn-primary px-8 py-3" @click="showConfigModal = false">
+                <div
+                    class="p-5 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-center gap-3 z-10">
+                    <button class="btn btn-primary px-12 py-3" @click="showConfigModal = false">
                         Done
                     </button>
                 </div>
