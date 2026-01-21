@@ -389,8 +389,24 @@ class RephraseController extends Controller
                 'keywords' => 'nullable|string',
                 'is_template' => 'nullable|boolean',
                 'category' => 'nullable|string',
+                'model_used' => 'nullable|string',
+                'latency_ms' => 'nullable|integer',
+                'temperature' => 'nullable|numeric',
+                'max_tokens' => 'nullable|integer',
+                'top_p' => 'nullable|numeric',
+                'frequency_penalty' => 'nullable|numeric',
+                'presence_penalty' => 'nullable|numeric'
             ]);
             KnowledgeBase::create($validated);
+
+            // Also add to audit log for consistency
+            AuditLog::create([
+                'action' => 'Manual Add',
+                'original_content' => $validated['original_text'],
+                'rephrased_content' => $validated['rephrased_text'],
+                'model_used' => $validated['model_used'] ?? null,
+                'user_name' => 'System'
+            ]);
         }
 
         // Notify AI
@@ -426,7 +442,8 @@ class RephraseController extends Controller
                 AuditLog::create([
                     'action' => 'Import',
                     'original_content' => $original,
-                    'rephrased_content' => $rephrased
+                    'rephrased_content' => $rephrased,
+                    'user_name' => 'System'
                 ]);
             }
         }

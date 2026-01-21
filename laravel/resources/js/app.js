@@ -478,8 +478,10 @@ function rephraserApp() {
             
             // 1. Calculate Approvals per Model
             this.history.forEach(item => {
-                if (item.approved && item.modelA_name) {
-                    const model = item.modelA_name; // Full name
+                if (item.approved) {
+                    // Always re-format to ensure grouping consistency
+                    const rawName = item.modelA_name || item.modelA || 'Unknown Model';
+                    const model = this.formatModelName(rawName);
                     if (!stats[model]) stats[model] = 0;
                     stats[model]++;
                 }
@@ -492,10 +494,7 @@ function rephraserApp() {
                 .sort((a, b) => b.count - a.count);
         },
 
-        // Helper to format model name display
-        formatModelName(name) {
-             return name.replace(':latest', '').replace(':8b-instruct-q3_K_M', '');
-        },
+
 
 
 
@@ -727,6 +726,9 @@ function rephraserApp() {
                 config: {
                     temperature: this.temperature,
                     maxTokens: this.maxTokens,
+                    topP: this.topP,
+                    frequencyPenalty: this.frequencyPenalty,
+                    presencePenalty: this.presencePenalty
                 }
             });
 
