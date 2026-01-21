@@ -663,14 +663,15 @@
                     <form @submit.prevent="login" class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Username or Email</label>
-                            <input type="text" x-model="loginForm.login" required
+                            <input type="text" x-model="loginForm.login" name="login" autocomplete="username" required
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="Enter username or email">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                            <input type="password" x-model="loginForm.password" required
+                            <input type="password" x-model="loginForm.password" name="password"
+                                autocomplete="current-password" required
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="Enter password">
                         </div>
@@ -710,14 +711,15 @@
                     <form @submit.prevent="register" class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
-                            <input type="text" x-model="registerForm.name" required
+                            <input type="text" x-model="registerForm.name" name="name" autocomplete="name" required
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="John Doe">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
-                            <input type="text" x-model="registerForm.username" required
+                            <input type="text" x-model="registerForm.username" name="username" autocomplete="username"
+                                required
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="johndoe">
                             <p class="text-xs text-gray-500 mt-1">Will be used as your default signature</p>
@@ -725,14 +727,15 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                            <input type="email" x-model="registerForm.email" required
+                            <input type="email" x-model="registerForm.email" name="email" autocomplete="email" required
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="john@example.com">
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                            <input type="password" x-model="registerForm.password" required minlength="8"
+                            <input type="password" x-model="registerForm.password" name="password"
+                                autocomplete="new-password" required minlength="8"
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="At least 8 characters">
                         </div>
@@ -1409,8 +1412,12 @@
                             d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     <span>Tip: Use <b>Optimize Index</b> after large prunes to rebuild the search cache.</span>
-                    <button @click="optimizeIndex()"
-                        class="ml-2 text-emerald-400 hover:text-emerald-300 underline font-bold">Optimize Now</button>
+                    <button @click="optimizeIndex()" :disabled="isOptimizing"
+                        class="ml-2 text-emerald-400 hover:text-emerald-300 underline font-bold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
+                        <span x-show="isOptimizing"
+                            class="animate-spin h-3 w-3 border-2 border-emerald-400 border-t-transparent rounded-full"></span>
+                        <span x-text="isOptimizing ? 'Optimizing...' : 'Optimize Now'"></span>
+                    </button>
                 </div>
             </div>
 
@@ -1942,8 +1949,9 @@
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="p-5 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3 z-10">
-                    <button class="btn btn-primary px-8 py-3" @click="showConfigModal = false">
+                <div
+                    class="p-5 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-center gap-3 z-10">
+                    <button class="btn btn-primary px-12 py-3" @click="showConfigModal = false">
                         Done
                     </button>
                 </div>

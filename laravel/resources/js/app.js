@@ -59,6 +59,7 @@ function rephraserApp() {
         // KB
         kbFile: null,
         importing: false,
+        isOptimizing: false,
         
         // Config Tab
         configTab: 'general',
@@ -786,6 +787,7 @@ function rephraserApp() {
 
         async optimizeIndex() {
             if(!confirm('This will update the DB cache for all entries and rebuild the in-memory index. It acts as a "hard refresh". Continue?')) return;
+            this.isOptimizing = true;
             this.status = 'Optimizing Index...';
             try {
                 const res = await fetch('/api/trigger-rebuild', {
@@ -798,8 +800,10 @@ function rephraserApp() {
                     this.triggerToast('Optimization Failed', 'error');
                 }
             } catch(e) {
-                this.triggerToast('Network Error', 'error');
+                console.error('Optimization error:', e);
+                this.triggerToast('Network error during optimization', 'error');
             } finally {
+                this.isOptimizing = false;
                 this.status = 'Done';
             }
         },
