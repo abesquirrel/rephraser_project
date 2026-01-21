@@ -55,8 +55,6 @@ function rephraserApp() {
         successMessage: '',
         
         // KB
-        
-        // KB
         kbFile: null,
         importing: false,
         isOptimizing: false,
@@ -142,8 +140,6 @@ function rephraserApp() {
         isPredictingKeywords: false,
 
         // Archive State
-        viewModal: false,
-        itemToView: null,
         viewModal: false,
         itemToView: null,
         archiveFilter: 'all', // 'all', 'saved', 'unsaved'
@@ -649,8 +645,6 @@ function rephraserApp() {
                         category: this.currentCategory,
                         model: model,
                         temperature: this.temperature,
-                        max_tokens: finalTokens,
-                        kb_count: this.kbCount,
                         max_tokens: finalTokens,
                         kb_count: this.kbCount,
                         negative_prompt: this.negativePrompt,
