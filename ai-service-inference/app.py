@@ -155,28 +155,28 @@ def extract_keywords(text):
     keywords = call_llm(messages, temperature=0.1, max_tokens=50)
     return keywords.strip().strip("'").strip('"')
 
-def web_search_tool(query):
-    combined_results = []
-    
-    # refined context as requested
-    specific_keywords = "mobile service OR 'US MVNO' OR 'eSIM support' OR 'cellular network'"
-    forums = "site:reddit.com OR site:apple.com OR site:google.com OR site:howardforums.com OR site:xda-developers.com"
-    targeted_query = f"{query} ({specific_keywords}) ({forums})"
+    # prioritized search: official domains
+    official_sites = "site:apple.com OR site:samsung.com OR site:t-mobile.com OR site:verizon.com OR site:att.com OR site:tello.com OR site:google.com OR site:motorola.com"
+    targeted_query = f"{query} ({official_sites})"
     
     try:
-        logger.info(f"Targeted Search: {targeted_query}")
+        logger.info(f"Targeted Official Search: {targeted_query}")
         results = DDGS().text(targeted_query, max_results=WEB_SEARCH_RESULT_COUNT)
         if results:
-            combined_results.extend([f"[Source: {r.get('title','')}] {r.get('body', '')}" for r in results])
+            combined_results.extend([f"[Official Source: {r.get('title','')}] {r.get('body', '')}" for r in results])
     except Exception as e:
         logger.error(f"Targeted search failed: {e}")
 
     if len(combined_results) < 2:
+        # Tech context research
+        tech_context = "mobile service OR 'US MVNO' OR 'eSIM support' OR 'cellular network' OR 'VoLTE' OR 'RCS'"
+        forums = "site:howardforums.com OR site:xda-developers.com OR site:reddit.com/r/tello OR site:reddit.com/r/tmobile"
+        broad_query = f"{query} ({tech_context}) ({forums})"
         try:
-            logger.info(f"Broad Search: {query}")
-            results = DDGS().text(query, max_results=WEB_SEARCH_RESULT_COUNT)
+            logger.info(f"Technical Context Search: {broad_query}")
+            results = DDGS().text(broad_query, max_results=WEB_SEARCH_RESULT_COUNT)
             if results:
-                combined_results.extend([f"[Broad] {r.get('title','')} - {r.get('body', '')}" for r in results])
+                combined_results.extend([f"[Technical Resource] {r.get('title','')} - {r.get('body', '')}" for r in results])
         except Exception as e:
             logger.error(f"Broad search failed: {e}")
 
@@ -198,12 +198,19 @@ def build_structured_prompt(original_text, examples, web_context=None, signature
             "protocol": (
                 "### PROTOCOL\n"
                 "1. **Audience**: Technical support colleagues. Tone is neutral, professional, and internal-support focused.\n"
-                "2. **Analyze**: Identify the core issue, actions taken, and next steps.\n"
-                "3. **Restrictions**: Do not introduce new facts or assumptions. Do not store/recall personal memory unless instructed. Do not mention internal policies.\n"
-                "4. **Technical Context**:\n"
-                "   - iPhone: APNs are managed via carrier bundle, no manual editing.\n"
-                "   - Android: CSC/firmware origin can limit functionality.\n"
-                "   - Compatibility: Clearly state limitations if device is incompatible or region-restricted.\n"
+                "2. **Goal**: Transform raw notes into clean, accurate, and professional support-ready responses.\n"
+                "3. **Retrieval Guidelines**:\n"
+                "   - Sources: T-Mobile, Tello, AT&T, Verizon, Apple, Samsung, LG, Motorola support pages; GSMA IMEI/TAC databases; Android developer documentation; Cloudflare/Google DNS guides.\n"
+                "   - Priority: Use official and reliable documentation first. Only reference user forums or blogs as illustrative examples if clearly indicated.\n"
+                "   - Integration: Summarize retrieved information into Observations, Actions Taken, and Recommendations.\n"
+                "4. **Technical Focus**:\n"
+                "   - Device compatibility, firmware, CSC, and region restrictions.\n"
+                "   - Network registration, roaming, and VoLTE/Wi-Fi Calling issues.\n"
+                "   - SIM provisioning, APN configuration, and data settings.\n"
+                "5. **Instructions Handling**:\n"
+                "   - Provide exact device-specific steps with menu paths and clear, ordered actions when requested.\n"
+                "   - Avoid over-explaining basic UI navigation unless explicitly requested.\n"
+                "6. **Restrictions**: Do not introduce new facts or assumptions. Do not store/recall personal memory unless instructed. Do not mention internal policies.\n"
             ),
             "format": (
                 "Hello,\n\n"
