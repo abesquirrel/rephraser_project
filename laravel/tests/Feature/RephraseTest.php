@@ -9,7 +9,7 @@ uses(RefreshDatabase::class);
 
 it('can rephrase text via streaming', function () {
     Http::fake([
-        'http://rephraser-ai:5001/rephrase' => Http::response('{"data": "rephrased text"}', 200)
+        'http://rephraser-ai-inference:5001/rephrase' => Http::response('{"data": "rephrased text"}', 200)
     ]);
 
     $response = $this->postJson('/api/rephrase', [
@@ -18,13 +18,12 @@ it('can rephrase text via streaming', function () {
     ]);
 
     $response->assertStatus(200);
-    // Since it's a stream, we might need more complex verification if we were strictly checking content,
-    // but assertStatus(200) verifies the controller logic and proxying.
 });
 
 it('can approve and learn from a rephrased response', function () {
     Http::fake([
-        'http://rephraser-ai:5001/trigger_rebuild' => Http::response(['status' => 'success'], 200)
+        'http://rephraser-ai-inference:5001/trigger_rebuild' => Http::response(['status' => 'success'], 200),
+        'http://rephraser-ai-embedding:5002/trigger_rebuild' => Http::response(['status' => 'success'], 200)
     ]);
 
     $data = [
@@ -52,7 +51,7 @@ it('can approve and learn from a rephrased response', function () {
 
 it('sanitizes input before sending to AI', function () {
     Http::fake([
-        'http://rephraser-ai:5001/rephrase' => function ($request) {
+        'http://rephraser-ai-inference:5001/rephrase' => function ($request) {
             if (!str_contains($request['text'], '<script>') && str_contains($request['text'], 'test')) {
                 return Http::response(['data' => 'ok'], 200);
             }
@@ -69,7 +68,7 @@ it('sanitizes input before sending to AI', function () {
 
 it('passes through tuning parameters to AI service', function () {
     Http::fake([
-        'http://rephraser-ai:5001/rephrase' => function ($request) {
+        'http://rephraser-ai-inference:5001/rephrase' => function ($request) {
             if (
                 $request['temperature'] == 0.8 &&
                 $request['max_tokens'] == 1200 &&
@@ -91,4 +90,30 @@ it('passes through tuning parameters to AI service', function () {
     ]);
 
     $response->assertStatus(200);
+});
+
+it('strictly follows the Tech Support persona structure', function () {
+    Http::fake([
+        'http://rephraser-ai-inference:5001/rephrase' => Http::response(json_encode([
+            'data' => "Hello,\n\nObservations:\nThe device is an iPhone 14.\n\nActions Taken:\nNone.\n\nRecommendations:\nPlease check the carrier bundle.\n\nRegards,\nPaul R"
+        ]), 200)
+    ]);
+
+    $response = $this->postJson('/api/rephrase', [
+        'text' => 'iphone 14 apn not working',
+        'role' => 'Tech Support'
+    ]);
+
+    $response->assertStatus(200);
+
+    ob_start();
+    $response->baseResponse->sendContent();
+    $content = ob_get_clean();
+
+    expect($content)->toContain('Hello,');
+    expect($content)->toContain('Observations:');
+    expect($content)->toContain('Actions Taken:');
+    expect($content)->toContain('Recommendations:');
+    expect($content)->toContain('Regards,');
+    expect($content)->toContain('Paul R');
 });

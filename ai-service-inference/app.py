@@ -190,18 +190,25 @@ def build_structured_prompt(original_text, examples, web_context=None, signature
     # Scalability: Add new roles here in the future
     prompts = {
         "tech_support": {
-            "identity": f"You are {signature}. Technical Support Specialist.",
+            "identity": f"You are {signature}, a Tech Support Analyst Assistant. Technical support assistant specialized in mobile telecom troubleshooting, provisioning, roaming, VoLTE, Wi-Fi Calling, RCS, APNs, CSC/firmware compatibility, and carrier back-end analysis.",
             "protocol": (
                 "### PROTOCOL\n"
-                "1. **Audience**: You are writing to a colleague or customer requiring detailed technical context.\n"
+                "1. **Audience**: Technical support colleagues. Tone is neutral, professional, and internal-support focused.\n"
                 "2. **Analyze**: Identify the core issue, actions taken, and next steps.\n"
-                "3. **Format**: STICK STRICTLY to the required section headers.\n"
+                "3. **Restrictions**: Do not introduce new facts or assumptions. Do not store/recall personal memory unless instructed. Do not mention internal policies.\n"
+                "4. **Technical Context**:\n"
+                "   - iPhone: APNs are managed via carrier bundle, no manual editing.\n"
+                "   - Android: CSC/firmware origin can limit functionality.\n"
+                "   - Compatibility: Clearly state limitations if device is incompatible or region-restricted.\n"
             ),
             "format": (
                 "Hello,\n\n"
-                "Observations: (Details of the issue observed, potential problems, and diagnosis)\n\n"
-                "Actions taken: (Active actions performed to fix/correct/improve. Leave empty if none)\n\n"
-                "Recommendations: (Suggestions for the customer, preventive measures, or expected customer actions)\n\n"
+                "Observations:\n"
+                "<concise factual summary>\n\n"
+                "Actions Taken:\n"
+                "<only if actions were performed, otherwise state 'None.'>\n\n"
+                "Recommendations:\n"
+                "<clear next steps or guidance>\n\n"
                 "Regards,\n"
                 "{signature}"
             )
@@ -260,14 +267,14 @@ def build_structured_prompt(original_text, examples, web_context=None, signature
     
     # --- MODE ADJUSTMENTS ---
     if web_context:
-        system += "### MODE: WEB VERIFICATION\n"
-        system += "Use 'Web Search Context' to valid claims in 'Notes'. Correct any technical inaccuracies in the 'Recommendations' section.\n\n"
+        system += "### MODE: WEB VERIFICATION & FACT CHECKING\n"
+        system += "Use 'Web Search Context' to validate claims in the source data. Correct any technical inaccuracies in the 'Recommendations' section based on the search context.\n\n"
     elif template_mode:
-        system += "### MODE: TEMPLATE ADAPTER\n"
-        system += "Use 'Reference Examples' as the structural guide, but inject the 'Notes' content into it.\n\n"
+        system += "### MODE: KNOWLEDGE BASE ADAPTER\n"
+        system += "Use 'Reference Examples' as the structure and logic guide. Adopt the technical reasoning found in the examples while applying it to the new source data.\n\n"
     else:
-        system += "### MODE: REPHRASE\n"
-        system += "Standard rephrasing mode. Focus on clarity and grammar.\n\n"
+        system += "### MODE: TECHNICAL REPHRASE\n"
+        system += "Standard rephrasing mode. Focus on technical accuracy, clarity, and consistency with previous support cases.\n\n"
 
     # --- SHARED INSTRUCTIONS ---
     system += shared_constraints
@@ -281,11 +288,11 @@ def build_structured_prompt(original_text, examples, web_context=None, signature
         system += f"You MUST AVOID: {negative_prompt}\n\n"
     
     # --- FINAL FORMATTING ---
-    system += f"### REQUIRED OUTPUT FORMAT\n"
-    system += "You must follow this structure exactly:\n"
+    system += "### REQUIRED OUTPUT FORMAT\n"
+    system += "You MUST follow this structure EXACTLY. Do NOT use bullet points or markdown unless requested by a directive. Do NOT add sections not requested.\n"
     system += current_role['format'].format(signature=signature) + "\n\n"
     
-    system += "CRITICAL: The output must start exactly with 'Hello,'."
+    system += "CRITICAL: The output must start exactly with 'Hello,'. Do not include any preamble or conversational filler."
     
     # --- BUILD USER CONTENT ---
     user = f"Notes (SOURCE DATA):\n{original_text}\n\n"
