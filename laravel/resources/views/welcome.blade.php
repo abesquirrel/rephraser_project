@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Masha: The Rephraser</title>
+    <title>Masha: The Cat</title>
     <meta name="description" content="A premium, AI-powered support analyst rephrasing tool.">
 
     <!-- Favicon -->
@@ -35,17 +35,15 @@
     <div class="container mx-auto px-4 py-4 max-w-7xl">
 
         <!-- Header -->
-        <header class="header animate-fade mb-4 flex flex-col md:flex-row justify-between items-center gap-4 px-2">
-            <div class="text-left">
+        <header class="header animate-fade mb-8 flex flex-col items-center text-center gap-4 px-2">
+            <div>
                 <h1
-                    class="text-2xl font-bold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
-                    Masha: The Rephraser
+                    class="text-4xl font-bold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
+                    Masha: The Cat
                 </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
+                <p class="text-base text-gray-500 dark:text-gray-400">
                     The lazy cat with the best ideas.<br>
-                    <i>
-                        In training — furballs may occur.
-                    </i>
+                    <i>In training — furballs may occur.</i>
                 </p>
             </div>
 
@@ -64,36 +62,37 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-8 items-start">
+        <div class="flex flex-col gap-8 max-w-4xl mx-auto">
 
             <!-- LEFT COLUMN: Input & Config -->
             <section class="flex flex-col gap-8" aria-label="Input Configuration">
                 <!-- Main Input -->
-                <div class="glass-card animate-fade p-0 overflow-visible delay-[100ms]">
-                    <div class="p-5 pb-4">
-                        <div class="section-title mb-2 text-sky-500 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
+                <div class="glass-card animate-fade p-0 overflow-hidden delay-[100ms] flex flex-col">
+                    <div class="p-8">
+                        <h2
+                            class="section-title mb-6 text-xl font-bold font-display text-gray-900 dark:text-gray-100 flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-sky-500" viewBox="0 0 24 24"
                                 stroke="currentColor" fill="none" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                             </svg>
                             <span>Compose</span>
-                        </div>
+                        </h2>
 
-                        <div class="mb-4 flex-1 flex flex-col">
+                        <div class="mb-6">
                             <label for="rawInputArea" class="sr-only">Input text to rephrase</label>
                             <textarea id="rawInputArea" x-model="inputText" placeholder="Input notes..."
-                                class="w-full min-h-[160px] p-4 text-base leading-relaxed rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"></textarea>
+                                class="w-full min-h-[200px] p-4 text-lg leading-chill rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"></textarea>
                         </div>
 
-                        <!-- Input Configuration Controls (Moved from Modal) -->
-                        <div class="mb-5 flex flex-wrap gap-4 items-end animate-fade delay-[100ms]">
+                        <!-- Input Configuration Controls -->
+                        <div class="mb-8 flex flex-wrap gap-4 items-end animate-fade delay-[100ms]">
                             <!-- Keywords Input -->
-                            <div class="flex-1 min-w-[240px]">
-                                <label class="label-text flex justify-between mb-1.5 text-xs text-gray-500 font-medium">
+                            <div class="flex-1 min-w-[300px]">
+                                <label class="label-text flex justify-between mb-2 text-xs text-gray-500 font-medium">
                                     <span>Keywords & Context</span>
                                     <button @click="predictKeywords()"
-                                        class="text-sky-500 hover:text-sky-600 hover:underline text-xs flex items-center gap-1.5 transition-colors"
+                                        class="text-sky-500 hover:text-sky-600 hover:underline text-xs flex items-center gap-1.5 transition-all"
                                         :disabled="!inputText || isPredictingKeywords">
                                         <svg x-show="isPredictingKeywords" class="animate-spin h-3 w-3 text-sky-500"
                                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -118,19 +117,19 @@
                                     </div>
                                     <input type="text" x-model="searchKeywords"
                                         placeholder="e.g. professional, email response..."
-                                        class="form-input w-full pl-9 p-2.5 text-sm rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all placeholder-gray-400">
+                                        class="form-input w-full pl-9 p-3 text-sm rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all placeholder-gray-400">
                                 </div>
                             </div>
 
                             <!-- Role Selector -->
                             <div class="flex-1 min-w-[200px]">
-                                <label class="label-text flex justify-between mb-1.5 text-xs text-gray-500 font-medium">
+                                <label class="label-text flex justify-between mb-2 text-xs text-gray-500 font-medium">
                                     <span>Target Role</span>
                                     <button @click="showConfigModal = true; configTab = 'roles'"
                                         class="text-xs text-sky-500 hover:underline">Manage</button>
                                 </label>
                                 <select x-model="selectedRoleName"
-                                    class="form-select w-full p-2.5 text-sm rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all font-medium text-gray-700 dark:text-gray-200">
+                                    class="form-select w-full p-3 text-sm rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all font-medium text-gray-700 dark:text-gray-200">
                                     <template x-for="role in promptRoles" :key="role.id">
                                         <option :value="role.name"
                                             x-text="role.name + (role.is_default ? ' (Default)' : '')"></option>
@@ -142,12 +141,12 @@
                             <div class="flex gap-3 pb-0.5">
                                 <!-- Template Mode -->
                                 <label
-                                    class="flex items-center gap-2.5 cursor-pointer px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
+                                    class="flex items-center gap-2.5 cursor-pointer px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
                                     :class="templateMode ? 'bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-500/30' : ''">
                                     <div class="relative flex items-center">
                                         <input type="checkbox" x-model="templateMode" class="peer sr-only">
                                         <div
-                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-sky-500 shadow-inner">
+                                            class="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-sky-500 shadow-inner">
                                         </div>
                                     </div>
                                     <span class="text-xs font-bold uppercase tracking-wider"
@@ -156,12 +155,12 @@
 
                                 <!-- Online Research -->
                                 <label
-                                    class="flex items-center gap-2.5 cursor-pointer px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
+                                    class="flex items-center gap-2.5 cursor-pointer px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
                                     :class="enableWebSearch ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-500/30' : ''">
                                     <div class="relative flex items-center">
                                         <input type="checkbox" x-model="enableWebSearch" class="peer sr-only">
                                         <div
-                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-500 shadow-inner">
+                                            class="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-500 shadow-inner">
                                         </div>
                                     </div>
                                     <span class="text-xs font-bold uppercase tracking-wider"
@@ -171,23 +170,23 @@
                         </div>
 
                         <div class="flex gap-4 items-center">
-                            <button class="btn btn-primary w-full py-3 flex items-center justify-center gap-2"
+                            <button
+                                class="btn btn-primary w-full py-4 text-lg flex items-center justify-center gap-3 shadow-xl"
                                 @click="generateRephrase()" :disabled="isGenerating || !inputText.trim()">
                                 <span x-show="!isGenerating" class="flex items-center gap-2">
-                                    Generate Response
+                                    Generate Rephrased Response
                                 </span>
-                                <span x-show="isGenerating" class="flex items-center gap-2 animate-pulse"
-                                    style="display: none;">
-                                    Generating...
+                                <span x-show="isGenerating" class="flex items-center gap-2 animate-pulse" x-cloak>
+                                    Generating Response...
                                 </span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Configuration Toggle -->
-                    <div class="border-t border-gray-200/50 dark:border-gray-700/50">
+                    <!-- Configuration Toggle inside card as footer -->
+                    <div class="border-t border-gray-200/50 dark:border-gray-700/50 bg-black/5 dark:bg-white/5">
                         <button @click="showConfigModal = true"
-                            class="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none rounded-b-2xl">
+                            class="w-full flex items-center justify-center gap-2 py-4 text-sm text-gray-500 hover:text-sky-500 transition-colors focus:outline-none">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24"
                                 stroke="currentColor" fill="none">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -197,127 +196,135 @@
                         </button>
                     </div>
                 </div>
-
-
-
-                <!-- Floating Loader (Non-blocking) -->
-                <div x-show="isGenerating" x-cloak
-                    class="fixed bottom-8 right-8 z-[60] flex items-center gap-4 bg-black/80 backdrop-blur-md p-4 rounded-2xl shadow-2xl border border-sky-500/30 animate-fade-in"
-                    x-transition:enter="duration-300 ease-out" x-transition:enter-start="opacity-0 translate-y-4"
-                    x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="duration-200 ease-in"
-                    x-transition:leave-start="opacity-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 translate-y-4">
-
-                    <div class="relative w-10 h-10 flex items-center justify-center">
-                        <div class="absolute inset-0 bg-sky-500/20 rounded-full animate-ping"></div>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-sky-400 animate-pulse relative z-10"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                    <div class="pr-2">
-                        <div class="text-sm font-bold text-white" x-text="friendlyStatus"></div>
-                        <div class="text-[10px] text-gray-400 uppercase tracking-widest"
-                            x-text="status !== friendlyStatus ? status : ''"></div>
-                    </div>
-                </div>
             </section>
+
+            <!-- Floating Loader (Non-blocking) -->
+            <div x-show="isGenerating" x-cloak
+                class="fixed bottom-8 right-8 z-[60] flex items-center gap-4 bg-black/80 backdrop-blur-md p-4 rounded-2xl shadow-2xl border border-sky-500/30 animate-fade-in"
+                x-transition:enter="duration-300 ease-out" x-transition:enter-start="opacity-0 translate-y-4"
+                x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="duration-200 ease-in"
+                x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4">
+
+                <div class="relative w-10 h-10 flex items-center justify-center">
+                    <div class="absolute inset-0 bg-sky-500/20 rounded-full animate-ping"></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-sky-400 animate-pulse relative z-10"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div class="pr-2">
+                    <div class="text-sm font-bold text-white" x-text="friendlyStatus"></div>
+                    <div class="text-[10px] text-gray-400 uppercase tracking-widest"
+                        x-text="status !== friendlyStatus ? status : ''"></div>
+                </div>
+            </div>
 
             <!-- RIGHT COLUMN: Output & History -->
             <section class="flex flex-col gap-4" aria-label="Output">
                 <template x-if="history.length > 0">
-                    <div class="animate-fade delay-[200ms]">
-                        <h2 class="section-title mb-3 flex items-center justify-between">
-                            <span>Latest Response</span>
-                            <span class="info-pill font-normal"
+                    <div class="animate-fade delay-[200ms] glass-card p-8 shadow-xl shadow-sky-500/5">
+                        <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200/10">
+                            <h2
+                                class="section-title m-0 text-xl font-bold font-display text-gray-900 dark:text-gray-100 flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-sky-500" viewBox="0 0 24 24"
+                                    stroke="currentColor" fill="none" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                <span>Latest Response</span>
+                            </h2>
+                            <span class="info-pill font-mono text-[10px] uppercase tracking-wider"
                                 x-text="new Date(history[0].timestamp).toLocaleTimeString()"></span>
-                        </h2>
+                        </div>
 
                         <!-- Display only the latest item -->
                         <template x-for="(item, idx) in [history[0]]" :key="item.timestamp">
-                            <article
-                                class="glass-card history-card p-0 overflow-hidden border-0 shadow-none bg-transparent"
-                                :class="{ 'approved': item.approved }">
+                            <div class="space-y-10">
+                                <!-- Original Input Display (No nested card, just subtle container) -->
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="label-text m-0 text-[10px] font-bold">Input Notes</span>
+                                        <span
+                                            class="bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border border-emerald-500/20"
+                                            x-show="item.approved">Synchronized</span>
+                                    </div>
+                                    <div class="p-5 rounded-xl bg-black/5 dark:bg-white/5 border border-transparent font-serif leading-relaxed text-gray-600 dark:text-gray-400 italic"
+                                        x-text="item.original"></div>
+                                </div>
 
-                                <div class="flex flex-col gap-8">
-                                    <!-- Original Input Display -->
-                                    <div class="glass-card p-6 mb-4 relative">
-                                        <div class="flex justify-between mb-4">
-                                            <span class="label-text m-0">Original</span>
-                                            <span
-                                                class="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-emerald-500/20 flex items-center justify-center min-w-[45px]"
-                                                x-show="item.approved">Saved</span>
-                                        </div>
-                                        <div class="bubble bubble-original text-sm p-3 border-l-4 border-indigo-500"
-                                            x-text="item.original"></div>
+                                <!-- Refined Output Area -->
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <span class="label-text m-0 text-sky-500 font-bold">Rephrased Solution</span>
                                     </div>
 
-                                    <!-- Refined Output -->
-                                    <!-- Refined Output Area -->
-                                    <!-- Refined Output Area -->
-                                    <div id="results-area"
-                                        class="glass-card p-6 border-sky-500 shadow-xl shadow-sky-500/10">
-
-                                        <!-- Standard Single Output -->
-                                        <div>
-                                            <div class="mb-4">
-                                                <span class="label-text">Refined Output</span>
-                                            </div>
-                                            <div x-show="!item.isEditing">
-                                                <div class="bubble bubble-rephrased text-base p-4 bg-white/50 dark:bg-black/20"
-                                                    x-text="item.rephrased"></div>
-                                            </div>
-                                            <div x-show="item.isEditing" x-cloak>
-                                                <textarea :id="'edit-' + idx" x-model="item.rephrased"
-                                                    class="edit-textarea w-full p-4 rounded-xl bg-white dark:bg-gray-800 border border-green-500/20 focus:border-sky-500"
-                                                    rows="10"></textarea>
-                                            </div>
+                                    <div class="relative group">
+                                        <div x-show="!item.isEditing">
+                                            <div class="p-6 rounded-2xl bg-gradient-to-br from-sky-50 dark:from-sky-900/10 to-indigo-50 dark:to-indigo-900/10 border border-sky-100 dark:border-sky-500/20 shadow-sm text-lg leading-chill font-medium text-gray-800 dark:text-gray-200 whitespace-pre-wrap"
+                                                x-text="item.rephrased"></div>
                                         </div>
-
-                                        <!-- Actions -->
-                                        <div class="flex flex-wrap gap-3 mt-6 pt-6 border-t border-gray-200/10">
-
-                                            <div class="flex justify-end gap-3 mt-6">
-                                                <button class="btn btn-ghost px-4 py-2 text-sm"
-                                                    @click="copyText(item.rephrased)">Copy</button>
-                                                <button class="btn btn-ghost px-4 py-2 text-sm" @click="toggleEdit(0)"
-                                                    x-text="item.isEditing ? 'Save' : 'Edit'"></button>
-                                                <button
-                                                    class="btn btn-ghost px-4 py-2 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                                    @click="regenerateResponse(item)" :disabled="isGenerating">
-                                                    Regenerate
-                                                </button>
-                                                <button class="btn px-5 py-2 text-sm font-semibold"
-                                                    :class="item.approved ? 'btn-success-ghost' : 'btn-ghost'"
-                                                    @click="approveHistoryEntry(item, 0)">
-                                                    Approve
-                                                </button>
-                                            </div>
+                                        <div x-show="item.isEditing" x-cloak>
+                                            <textarea :id="'edit-' + idx" x-model="item.rephrased"
+                                                class="w-full p-6 text-lg rounded-2xl bg-white dark:bg-gray-800 border border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all font-medium leading-chill"
+                                                rows="12"></textarea>
                                         </div>
                                     </div>
-                            </article>
+
+                                    <!-- Actions -->
+                                    <div
+                                        class="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-gray-200/5">
+                                        <div class="flex gap-2">
+                                            <button
+                                                class="btn btn-ghost px-5 py-2.5 text-sm font-bold text-red-400 hover:text-red-500 hover:bg-red-500/10"
+                                                @click="regenerateResponse(item)" :disabled="isGenerating">
+                                                Regenerate
+                                            </button>
+                                        </div>
+                                        <div class="flex gap-3">
+                                            <button class="btn btn-ghost px-5 py-2.5 text-sm font-bold"
+                                                @click="copyText(item.rephrased)">Copy</button>
+                                            <button class="btn btn-ghost px-5 py-2.5 text-sm font-bold"
+                                                @click="toggleEdit(0)"
+                                                x-text="item.isEditing ? 'Sync Changes' : 'Refine'"></button>
+                                            <button
+                                                class="btn px-8 py-2.5 text-sm font-black uppercase tracking-tighter transition-all"
+                                                :class="item.approved ? 'bg-emerald-500 text-white' : 'bg-sky-500 text-white shadow-lg shadow-sky-500/20 hover:shadow-sky-500/40'"
+                                                @click="approveHistoryEntry(item, 0)">
+                                                <span x-text="item.approved ? 'Approved' : 'Approve & Save'"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </template>
                     </div>
                 </template>
 
-                <!-- Archive Section -->
                 <template x-if="history.length > 1">
-                    <div x-data="{ openArchive: false }">
+                    <div x-data="{ openArchive: false }"
+                        class="glass-card p-0 overflow-hidden opacity-90 hover:opacity-100 transition-opacity">
                         <button
-                            class="w-full glass-card p-4 cursor-pointer border-dashed opacity-80 hover:opacity-100 transition-opacity flex justify-between items-center"
+                            class="w-full p-8 cursor-pointer flex justify-between items-center focus:outline-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                             @click="openArchive = !openArchive">
-                            <h3 class="section-title m-0 text-base flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-sky-500" viewBox="0 0 24 24"
-                                    stroke="currentColor" fill="none">
+                            <h3 class="section-title m-0 text-lg font-bold flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-sky-500" viewBox="0 0 24 24"
+                                    stroke="currentColor" fill="none" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                 </svg>
-                                Response Archive
+                                <span>Response Archive</span>
                             </h3>
                             <div class="flex items-center gap-3">
                                 <span x-text="totalFilteredCount + ' Items'"
-                                    class="info-pill bg-sky-100 dark:bg-sky-900/30"></span>
+                                    class="info-pill bg-sky-100 dark:bg-sky-900/30 text-[10px] font-bold"></span>
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="w-4 h-4 text-gray-400 transition-transform duration-300"
+                                    :class="openArchive ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
                             </div>
                         </button>
 
@@ -474,7 +481,7 @@
                                         class="p-6 rounded-2xl bg-gradient-to-br from-sky-50 dark:from-sky-900/10 to-indigo-50 dark:to-indigo-900/10 border border-sky-100 dark:border-sky-500/20 shadow-sm">
 
                                         <div x-show="!itemToView.isEditing">
-                                            <p class="text-base text-gray-800 dark:text-gray-100 leading-chill font-medium"
+                                            <p class="text-base text-gray-800 dark:text-gray-100 leading-chill font-medium whitespace-pre-wrap"
                                                 x-text="itemToView.rephrased || itemToView.response || itemToView.text">
                                             </p>
                                         </div>
@@ -510,148 +517,156 @@
                     </template>
                 </div>
             </section>
-        </div>
 
-        <!-- KB Management (Advanced Section) -->
-        <div x-data="{ expanded: false }" class="glass-card animate-fade p-0 overflow-hidden delay-[300ms] mt-6">
-            <button @click="expanded = !expanded"
-                class="w-full flex justify-between items-center p-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none">
-                <div class="section-title m-0 flex items-center gap-3 text-sky-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" stroke="currentColor"
-                        fill="none">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                    </svg>
-                    Knowledge Base Settings
-                </div>
-                <span x-text="expanded ? 'Hide' : 'Expand'"
-                    class="btn-ghost text-xs px-3 py-1.5 rounded-full border border-current"></span>
-            </button>
-
-            <div x-show="expanded" x-cloak x-collapse
-                class="border-t border-gray-200/50 dark:border-gray-700/50 bg-black/5 dark:bg-white/5">
-                <div class="p-8">
-                    <!-- Manual Data Entry -->
-                    <div class="mb-10">
-                        <h3 class="text-sm font-semibold mb-4 text-gray-900 dark:text-gray-100">Add Training Data
-                            Manually</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <textarea x-model="manualOrig" placeholder="Original input (e.g. rough notes)..." rows="4"
-                                class="form-input w-full p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"></textarea>
-                            <textarea x-model="manualReph" placeholder="Ideal rephrased response..." rows="4"
-                                class="form-input w-full p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"></textarea>
-                        </div>
-
-                        <div class="flex flex-wrap gap-4 items-end">
-                            <div class="flex-1 min-w-[200px]">
-                                <label class="label-text flex justify-between">
-                                    Keywords
-                                    <button @click="predictKeywords()"
-                                        class="text-sky-500 hover:underline text-xs flex items-center gap-1"
-                                        :disabled="!manualOrig || isPredictingKeywords">
-                                        <template x-if="isPredictingKeywords">
-                                            <svg class="animate-spin h-3 w-3 text-sky-500"
-                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                                    stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                </path>
-                                            </svg>
-                                        </template>
-                                        <span x-text="isPredictingKeywords ? 'Predicting...' : 'Auto-Predict'"></span>
-                                    </button>
-                                </label>
-                                <input type="text" x-model="manualKeywords" placeholder="firmware, latency..."
-                                    class="form-input w-full p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                            </div>
-                            <div class="flex-1 min-w-[150px]">
-                                <label class="label-text">Category</label>
-                                <select x-model="manualCategory"
-                                    class="form-select w-full p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                                    <option value="">Select...</option>
-                                    <template x-for="cat in categories" :key="cat">
-                                        <option :value="cat" x-text="cat"></option>
-                                    </template>
-                                </select>
-                            </div>
-                            <div class="flex items-center pb-3">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" x-model="manualIsTemplate"
-                                        class="rounded text-sky-500 focus:ring-sky-500">
-                                    <span class="text-sm font-medium">Template?</span>
-                                </label>
-                            </div>
-                            <button class="btn btn-primary px-6 py-2.5 flex items-center justify-center min-w-[120px]"
-                                @click="addManual()" :disabled="!manualOrig.trim() || !manualReph.trim() || adding">
-                                <span x-show="!adding">Add Entry</span>
-                                <span x-show="adding">Saving...</span>
-                            </button>
-                        </div>
+            <!-- KB Management (Advanced Section) -->
+            <div x-data="{ expanded: false }" class="glass-card animate-fade p-0 overflow-hidden delay-[300ms]">
+                <button @click="expanded = !expanded"
+                    class="w-full flex justify-between items-center p-8 hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none">
+                    <div class="section-title m-0 flex items-center gap-3 text-sky-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24"
+                            stroke="currentColor" fill="none">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                        </svg>
+                        Knowledge Base Settings
                     </div>
+                    <span x-text="expanded ? 'Hide' : 'Expand'"
+                        class="btn-ghost text-xs px-3 py-1.5 rounded-full border border-current"></span>
+                </button>
 
-                    <div class="border-t border-gray-200/50 dark:border-gray-700/50 pt-8">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Knowledge Base Insights
-                            </h3>
-                            <button
-                                class="btn btn-ghost p-2 rounded-lg hover:bg-sky-500/10 hover:text-sky-500 transition-all group"
-                                @click="fetchKbStats()" :disabled="status.includes('stats')" title="Refresh Stats">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
-                                    :class="status.includes('stats') ? 'animate-spin text-sky-500' : 'text-gray-500 group-hover:text-sky-500'"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="bg-black/5 dark:bg-white/5 rounded-lg p-4">
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div class="text-center p-2 rounded bg-white/5 border border-white/10">
-                                    <div class="text-2xl font-bold text-sky-500" x-text="kbStats.total_entries">0</div>
-                                    <div class="text-[10px] uppercase text-gray-500 font-bold">Total Entries</div>
-                                </div>
-                                <div class="text-center p-2 rounded bg-white/5 border border-white/10">
-                                    <div class="text-xs font-mono text-gray-400 mt-2"
-                                        x-text="kbStats.last_updated ? new Date(kbStats.last_updated).toLocaleDateString() : 'Never'">
-                                    </div>
-                                    <div class="text-[10px] uppercase text-gray-500 font-bold mt-1">Last Updated</div>
-                                </div>
+                <div x-show="expanded" x-cloak x-collapse
+                    class="border-t border-gray-200/50 dark:border-gray-700/50 bg-black/5 dark:bg-white/5">
+                    <div class="p-8">
+                        <!-- Manual Data Entry -->
+                        <div class="mb-10">
+                            <h3 class="text-sm font-semibold mb-4 text-gray-900 dark:text-gray-100">Add Training Data
+                                Manually</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <textarea x-model="manualOrig" placeholder="Original input (e.g. rough notes)..."
+                                    rows="4"
+                                    class="form-input w-full p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"></textarea>
+                                <textarea x-model="manualReph" placeholder="Ideal rephrased response..." rows="4"
+                                    class="form-input w-full p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"></textarea>
                             </div>
 
-                            <template x-if="kbStats.category_breakdown && kbStats.category_breakdown.length > 0">
-                                <div>
-                                    <h4 class="text-[10px] uppercase font-bold text-gray-500 mb-2">Top Categories</h4>
-                                    <div class="space-y-1">
-                                        <template x-for="cat in kbStats.category_breakdown" :key="cat.category">
-                                            <div class="flex justify-between items-center text-xs">
-                                                <span class="text-gray-400" x-text="cat.category"></span>
-                                                <span class="font-mono text-sky-400" x-text="cat.count"></span>
-                                            </div>
+                            <div class="flex flex-wrap gap-4 items-end">
+                                <div class="flex-1 min-w-[200px]">
+                                    <label class="label-text flex justify-between">
+                                        Keywords
+                                        <button @click="predictKeywords()"
+                                            class="text-sky-500 hover:underline text-xs flex items-center gap-1"
+                                            :disabled="!manualOrig || isPredictingKeywords">
+                                            <template x-if="isPredictingKeywords">
+                                                <svg class="animate-spin h-3 w-3 text-sky-500"
+                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                        stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                    </path>
+                                                </svg>
+                                            </template>
+                                            <span
+                                                x-text="isPredictingKeywords ? 'Predicting...' : 'Auto-Predict'"></span>
+                                        </button>
+                                    </label>
+                                    <input type="text" x-model="manualKeywords" placeholder="firmware, latency..."
+                                        class="form-input w-full p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                                </div>
+                                <div class="flex-1 min-w-[150px]">
+                                    <label class="label-text">Category</label>
+                                    <select x-model="manualCategory"
+                                        class="form-select w-full p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                                        <option value="">Select...</option>
+                                        <template x-for="cat in categories" :key="cat">
+                                            <option :value="cat" x-text="cat"></option>
                                         </template>
+                                    </select>
+                                </div>
+                                <div class="flex items-center pb-3">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" x-model="manualIsTemplate"
+                                            class="rounded text-sky-500 focus:ring-sky-500">
+                                        <span class="text-sm font-medium">Template?</span>
+                                    </label>
+                                </div>
+                                <button
+                                    class="btn btn-primary px-6 py-2.5 flex items-center justify-center min-w-[120px]"
+                                    @click="addManual()" :disabled="!manualOrig.trim() || !manualReph.trim() || adding">
+                                    <span x-show="!adding">Add Entry</span>
+                                    <span x-show="adding">Saving...</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-gray-200/50 dark:border-gray-700/50 pt-8">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Knowledge Base
+                                    Insights
+                                </h3>
+                                <button
+                                    class="btn btn-ghost p-2 rounded-lg hover:bg-sky-500/10 hover:text-sky-500 transition-all group"
+                                    @click="fetchKbStats()" :disabled="status.includes('stats')" title="Refresh Stats">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
+                                        :class="status.includes('stats') ? 'animate-spin text-sky-500' : 'text-gray-500 group-hover:text-sky-500'"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="bg-black/5 dark:bg-white/5 rounded-lg p-4">
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div class="text-center p-2 rounded bg-white/5 border border-white/10">
+                                        <div class="text-2xl font-bold text-sky-500" x-text="kbStats.total_entries">0
+                                        </div>
+                                        <div class="text-[10px] uppercase text-gray-500 font-bold">Total Entries</div>
+                                    </div>
+                                    <div class="text-center p-2 rounded bg-white/5 border border-white/10">
+                                        <div class="text-xs font-mono text-gray-400 mt-2"
+                                            x-text="kbStats.last_updated ? new Date(kbStats.last_updated).toLocaleDateString() : 'Never'">
+                                        </div>
+                                        <div class="text-[10px] uppercase text-gray-500 font-bold mt-1">Last Updated
+                                        </div>
                                     </div>
                                 </div>
-                            </template>
-                        </div>
-                    </div>
 
-                    <div class="mt-8 border-t border-gray-200/50 dark:border-gray-700/50 pt-6">
-                        <div class="flex flex-col md:flex-row gap-4 items-end">
-                            <div class="flex-1 w-full">
-                                <label class="label-text" for="bulkImport">Bulk Import (CSV)</label>
-                                <p class="text-xs opacity-60 mb-2">Format: original, rephrased, keywords, is_template,
-                                    category</p>
-                                <input type="file" @change="kbFile = $event.target.files[0]" id="bulkImport"
-                                    class="w-full p-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg text-sm">
+                                <template x-if="kbStats.category_breakdown && kbStats.category_breakdown.length > 0">
+                                    <div>
+                                        <h4 class="text-[10px] uppercase font-bold text-gray-500 mb-2">Top Categories
+                                        </h4>
+                                        <div class="space-y-1">
+                                            <template x-for="cat in kbStats.category_breakdown" :key="cat.category">
+                                                <div class="flex justify-between items-center text-xs">
+                                                    <span class="text-gray-400" x-text="cat.category"></span>
+                                                    <span class="font-mono text-sky-400" x-text="cat.count"></span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
-                            <button class="btn btn-ghost whitespace-nowrap" @click="importKB()"
-                                :disabled="!kbFile || importing">
-                                Import Corpus
-                            </button>
                         </div>
 
+                        <div class="mt-8 border-t border-gray-200/50 dark:border-gray-700/50 pt-6">
+                            <div class="flex flex-col md:flex-row gap-4 items-end">
+                                <div class="flex-1 w-full">
+                                    <label class="label-text" for="bulkImport">Bulk Import (CSV)</label>
+                                    <p class="text-xs opacity-60 mb-2">Format: original, rephrased, keywords,
+                                        is_template,
+                                        category</p>
+                                    <input type="file" @change="kbFile = $event.target.files[0]" id="bulkImport"
+                                        class="w-full p-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg text-sm">
+                                </div>
+                                <button class="btn btn-ghost whitespace-nowrap" @click="importKB()"
+                                    :disabled="!kbFile || importing">
+                                    Import Corpus
+                                </button>
+                            </div>
 
 
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -683,8 +698,7 @@
                         </div>
 
                         <div class="flex gap-3 mt-6">
-                            <button type="submit"
-                                class="flex-1 btn btn-primary py-3 px-6 shadow-lg">
+                            <button type="submit" class="flex-1 btn btn-primary py-3 px-6 shadow-lg">
                                 Login
                             </button>
                             <button type="button" @click="showLogin = false"
@@ -1557,9 +1571,7 @@
             <!-- Footer -->
             <div class="p-5 border-t border-gray-700/30 bg-[#1a1b26]/50 flex justify-end gap-3">
                 <button class="btn btn-ghost px-6 py-2" @click="showEditKbModal = false">Cancel</button>
-                <button
-                    class="btn btn-primary font-bold px-8 py-2 shadow-lg"
-                    @click="saveKbEdit()">
+                <button class="btn btn-primary font-bold px-8 py-2 shadow-lg" @click="saveKbEdit()">
                     Save Changes
                 </button>
             </div>
@@ -1763,6 +1775,15 @@
                                                 <option :value="cat" x-text="cat"></option>
                                             </template>
                                         </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="label-text">Custom Research Sources</label>
+                                        <input type="text" x-model="customSearchSources"
+                                            placeholder="e.g. reddit.com, stackoverflow.com"
+                                            class="form-input w-full p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors">
+                                        <p class="text-[10px] text-gray-500 mt-1">Comma-separated domains to search in
+                                            addition to official domains.</p>
                                     </div>
 
 

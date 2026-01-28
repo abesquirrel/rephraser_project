@@ -154,21 +154,38 @@ def extract_keywords(text):
     messages = [{"role": "user", "content": prompt}]
     keywords = call_llm(messages, temperature=0.1, max_tokens=50)
     return keywords.strip().strip("'").strip('"')
-
-    # prioritized search: official domains
-    official_sites = "site:apple.com OR site:samsung.com OR site:t-mobile.com OR site:verizon.com OR site:att.com OR site:tello.com OR site:google.com OR site:motorola.com"
+def web_search_tool(query, custom_sources=None):
+    """
+    Search DuckDuckGo with priority domains and optional custom sources.
+    """
+    combined_results = []
+    
+    # Base official domains
+    official_domains = [
+        "apple.com", "samsung.com", "t-mobile.com", "verizon.com", 
+        "att.com", "tello.com", "google.com", "motorola.com"
+    ]
+    
+    # Add custom sources if provided
+    if custom_sources:
+        # Split by comma and clean up
+        extra = [s.strip() for s in custom_sources.split(",") if s.strip()]
+        official_domains.extend(extra)
+    
+    # Construct "site:domain.com OR site:..." string
+    official_sites = " OR ".join([f"site:{d}" for d in official_domains])
     targeted_query = f"{query} ({official_sites})"
     
     try:
-        logger.info(f"Targeted Official Search: {targeted_query}")
+        logger.info(f"Targeted Research Search: {targeted_query}")
         results = DDGS().text(targeted_query, max_results=WEB_SEARCH_RESULT_COUNT)
         if results:
-            combined_results.extend([f"[Official Source: {r.get('title','')}] {r.get('body', '')}" for r in results])
+            combined_results.extend([f"[Technical Source: {r.get('title','')}] {r.get('body', '')}" for r in results])
     except Exception as e:
         logger.error(f"Targeted search failed: {e}")
 
     if len(combined_results) < 2:
-        # Tech context research
+        # Tech context research fallback
         tech_context = "mobile service OR 'US MVNO' OR 'eSIM support' OR 'cellular network' OR 'VoLTE' OR 'RCS'"
         forums = "site:howardforums.com OR site:xda-developers.com OR site:reddit.com/r/tello OR site:reddit.com/r/tmobile"
         broad_query = f"{query} ({tech_context}) ({forums})"
@@ -181,7 +198,7 @@ def extract_keywords(text):
             logger.error(f"Broad search failed: {e}")
 
     if combined_results:
-        return "\\n\\n".join(combined_results[:5])
+        return "\n\n".join(combined_results[:5])
     return "No relevant information found online."
 
 def build_structured_prompt(original_text, examples, web_context=None, signature="Paul", direct_instruction=None, negative_prompt=None, template_mode=False, role="tech_support", role_config=None):
@@ -380,6 +397,7 @@ def handle_rephrase():
     search_keywords = data.get('search_keywords', '')
     template_mode = data.get('template_mode', False)
     category = data.get('category', None)
+    custom_search_sources = data.get('custom_search_sources', '')
 
     # Mode Enforcement Logic
     if enable_web_search:
@@ -423,7 +441,7 @@ def handle_rephrase():
                     kw = input_text
                 else:
                     kw = extract_keywords(input_text)
-            results["web"] = web_search_tool(kw)
+            results["web"] = web_search_tool(kw, custom_sources=custom_search_sources)
             logger.info(f"Web Search took {time.time() - t_start:.3f}s")
 
         # Start background threads

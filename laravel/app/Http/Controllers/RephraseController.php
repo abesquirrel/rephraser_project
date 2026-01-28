@@ -34,6 +34,7 @@ class RephraseController extends Controller
         $inputLength = strlen($data['text'] ?? '');
         $data['text'] = $this->sanitize($data['text'] ?? '');
         $data['negative_prompt'] = $this->sanitize($data['negative_prompt'] ?? '');
+        $data['custom_search_sources'] = $this->sanitize($data['custom_search_sources'] ?? '');
 
         // --- Dynamic Role Lookup ---
         $roleName = $data['role'] ?? null;

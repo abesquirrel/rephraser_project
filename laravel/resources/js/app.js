@@ -36,6 +36,7 @@ function rephraserApp() {
         presencePenalty: 0.0,
         autoTokens: Alpine.$persist(true).as('rephraser_auto_tokens'),
         negativePrompt: Alpine.$persist('').as('rephraser_negative_prompt'),
+        customSearchSources: Alpine.$persist('').as('rephraser_custom_search_sources'),
         modelSettings: Alpine.$persist({}).as('rephraser_model_settings'),
         
         // Authentication
@@ -647,6 +648,7 @@ function rephraserApp() {
                         max_tokens: finalTokens,
                         kb_count: this.kbCount,
                         negative_prompt: this.negativePrompt,
+                        custom_search_sources: this.customSearchSources, // Add this line
                         role: this.selectedRoleName // Pass selected role
                     })
                 });
