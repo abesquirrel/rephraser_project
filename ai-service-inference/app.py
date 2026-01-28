@@ -136,7 +136,11 @@ def extract_keywords(text):
     msisdns = re.findall(r'\b\d{10,12}\b', text)
     error_codes = re.findall(r'\b[A-Z0-9]{5,15}\b', text)
     
-    technical_hits = imeis + msisdns + error_codes
+    # Brand and Model detection: common mobile brands and Alpha-numeric model codes
+    brands = re.findall(r'\b(Apple|Samsung|Google|Pixel|iPhone|Galaxy|Motorola|Nokia|Xiaomi|Oppo|Vivo|Realme|OnePlus|Huawei|LG|Sony|ZTE|Alcatel|Asus|TCL)\b', text, re.IGNORECASE)
+    model_codes = re.findall(r'\bSM-[A-Z0-9]{4,10}\b|\bSM[A-Z0-9]{4,10}\b|\b[A-Z]{1,2}-[A-Z0-9]{2,10}\b', text, re.IGNORECASE)
+
+    technical_hits = brands + model_codes + imeis + msisdns + error_codes
     if len(technical_hits) >= 2:
         return " ".join(technical_hits[:5])
 
@@ -279,13 +283,13 @@ def build_structured_prompt(original_text, examples, web_context=None, signature
     # --- SHARED INSTRUCTIONS ---
     system += shared_constraints
 
-    if direct_instruction:
-        system += f"### USER DIRECTIVE: {direct_instruction}\n"
-        system += "Follow this instruction above all else.\n\n"
-    
     if negative_prompt:
         system += f"### STYLE EXCLUSIONS (NEGATIVE PROMPT)\n"
         system += f"You MUST AVOID: {negative_prompt}\n\n"
+    
+    if direct_instruction:
+        system += "### CRITICAL USER DIRECTIVE\n"
+        system += f"FOLLOW THIS INSTRUCTION ABOVE ALL ELSE: {direct_instruction}\n\n"
     
     # --- FINAL FORMATTING ---
     system += "### REQUIRED OUTPUT FORMAT\n"
