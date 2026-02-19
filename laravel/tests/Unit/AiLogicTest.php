@@ -10,7 +10,7 @@ it('includes the secure API key in AI service calls', function () {
     config(['rephraser.ai_key' => 'test_key_123']);
 
     Http::fake([
-        'http://rephraser-ai:5001/suggest_keywords' => function ($request) {
+        'http://rephraser-ai-inference:5001/suggest_keywords' => function ($request) {
             if ($request->hasHeader('X-AI-KEY', 'test_key_123')) {
                 return Http::response(['keywords' => 'test'], 200);
             }
@@ -29,14 +29,14 @@ it('includes the secure API key in AI service calls', function () {
 
 it('handles AI service failure gracefully', function () {
     Http::fake([
-        'http://rephraser-ai:5001/suggest_keywords' => Http::response(['error' => 'fail'], 500)
+        'http://rephraser-ai-inference:5001/suggest_keywords' => Http::response(['error' => 'fail'], 500)
     ]);
 
     $controller = new RephraseController();
     $request = new Request(['text' => 'test text']);
 
     $response = $controller->suggestKeywords($request);
-    
+
     expect($response)->toBeArray();
     expect($response['error'])->toBe('fail');
 });
