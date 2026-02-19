@@ -639,7 +639,7 @@ function rephraserApp() {
                     body: JSON.stringify({
                         text: textToProcess,
                         signature: this.signature,
-                        enable_web_search: this.enableWebSearch,
+                        web_search_enabled: this.enableWebSearch,
                         search_keywords: this.searchKeywords,
                         template_mode: this.templateMode,
                         category: this.currentCategory,
@@ -656,6 +656,7 @@ function rephraserApp() {
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let buffer = '';
+                let accumulated = '';
 
                 // Link stream to history item if provided
                 const historyItem = this.history[0];
@@ -682,18 +683,12 @@ function rephraserApp() {
                                 });
                             }
                             if (parsed.token) {
-                                // Append token in real-time
-                                this.rephrasedContent += parsed.token;
-                                if (historyItem) {
-                                    historyItem.rephrased = this.rephrasedContent;
-                                }
+                                // Accumulate token locally, do NOT update UI in real-time
+                                accumulated += parsed.token;
                             }
                             if (parsed.data) {
-                                // Final full data (ensure sync and strip markdown)
-                                this.rephrasedContent = this.stripMarkdown(parsed.data);
-                                if (historyItem) {
-                                    historyItem.rephrased = this.rephrasedContent;
-                                }
+                                // Final full data (preserve it but still wait for stream end for safety)
+                                accumulated = this.stripMarkdown(parsed.data);
                             }
                         } catch (e) {
                             console.warn('JSON Parse error on line:', line, e);
@@ -704,8 +699,14 @@ function rephraserApp() {
                 if (buffer.trim()) {
                     try {
                         const parsed = JSON.parse(buffer);
-                        if (parsed.data) this[targetKey] = parsed.data;
+                        if (parsed.data) accumulated = this.stripMarkdown(parsed.data);
                     } catch(e) {}
+                }
+
+                // Update UI once everything is done
+                this.rephrasedContent = accumulated;
+                if (historyItem) {
+                    historyItem.rephrased = this.rephrasedContent;
                 }
             };
 

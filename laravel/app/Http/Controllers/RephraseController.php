@@ -36,6 +36,14 @@ class RephraseController extends Controller
         $data['negative_prompt'] = $this->sanitize($data['negative_prompt'] ?? '');
         $data['custom_search_sources'] = $this->sanitize($data['custom_search_sources'] ?? '');
 
+        // Normalize web search keys for both logging and AI service consistency
+        $webSearch = $data['web_search_enabled'] ?? $data['enable_web_search'] ?? false;
+        if (is_string($webSearch)) {
+            $webSearch = ($webSearch === 'true' || $webSearch === '1');
+        }
+        $data['web_search_enabled'] = $webSearch;
+        $data['enable_web_search'] = $webSearch;
+
         // --- Dynamic Role Lookup ---
         $roleName = $data['role'] ?? null;
 
@@ -83,7 +91,7 @@ class RephraseController extends Controller
             'temperature' => $data['temperature'] ?? null,
             'max_tokens' => $data['max_tokens'] ?? null,
             'kb_count' => $data['kb_count'] ?? null,
-            'web_search_enabled' => $data['web_search_enabled'] ?? false,
+            'web_search_enabled' => $data['web_search_enabled'],
             'template_mode' => $data['template_mode'] ?? false,
             'prompt_tokens' => (int) ($inputLength / 3), // Approx 3-4 chars per token
         ]);
@@ -125,12 +133,14 @@ class RephraseController extends Controller
                     if (empty($chunk))
                         continue;
 
-                    $accumulatedOutput .= $chunk;
                     echo $chunk;
+                    $accumulatedOutput .= $chunk;
 
-                    if (ob_get_level() > 0)
-                        ob_flush();
-                    flush();
+                    if (!app()->environment('testing')) {
+                        if (ob_get_level() > 0)
+                            ob_flush();
+                        flush();
+                    }
                 }
 
                 // 2. Update Log on Completion

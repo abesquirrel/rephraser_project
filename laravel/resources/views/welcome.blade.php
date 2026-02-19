@@ -32,7 +32,7 @@
 </head>
 
 <body x-data="rephraserApp()" class="antialiased min-h-screen transition-colors duration-300">
-    <div class="container mx-auto px-4 py-4 max-w-7xl">
+    <div class="px-4 py-4 md:px-8 lg:px-12 w-full">
 
         <!-- Header -->
         <header class="header animate-fade mb-8 flex flex-col items-center text-center gap-4 px-2">
@@ -62,12 +62,12 @@
             </div>
         </header>
 
-        <div class="flex flex-col gap-8 max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-stretch">
 
             <!-- LEFT COLUMN: Input & Config -->
             <section class="flex flex-col gap-8" aria-label="Input Configuration">
                 <!-- Main Input -->
-                <div class="glass-card animate-fade p-0 overflow-hidden delay-[100ms] flex flex-col">
+                <div class="glass-card animate-fade p-0 overflow-hidden delay-[100ms] flex flex-col h-full">
                     <div class="p-8">
                         <h2
                             class="section-title mb-6 text-xl font-bold font-display text-gray-900 dark:text-gray-100 flex items-center gap-3">
@@ -82,7 +82,8 @@
                         <div class="mb-6">
                             <label for="rawInputArea" class="sr-only">Input text to rephrase</label>
                             <textarea id="rawInputArea" x-model="inputText" placeholder="Input notes..."
-                                class="w-full min-h-[200px] p-4 text-lg leading-chill rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"></textarea>
+                                class="w-full min-h-[200px] p-4 text-lg leading-chill rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"
+                                style="height: 411px;" spellcheck="false" data-gramm="false"></textarea>
                         </div>
 
                         <!-- Input Configuration Controls -->
@@ -221,9 +222,10 @@
             </div>
 
             <!-- RIGHT COLUMN: Output & History -->
-            <section class="flex flex-col gap-4" aria-label="Output">
+            <section class="flex flex-col gap-4 h-full" aria-label="Output">
                 <template x-if="history.length > 0">
-                    <div class="animate-fade delay-[200ms] glass-card p-8 shadow-xl shadow-sky-500/5">
+                    <div
+                        class="animate-fade delay-[200ms] glass-card p-8 shadow-xl shadow-sky-500/5 h-full flex flex-col">
                         <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200/10">
                             <h2
                                 class="section-title m-0 text-xl font-bold font-display text-gray-900 dark:text-gray-100 flex items-center gap-3">
@@ -261,7 +263,14 @@
 
                                     <div class="relative group">
                                         <div x-show="!item.isEditing">
-                                            <div class="p-6 rounded-2xl bg-gradient-to-br from-sky-50 dark:from-sky-900/10 to-indigo-50 dark:to-indigo-900/10 border border-sky-100 dark:border-sky-500/20 shadow-sm text-lg leading-chill font-medium text-gray-800 dark:text-gray-200 whitespace-pre-wrap"
+                                            <div x-show="item.rephrased === '...' && isGenerating"
+                                                class="p-6 rounded-2xl bg-black/5 dark:bg-white/5 border border-dashed border-sky-300 dark:border-sky-500/30 animate-pulse flex flex-col gap-4">
+                                                <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+                                                <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
+                                                <div class="h-4 bg-gray-300 dark:bg-gray-700 rounded w-5/6"></div>
+                                            </div>
+                                            <div x-show="item.rephrased !== '...'"
+                                                class="p-6 rounded-2xl bg-gradient-to-br from-sky-50 dark:from-sky-900/10 to-indigo-50 dark:to-indigo-900/10 border border-sky-100 dark:border-sky-500/20 shadow-sm text-lg leading-chill font-medium text-gray-800 dark:text-gray-200 whitespace-pre-wrap"
                                                 x-text="item.rephrased"></div>
                                         </div>
                                         <div x-show="item.isEditing" x-cloak>
@@ -301,225 +310,225 @@
                     </div>
                 </template>
 
-                <template x-if="history.length > 1">
-                    <div x-data="{ openArchive: false }"
-                        class="glass-card p-0 overflow-hidden opacity-90 hover:opacity-100 transition-opacity">
-                        <button
-                            class="w-full p-8 cursor-pointer flex justify-between items-center focus:outline-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                            @click="openArchive = !openArchive">
-                            <h3 class="section-title m-0 text-lg font-bold flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-sky-500" viewBox="0 0 24 24"
-                                    stroke="currentColor" fill="none" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                </svg>
-                                <span>Response Archive</span>
-                            </h3>
-                            <div class="flex items-center gap-3">
-                                <span x-text="totalFilteredCount + ' Items'"
-                                    class="info-pill bg-sky-100 dark:bg-sky-900/30 text-[10px] font-bold"></span>
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="w-4 h-4 text-gray-400 transition-transform duration-300"
-                                    :class="openArchive ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
-                        </button>
+            </section>
 
-                        <div x-show="openArchive" x-collapse class="mt-6">
-                            <!-- Archive Controls -->
-                            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-                                <div class="flex p-1 bg-black/5 dark:bg-white/5 rounded-lg">
-                                    <button @click="archiveFilter = 'all'; currentPage = 1"
-                                        :class="{'bg-white dark:bg-white/10 shadow-sm text-sky-500': archiveFilter === 'all', 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200': archiveFilter !== 'all'}"
-                                        class="px-4 py-1.5 text-xs font-medium rounded-md transition-all">All</button>
-                                    <button @click="archiveFilter = 'saved'; currentPage = 1"
-                                        :class="{'bg-white dark:bg-white/10 shadow-sm text-emerald-500': archiveFilter === 'saved', 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200': archiveFilter !== 'saved'}"
-                                        class="px-4 py-1.5 text-xs font-medium rounded-md transition-all">Saved</button>
-                                    <button @click="archiveFilter = 'unsaved'; currentPage = 1"
-                                        :class="{'bg-white dark:bg-white/10 shadow-sm text-amber-500': archiveFilter === 'unsaved', 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200': archiveFilter !== 'unsaved'}"
-                                        class="px-4 py-1.5 text-xs font-medium rounded-md transition-all">Unsaved</button>
-                                </div>
+            <template x-if="history.length > 1">
+                <div x-data="{ openArchive: false }"
+                    class="lg:col-span-2 glass-card p-0 overflow-hidden opacity-90 hover:opacity-100 transition-opacity">
+                    <button
+                        class="w-full p-8 cursor-pointer flex justify-between items-center focus:outline-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        @click="openArchive = !openArchive">
+                        <h3 class="section-title m-0 text-lg font-bold flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-sky-500" viewBox="0 0 24 24"
+                                stroke="currentColor" fill="none" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                            </svg>
+                            <span>Response Archive</span>
+                        </h3>
+                        <div class="flex items-center gap-3">
+                            <span x-text="totalFilteredCount + ' Items'"
+                                class="info-pill bg-sky-100 dark:bg-sky-900/30 text-[10px] font-bold"></span>
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="w-4 h-4 text-gray-400 transition-transform duration-300"
+                                :class="openArchive ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </button>
 
-                                <div class="flex items-center gap-2">
-                                    <button @click="refreshArchive()"
-                                        class="btn btn-ghost text-xs text-gray-500 hover:text-sky-500 font-medium flex items-center gap-1 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
-                                            :class="isRefreshingArchive ? 'animate-spin' : ''" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                        <span x-text="isRefreshingArchive ? 'Refreshing...' : 'Refresh'"></span>
-                                    </button>
-                                    <button @click="clearUnsaved()"
-                                        class="btn btn-ghost text-xs text-red-400 hover:text-red-500 font-medium flex items-center gap-1 transition-colors hover:bg-red-500/10">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                        Clear Unsaved
-                                    </button>
-                                </div>
+                    <div x-show="openArchive" x-collapse class="mt-6">
+                        <!-- Archive Controls -->
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 px-8">
+                            <div class="flex p-1 bg-black/5 dark:bg-white/5 rounded-lg">
+                                <button @click="archiveFilter = 'all'; currentPage = 1"
+                                    :class="{'bg-white dark:bg-white/10 shadow-sm text-sky-500': archiveFilter === 'all', 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200': archiveFilter !== 'all'}"
+                                    class="px-4 py-1.5 text-xs font-medium rounded-md transition-all">All</button>
+                                <button @click="archiveFilter = 'saved'; currentPage = 1"
+                                    :class="{'bg-white dark:bg-white/10 shadow-sm text-emerald-500': archiveFilter === 'saved', 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200': archiveFilter !== 'saved'}"
+                                    class="px-4 py-1.5 text-xs font-medium rounded-md transition-all">Saved</button>
+                                <button @click="archiveFilter = 'unsaved'; currentPage = 1"
+                                    :class="{'bg-white dark:bg-white/10 shadow-sm text-amber-500': archiveFilter === 'unsaved', 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200': archiveFilter !== 'unsaved'}"
+                                    class="px-4 py-1.5 text-xs font-medium rounded-md transition-all">Unsaved</button>
                             </div>
 
-                            <!-- Grid -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <template x-for="(item, idx) in paginatedHistory" :key="item.timestamp">
-                                    <div class="glass-card p-5 hover:bg-white/40 dark:hover:bg-black/40 transition-colors group relative cursor-pointer border border-gray-200/50 dark:border-gray-700/50"
-                                        @click="itemToView = item; viewModal = true">
-
-                                        <div class="flex justify-between items-start mb-3">
-                                            <span class="text-xs font-mono text-gray-400"
-                                                x-text="new Date(item.timestamp).toLocaleString()"></span>
-                                            <span x-show="item.approved"
-                                                class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full font-bold">SAVED</span>
-                                        </div>
-
-                                        <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-3 mb-3 leading-relaxed"
-                                            x-text="item.rephrased || item.response || item.text"></p>
-
-                                        <div
-                                            class="flex items-center gap-2 mt-auto pt-3 border-t border-gray-200/50 dark:border-gray-700/50">
-                                            <span class="text-[10px] uppercase tracking-wider font-bold text-sky-500"
-                                                x-text="item.modelA_name || item.modelA || 'AI Model'"></span>
-                                            <span
-                                                class="text-xs text-gray-400 ml-auto group-hover:text-sky-500 transition-colors">View
-                                                Details &rarr;</span>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <!-- Pagination -->
-                            <div class="flex justify-between items-center mt-6" x-show="totalPages > 1">
-                                <button class="btn btn-ghost text-xs" :disabled="currentPage === 1"
-                                    @click="currentPage--">
-                                    &larr; Prev
+                            <div class="flex items-center gap-2">
+                                <button @click="refreshArchive()"
+                                    class="btn btn-ghost text-xs text-gray-500 hover:text-sky-500 font-medium flex items-center gap-1 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
+                                        :class="isRefreshingArchive ? 'animate-spin' : ''" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    <span x-text="isRefreshingArchive ? 'Refreshing...' : 'Refresh'"></span>
                                 </button>
-                                <span class="text-xs text-gray-400">Page <span x-text="currentPage"></span> of <span
-                                        x-text="totalPages"></span></span>
-                                <button class="btn btn-ghost text-xs" :disabled="currentPage === totalPages"
-                                    @click="currentPage++">
-                                    Next &rarr;
+                                <button @click="clearUnsaved()"
+                                    class="btn btn-ghost text-xs text-red-400 hover:text-red-500 font-medium flex items-center gap-1 transition-colors hover:bg-red-500/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Clear Unsaved
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </template>
 
-                <!-- Response Details Modal -->
-                <div x-show="viewModal" class="fixed inset-0 z-[100] flex items-center justify-center p-2" x-cloak>
-                    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-                        @click="viewModal = false" x-show="viewModal" x-transition:enter="duration-300 ease-out"
-                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                        x-transition:leave="duration-200 ease-in" x-transition:leave-start="opacity-100"
-                        x-transition:leave-end="opacity-0"></div>
+                        <!-- Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-8 pb-8">
+                            <template x-for="(item, idx) in paginatedHistory" :key="item.timestamp">
+                                <div class="glass-card p-5 hover:bg-white/40 dark:hover:bg-black/40 transition-colors group relative cursor-pointer border border-gray-200/50 dark:border-gray-700/50"
+                                    @click="itemToView = item; viewModal = true">
 
-                    <template x-if="itemToView">
-                        <div class="glass-card relative w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl ring-1 ring-white/10"
-                            x-show="viewModal" x-transition:enter="duration-300 ease-out"
-                            x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                            x-transition:leave="duration-200 ease-in" x-transition:leave-start="opacity-100 scale-100"
-                            x-transition:leave-end="opacity-0 scale-95">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <span class="text-xs font-mono text-gray-400"
+                                            x-text="new Date(item.timestamp).toLocaleString()"></span>
+                                        <span x-show="item.approved"
+                                            class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full font-bold">SAVED</span>
+                                    </div>
 
-                            <div class="flex justify-between items-center p-6 border-b border-gray-200/10">
-                                <div class="flex items-center gap-3">
-                                    <h3 class="text-xl font-bold font-display text-sky-500">Response Details</h3>
-                                    <span class="info-pill bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400"
-                                        x-text="itemToView.modelA_name || itemToView.modelA || 'Unknown Model'"></span>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-3 mb-3 leading-relaxed"
+                                        x-text="item.rephrased || item.response || item.text"></p>
+
+                                    <div
+                                        class="flex items-center gap-2 mt-auto pt-3 border-t border-gray-200/50 dark:border-gray-700/50">
+                                        <span class="text-[10px] uppercase tracking-wider font-bold text-sky-500"
+                                            x-text="item.modelA_name || item.modelA || 'AI Model'"></span>
+                                        <span
+                                            class="text-xs text-gray-400 ml-auto group-hover:text-sky-500 transition-colors">View
+                                            Details &rarr;</span>
+                                    </div>
                                 </div>
-                                <button @click="viewModal = false"
-                                    class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24"
+                            </template>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="flex justify-between items-center mt-6 px-8 pb-8" x-show="totalPages > 1">
+                            <button class="btn btn-ghost text-xs" :disabled="currentPage === 1" @click="currentPage--">
+                                &larr; Prev
+                            </button>
+                            <span class="text-xs text-gray-400">Page <span x-text="currentPage"></span> of <span
+                                    x-text="totalPages"></span></span>
+                            <button class="btn btn-ghost text-xs" :disabled="currentPage === totalPages"
+                                @click="currentPage++">
+                                Next &rarr;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Response Details Modal -->
+            <div x-show="viewModal" class="fixed inset-0 z-[100] flex items-center justify-center p-2" x-cloak>
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" @click="viewModal = false"
+                    x-show="viewModal" x-transition:enter="duration-300 ease-out" x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100" x-transition:leave="duration-200 ease-in"
+                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+
+                <template x-if="itemToView">
+                    <div class="glass-card relative w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl ring-1 ring-white/10"
+                        x-show="viewModal" x-transition:enter="duration-300 ease-out"
+                        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="duration-200 ease-in" x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95">
+
+                        <div class="flex justify-between items-center p-6 border-b border-gray-200/10">
+                            <div class="flex items-center gap-3">
+                                <h3 class="text-xl font-bold font-display text-sky-500">Response Details</h3>
+                                <span class="info-pill bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400"
+                                    x-text="itemToView.modelA_name || itemToView.modelA || 'Unknown Model'"></span>
+                            </div>
+                            <button @click="viewModal = false"
+                                class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="overflow-y-auto p-8 space-y-8 custom-scrollbar">
+                            <div>
+                                <h4
+                                    class="text-xs uppercase tracking-widest font-bold text-gray-400 mb-3 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M6 18L18 6M6 6l12 12" />
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
-                                </button>
+                                    Original Input
+                                </h4>
+                                <div class="p-6 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 text-sm md:text-base text-gray-600 dark:text-gray-300 font-serif leading-relaxed"
+                                    x-text="itemToView.original"></div>
                             </div>
 
-                            <div class="overflow-y-auto p-8 space-y-8 custom-scrollbar">
-                                <div>
-                                    <h4
-                                        class="text-xs uppercase tracking-widest font-bold text-gray-400 mb-3 flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                            fill="none" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                        Original Input
-                                    </h4>
-                                    <div class="p-6 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 text-sm md:text-base text-gray-600 dark:text-gray-300 font-serif leading-relaxed"
-                                        x-text="itemToView.original"></div>
-                                </div>
+                            <div class="flex items-center gap-4 opacity-50">
+                                <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                </svg>
+                                <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
+                            </div>
 
-                                <div class="flex items-center gap-4 opacity-50">
-                                    <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
+                            <div>
+                                <h4
+                                    class="text-xs uppercase tracking-widest font-bold text-sky-500 mb-3 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                            d="M5 13l4 4L19 7" />
                                     </svg>
-                                    <div class="h-px bg-gray-300 dark:bg-gray-700 flex-1"></div>
-                                </div>
+                                    Rephrased Output
+                                </h4>
+                                <div
+                                    class="p-6 rounded-2xl bg-gradient-to-br from-sky-50 dark:from-sky-900/10 to-indigo-50 dark:to-indigo-900/10 border border-sky-100 dark:border-sky-500/20 shadow-sm">
 
-                                <div>
-                                    <h4
-                                        class="text-xs uppercase tracking-widest font-bold text-sky-500 mb-3 flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                            fill="none" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Rephrased Output
-                                    </h4>
-                                    <div
-                                        class="p-6 rounded-2xl bg-gradient-to-br from-sky-50 dark:from-sky-900/10 to-indigo-50 dark:to-indigo-900/10 border border-sky-100 dark:border-sky-500/20 shadow-sm">
+                                    <div x-show="!itemToView.isEditing">
+                                        <p class="text-base text-gray-800 dark:text-gray-100 leading-chill font-medium whitespace-pre-wrap"
+                                            x-text="itemToView.rephrased || itemToView.response || itemToView.text">
+                                        </p>
+                                    </div>
 
-                                        <div x-show="!itemToView.isEditing">
-                                            <p class="text-base text-gray-800 dark:text-gray-100 leading-chill font-medium whitespace-pre-wrap"
-                                                x-text="itemToView.rephrased || itemToView.response || itemToView.text">
-                                            </p>
-                                        </div>
-
-                                        <div x-show="itemToView.isEditing" x-cloak>
-                                            <textarea x-model="itemToView.rephrased"
-                                                class="w-full p-3 rounded-lg bg-white dark:bg-black/20 border border-sky-500/30 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 h-48 text-base"></textarea>
-                                        </div>
+                                    <div x-show="itemToView.isEditing" x-cloak>
+                                        <textarea x-model="itemToView.rephrased"
+                                            class="w-full p-3 rounded-lg bg-white dark:bg-black/20 border border-sky-500/30 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 h-48 text-base"></textarea>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div
-                                class="p-6 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3">
-                                <button class="btn btn-ghost text-sm"
-                                    @click="copyText(itemToView.rephrased || itemToView.response || itemToView.text)">Copy
-                                    Text</button>
-                                <button class="btn btn-ghost text-sm"
-                                    @click="itemToView.isEditing = !itemToView.isEditing"
-                                    x-text="itemToView.isEditing ? 'Cancel Edit' : 'Edit'">
-                                </button>
-                                <button class="btn btn-primary text-sm px-6" x-show="!itemToView.isEditing"
-                                    @click="viewModal = false">Close</button>
-                                <button class="btn btn-success text-sm px-6" x-show="itemToView.isEditing" @click="
+                        <div
+                            class="p-6 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3">
+                            <button class="btn btn-ghost text-sm"
+                                @click="copyText(itemToView.rephrased || itemToView.response || itemToView.text)">Copy
+                                Text</button>
+                            <button class="btn btn-ghost text-sm" @click="itemToView.isEditing = !itemToView.isEditing"
+                                x-text="itemToView.isEditing ? 'Cancel Edit' : 'Edit'">
+                            </button>
+                            <button class="btn btn-primary text-sm px-6" x-show="!itemToView.isEditing"
+                                @click="viewModal = false">Close</button>
+                            <button class="btn btn-success text-sm px-6" x-show="itemToView.isEditing" @click="
                                         inputText = itemToView.original; 
                                         rephrasedContent = itemToView.rephrased; 
                                         approveEntry().then(() => { 
                                             itemToView.isEditing = false; 
                                         });
                                     ">Save Changes</button>
-                            </div>
                         </div>
-                    </template>
-                </div>
+                    </div>
+                </template>
+            </div>
             </section>
 
             <!-- KB Management (Advanced Section) -->
-            <div x-data="{ expanded: false }" class="glass-card animate-fade p-0 overflow-hidden delay-[300ms]">
+            <div x-data="{ expanded: false }"
+                class="lg:col-span-2 glass-card animate-fade p-0 overflow-hidden delay-[300ms]">
                 <button @click="expanded = !expanded"
                     class="w-full flex justify-between items-center p-8 hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none">
                     <div class="section-title m-0 flex items-center gap-3 text-sky-500">

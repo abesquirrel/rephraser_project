@@ -129,7 +129,7 @@ it('extracts brand and model codes for web search', function () {
 
     $response = $this->postJson('/api/rephrase', [
         'text' => 'Samsung Galaxy SM-S911B roaming issue',
-        'enable_web_search' => true
+        'web_search_enabled' => true
     ]);
 
     $response->assertStatus(200);
