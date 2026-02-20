@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -6,10 +6,14 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 }
 
 /* Global Themed Scrollbar */
@@ -37,20 +41,26 @@ html {
 
 /* Dark Mode Variables (Only Mode) */
 /* Dark Mode Variables (Tokyo Night Theme) */
-.dark, :root {
+.dark,
+:root {
     /* Tokyo Night Core */
     --bg-color: #1a1b26; /* Tokyo Night Storm/Background */
     --card-bg: #24283b; /* Tokyo Night Moon/Lighter Background */
-    --card-border: rgba(122, 162, 247, 0.15); /* Tokyo Night Blue with opacity */
-    
+    --card-border: rgba(
+        122,
+        162,
+        247,
+        0.15
+    ); /* Tokyo Night Blue with opacity */
+
     /* Accents */
     --accent-primary: #7aa2f7; /* Tokyo Night Blue */
     --accent-secondary: #bb9af7; /* Tokyo Night Magenta */
-    
+
     /* Text */
     --text-main: #c0caf5; /* Tokyo Night Foreground */
     --text-dim: #a9b1d6; /* Tokyo Night Terminal Foreground */
-    
+
     /* Functional */
     --success: #9ece6a; /* Tokyo Night Green */
     --info: #7dcfff; /* Tokyo Night Cyan */
@@ -76,7 +86,8 @@ body {
     min-height: 100vh;
     padding: 0;
     overflow-x: hidden;
-    background-image: radial-gradient(
+    background-image:
+        radial-gradient(
             circle at 10% 20%,
             rgba(122, 162, 247, 0.08) 0%,
             transparent 40%
@@ -152,7 +163,9 @@ body {
     border-radius: 1rem; /* Comfortable radius */
     padding: 2rem; /* Comfortable padding */
     margin-bottom: 2rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
     position: relative;
     overflow: hidden;
 }
@@ -177,110 +190,6 @@ body {
     display: block;
 }
 
-/* Collapsible Configuration Drawer */
-.config-drawer {
-    border-top: 1px solid var(--card-border);
-    margin-top: 1rem;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
-}
-
-.config-toggle {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    cursor: pointer;
-    padding: 0.5rem;
-    margin-top: 0.5rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.2s;
-}
-
-.config-toggle:hover {
-    background-color: rgba(0,0,0,0.03);
-}
-
-/* Floating Status Logs (Pill) */
-.status-pill-container {
-    position: absolute; /* Relative to glass-card parent */
-    bottom: 1.5rem;
-    right: 1.5rem;
-    z-index: 10;
-    pointer-events: none; /* Let clicks pass through unless interacting */
-}
-
-.status-pill {
-    background: var(--card-bg);
-    border: 1px solid var(--accent-primary);
-    padding: 0.5rem 1rem;
-    border-radius: 2rem;
-    font-size: 0.85rem;
-    color: var(--text-main);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    animation: slideUpFade 0.3s ease-out;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
-@keyframes slideUpFade {
-    from { transform: translateY(10px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-.bubble {
-    padding: 1.5rem; /* More padding */
-    border-radius: 1rem;
-    font-size: 1rem; /* Larger font */
-    white-space: pre-wrap;
-    position: relative;
-    line-height: 1.7; /* Better readability */
-    transition: all 0.2s ease;
-}
-
-.bubble-original {
-    background: rgba(55, 65, 81, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-left: 3px solid var(--accent-secondary);
-    color: var(--text-dim);
-    font-size: 0.95rem;
-}
-
-.bubble-rephrased {
-    background: rgba(16, 185, 129, 0.05);
-    border: 1px solid rgba(16, 185, 129, 0.15);
-    border-left: 3px solid var(--accent-primary);
-    color: var(--text-main);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-.ab-grid {
-    grid-template-columns: 0.7fr 1.2fr 1.2fr !important;
-    gap: 1.5rem !important;
-}
-
-.vertical-history-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-.variants-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-}
-
-.variant-col {
-    display: flex;
-    flex-direction: column;
-}
-
 /* Button Components */
 .btn {
     display: inline-flex;
@@ -302,7 +211,9 @@ body {
 }
 
 .btn:focus-visible {
-    box-shadow: 0 0 0 2px var(--bg-color), 0 0 0 4px var(--accent-primary);
+    box-shadow:
+        0 0 0 2px var(--bg-color),
+        0 0 0 4px var(--accent-primary);
 }
 
 .btn-primary {
@@ -343,103 +254,6 @@ body {
 
 .dark .btn-ghost:hover {
     background: rgba(255, 255, 255, 0.1);
-}
-
-.btn-success-ghost {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669; /* Emerald 600 */
-}
-
-.btn-success-ghost:hover {
-    background: rgba(16, 185, 129, 0.2);
-}
-
-.edit-textarea {
-    width: 100%;
-    background: var(--input-bg);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    border-radius: 0.75rem;
-    color: var(--text-main);
-    padding: 1rem;
-    font-family: inherit;
-    font-size: 0.95rem;
-    resize: vertical;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-.edit-textarea:focus {
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
-}
-
-.form-select {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    color: var(--text-primary);
-    padding: 0.6rem;
-    border-radius: 8px;
-    width: 100%;
-}
-
-.btn-text-only {
-    background: none;
-    border: none;
-    color: var(--accent-primary);
-    cursor: pointer;
-    font-size: 0.75rem;
-    text-decoration: underline;
-}
-
-.btn-text-only:hover {
-    opacity: 0.8;
-}
-
-.bubble-rephrased {
-    background: rgba(16, 185, 129, 0.05);
-    border: 1px solid rgba(16, 185, 129, 0.15);
-    color: var(--text-main);
-}
-
-.btn-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.2fr;
-    gap: 1rem;
-}
-
-/* Collapsed History State */
-.history-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    padding: 0.5rem 0;
-}
-
-.history-card.collapsed .history-grid,
-.history-card.collapsed .btn-row {
-    display: none;
-}
-
-.history-card.approved {
-    border-left-color: var(--success);
-    background: rgba(
-        16,
-        185,
-        129,
-        0.08
-    ); /* Stronger green tint for confirmation */
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
-}
-
-.approved-badge {
-    background: var(--success);
-    color: #0b0f19;
-    padding: 0.2rem 0.6rem;
-    border-radius: 2rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
 }
 
 /* Toast Component */

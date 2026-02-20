@@ -513,13 +513,8 @@
                             </button>
                             <button class="btn btn-primary text-sm px-6" x-show="!itemToView.isEditing"
                                 @click="viewModal = false">Close</button>
-                            <button class="btn btn-success text-sm px-6" x-show="itemToView.isEditing" @click="
-                                        inputText = itemToView.original; 
-                                        rephrasedContent = itemToView.rephrased; 
-                                        approveEntry().then(() => { 
-                                            itemToView.isEditing = false; 
-                                        });
-                                    ">Save Changes</button>
+                            <button class="btn btn-success text-sm px-6" x-show="itemToView.isEditing"
+                                @click="approveEditedItem(itemToView)">Save Changes</button>
                         </div>
                     </div>
                 </template>
@@ -592,12 +587,28 @@
                                         </template>
                                     </select>
                                 </div>
-                                <div class="flex items-center pb-3">
+                                <div
+                                    class="flex items-center pb-3 border-r border-gray-200 dark:border-gray-700 pr-4 mt-2">
                                     <label class="flex items-center gap-2 cursor-pointer">
                                         <input type="checkbox" x-model="manualIsTemplate"
                                             class="rounded text-sky-500 focus:ring-sky-500">
                                         <span class="text-sm font-medium">Template?</span>
                                     </label>
+                                </div>
+                                <div class="flex-1 min-w-[150px]">
+                                    <label class="label-text text-sky-500 font-semibold mb-1 block">Model Used</label>
+                                    <select x-model="manualModelUsed"
+                                        class="w-full p-2 rounded-lg bg-black/5 dark:bg-white/5 border border-sky-500/30 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors appearance-none">
+                                        <option value="">Specific Model (Optional)</option>
+                                        <template x-for="model in availableModels" :key="model.id">
+                                            <option :value="model.id" x-text="model.name"></option>
+                                        </template>
+                                        <option value="custom_option">Custom...</option>
+                                    </select>
+                                    <input type="text" x-model="manualModelUsedCustom"
+                                        x-show="manualModelUsed === 'custom_option'"
+                                        placeholder="Enter custom model name..."
+                                        class="mt-2 w-full p-2 rounded-lg bg-black/5 dark:bg-white/5 border border-sky-500/30 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors">
                                 </div>
                                 <button
                                     class="btn btn-primary px-6 py-2.5 flex items-center justify-center min-w-[120px]"
@@ -667,7 +678,23 @@
                                     <input type="file" @change="kbFile = $event.target.files[0]" id="bulkImport"
                                         class="w-full p-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg text-sm">
                                 </div>
-                                <button class="btn btn-ghost whitespace-nowrap" @click="importKB()"
+                                <div class="flex-1 min-w-[150px]">
+                                    <label class="label-text text-sky-500 mb-1 block">Specify Model (Optional)</label>
+                                    <p class="text-xs opacity-60 mb-2 invisible">Placeholder</p>
+                                    <select x-model="bulkModelUsed"
+                                        class="w-full p-2 rounded-lg bg-black/5 dark:bg-white/5 border border-sky-500/30 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors appearance-none">
+                                        <option value="">No Model / Source Default</option>
+                                        <template x-for="model in availableModels" :key="model.id">
+                                            <option :value="model.id" x-text="model.name"></option>
+                                        </template>
+                                        <option value="custom_option">Custom...</option>
+                                    </select>
+                                    <input type="text" x-model="bulkModelUsedCustom"
+                                        x-show="bulkModelUsed === 'custom_option'"
+                                        placeholder="Enter custom model name..."
+                                        class="mt-2 w-full p-2 rounded-lg bg-black/5 dark:bg-white/5 border border-sky-500/30 text-sm focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors">
+                                </div>
+                                <button class="btn btn-ghost whitespace-nowrap h-[42px]" @click="importKB()"
                                     :disabled="!kbFile || importing">
                                     Import Corpus
                                 </button>
@@ -1560,7 +1587,12 @@
                             <template x-for="model in availableModels" :key="model.id">
                                 <option :value="model.id" x-text="model.name"></option>
                             </template>
+                            <option value="custom_option">Custom...</option>
                         </select>
+                        <input type="text" x-model="editionKbEntry.model_used_custom"
+                            x-show="editionKbEntry.model_used === 'custom_option'"
+                            placeholder="Enter custom model name..."
+                            class="mt-2 w-full bg-black/20 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors">
                     </div>
                 </div>
 

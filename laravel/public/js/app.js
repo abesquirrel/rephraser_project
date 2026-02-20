@@ -45,6 +45,8 @@ function rephraserApp() {
         manualKeywords: '',
         manualIsTemplate: false,
         manualCategory: '', // Added manualCategory
+        manualModelUsed: '', // Added manual model used
+        bulkModelUsed: '', // Added bulk model used
         adding: false,
 
         init() {
@@ -305,7 +307,8 @@ function rephraserApp() {
                         rephrased_text: content,
                         keywords: this.searchKeywords,
                         is_template: this.templateMode,
-                        category: this.currentCategory
+                        category: this.currentCategory,
+                        model_used: isAlt ? (this.modelB || 'AI Model') : (this.modelA || 'AI Model')
                     })
                 });
                 
@@ -328,6 +331,7 @@ function rephraserApp() {
                             category: this.currentCategory,
                             approved: true,
                             expanded: true,
+                            modelA_name: this.modelA || 'AI Model',
                             timestamp: new Date().toISOString()
                         });
                     }
@@ -375,7 +379,7 @@ function rephraserApp() {
                         keywords: item.keywords,
                         is_template: item.is_template,
                         category: item.category,
-                        model_used: isAlt ? item.modelB_name : item.modelA_name
+                        model_used: isAlt ? (item.modelB_name || item.modelB || 'AI Model') : (item.modelA_name || item.modelA || 'AI Model')
                     })
                 });
                 
@@ -396,6 +400,49 @@ function rephraserApp() {
                 this.triggerToast('❌ Network Error: ' + e.message);
             } finally {
                 this.history[idx].approving = false;
+                this.history = [...this.history];
+            }
+        },
+
+        async approveEditedItem(item) {
+            if (!item || !item.original || !item.rephrased) {
+                this.triggerToast('❌ Error: Missing Data');
+                return;
+            }
+
+            item.approving = true;
+            this.history = [...this.history]; 
+
+            try {
+                const res = await fetch('/api/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        original_text: item.original,
+                        rephrased_text: item.rephrased,
+                        keywords: item.keywords,
+                        is_template: item.is_template,
+                        category: item.category,
+                        model_used: item.modelA_name || item.modelA || 'AI Model'
+                    })
+                });
+
+                if (!res.ok) throw new Error(`HTTP status ${res.status}`);
+                
+                const data = await res.json();
+                if (data.status === 'success') {
+                    item.approved = true;
+                    this.history = [...this.history]; 
+                    this.triggerToast('✅ Saved to Knowledge Base');
+                } else {
+                    this.triggerToast('❌ Save Failed: ' + (data.error || 'Unknown'));
+                }
+            } catch (e) {
+                console.error('Approval error:', e);
+                this.triggerToast('❌ Network Error: ' + e.message);
+            } finally {
+                item.approving = false;
+                item.isEditing = false;
                 this.history = [...this.history];
             }
         },
@@ -433,6 +480,9 @@ function rephraserApp() {
             this.importing = true;
             const fd = new FormData();
             fd.append('file', this.kbFile);
+            if (this.bulkModelUsed) {
+                fd.append('model_used', this.bulkModelUsed);
+            }
 
             try {
                 const res = await fetch('/api/upload_kb', { method: 'POST', body: fd });
@@ -461,7 +511,8 @@ function rephraserApp() {
                         rephrased_text: this.manualReph,
                         keywords: this.manualKeywords,
                         is_template: this.manualIsTemplate,
-                        category: this.manualCategory // Added category
+                        category: this.manualCategory, // Added category
+                        model_used: this.manualModelUsed
                     })
                 });
                 const data = await res.json();
@@ -476,6 +527,7 @@ function rephraserApp() {
                         category: this.manualCategory,
                         approved: true, // Manually added entries are considered approved
                         expanded: true,
+                        modelA_name: this.manualModelUsed || 'AI Model',
                         timestamp: new Date().toISOString()
                     });
                     // Keep history manageable
@@ -484,6 +536,7 @@ function rephraserApp() {
                     this.manualOrig = ''; this.manualReph = '';
                     this.manualKeywords = ''; this.manualIsTemplate = false;
                     this.manualCategory = ''; // Clear manual category
+                    this.manualModelUsed = '';
                 } else {
                     this.triggerToast('❌ Add Failed: ' + (data.error || 'Unknown'));
                 }

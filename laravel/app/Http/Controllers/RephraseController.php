@@ -395,6 +395,7 @@ class RephraseController extends Controller
             $path = $request->file('file')->getRealPath();
             $file = fopen($path, 'r');
             $header = fgetcsv($file);
+            $modelUsed = $request->input('model_used', null);
 
             // Check if first row is a header or data
             $isHeader = false;
@@ -404,11 +405,11 @@ class RephraseController extends Controller
 
             if (!$isHeader && $header) {
                 // If not header, process it as data
-                $this->storeKnowledgeEntry($header);
+                $this->storeKnowledgeEntry($header, $modelUsed);
             }
 
             while (($row = fgetcsv($file)) !== false) {
-                $this->storeKnowledgeEntry($row);
+                $this->storeKnowledgeEntry($row, $modelUsed);
             }
             fclose($file);
         } elseif ($request->has('original_text')) {
@@ -445,7 +446,7 @@ class RephraseController extends Controller
         return response()->json(['status' => 'success']);
     }
 
-    private function storeKnowledgeEntry($row)
+    private function storeKnowledgeEntry($row, $modelUsed = null)
     {
         if (count($row) >= 2) {
             $original = trim($row[0]);
@@ -465,13 +466,15 @@ class RephraseController extends Controller
                     'rephrased_text' => $rephrased,
                     'keywords' => $keywords,
                     'is_template' => $isTemplate,
-                    'category' => $category
+                    'category' => $category,
+                    'model_used' => $modelUsed
                 ]);
 
                 AuditLog::create([
                     'action' => 'Import',
                     'original_content' => $original,
                     'rephrased_content' => $rephrased,
+                    'model_used' => $modelUsed,
                     'user_name' => 'System'
                 ]);
             }

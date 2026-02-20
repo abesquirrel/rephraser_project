@@ -137,6 +137,10 @@ function rephraserApp() {
         manualKeywords: '',
         manualIsTemplate: false,
         manualCategory: '', // Added manualCategory
+        manualModelUsed: '', // Fixed manual model used
+        manualModelUsedCustom: '', // Added custom
+        bulkModelUsed: '',
+        bulkModelUsedCustom: '', // Added custom
         adding: false,
         isPredictingKeywords: false,
 
@@ -970,18 +974,25 @@ function rephraserApp() {
                 category: entry.category || '',
                 role: entry.role || 'Tech Support',
                 is_template: !!entry.is_template,
-                model_used: entry.model_used || ''
+                model_used: entry.model_used || '',
+                model_used_custom: ''
             };
             this.showEditKbModal = true;
         },
 
         async saveKbEdit() {
             this.status = 'Saving changes...';
+            
+            const payload = { ...this.editionKbEntry };
+            if (payload.model_used === 'custom_option') {
+                payload.model_used = payload.model_used_custom;
+            }
+
             try {
                 const res = await fetch('/api/approve', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(this.editionKbEntry)
+                    body: JSON.stringify(payload)
                 });
                 
                 if (res.ok) {
@@ -1111,7 +1122,7 @@ function rephraserApp() {
                         is_template: this.templateMode,
                         category: this.currentCategory,
                         role: this.selectedRoleName || 'Tech Support', // Add role
-                        model_used: this.modelA,
+                        model_used: this.modelA || 'AI Model',
                         // Performance Data
                         latency_ms: isNaN(latest?.duration) ? null : Math.round(latest.duration),
                         temperature: latest?.config?.temperature ?? this.temperature,
@@ -1143,6 +1154,7 @@ function rephraserApp() {
                             approved: true,
                             id: data.id,
                             expanded: true,
+                            modelA_name: this.modelA || 'AI Model',
                             timestamp: new Date().toISOString()
                         });
                     }
@@ -1191,7 +1203,7 @@ function rephraserApp() {
                         is_template: item.is_template || false,
                         category: item.category || '',
                         role: this.selectedRoleName || 'Tech Support', // Add role
-                        model_used: item.modelA_name || '', // Changed from item.model to item.modelA_name to match original
+                        model_used: item.modelA_name || item.modelA || 'AI Model', // Changed from item.model to item.modelA_name to match original
                         latency_ms: item.duration ? Math.round(item.duration) : null,
                         temperature: item.config?.temperature ?? null,
                         max_tokens: item.config?.maxTokens ?? null,
@@ -1259,6 +1271,11 @@ function rephraserApp() {
             this.importing = true;
             const fd = new FormData();
             fd.append('file', this.kbFile);
+            
+            const finalBulkModel = this.bulkModelUsed === 'custom_option' ? this.bulkModelUsedCustom : this.bulkModelUsed;
+            if (finalBulkModel) {
+                fd.append('model_used', finalBulkModel);
+            }
 
             try {
                 const res = await fetch('/api/upload_kb', { method: 'POST', body: fd });
@@ -1279,6 +1296,7 @@ function rephraserApp() {
 
         async addManual() {
             this.adding = true;
+            const finalManualModel = this.manualModelUsed === 'custom_option' ? this.manualModelUsedCustom : this.manualModelUsed;
             try {
                 const res = await fetch('/api/upload_kb', {
                     method: 'POST',
@@ -1288,7 +1306,8 @@ function rephraserApp() {
                         rephrased_text: this.manualReph,
                         keywords: this.manualKeywords,
                         is_template: this.manualIsTemplate,
-                        category: this.manualCategory // Added category
+                        category: this.manualCategory, // Added category
+                        model_used: finalManualModel
                     })
                 });
                 const data = await res.json();
@@ -1303,6 +1322,7 @@ function rephraserApp() {
                         category: this.manualCategory,
                         approved: true, // Manually added entries are considered approved
                         expanded: true,
+                        modelA_name: finalManualModel || 'AI Model',
                         timestamp: new Date().toISOString()
                     });
                     // Keep history manageable
@@ -1311,6 +1331,7 @@ function rephraserApp() {
                     this.manualOrig = ''; this.manualReph = '';
                     this.manualKeywords = ''; this.manualIsTemplate = false;
                     this.manualCategory = ''; // Clear manual category
+                    this.manualModelUsed = ''; this.manualModelUsedCustom = '';
                 } else {
                     this.triggerToast('❌ Add Failed: ' + (data.error || 'Unknown'));
                 }
