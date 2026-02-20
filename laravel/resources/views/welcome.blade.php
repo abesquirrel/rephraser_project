@@ -497,7 +497,29 @@
 
                                     <div x-show="itemToView.isEditing" x-cloak>
                                         <textarea x-model="itemToView.rephrased"
-                                            class="w-full p-3 rounded-lg bg-white dark:bg-black/20 border border-sky-500/30 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 h-48 text-base"></textarea>
+                                            class="w-full p-3 mb-4 rounded-lg bg-white dark:bg-black/20 border border-sky-500/30 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 h-48 text-base"></textarea>
+
+                                        <div>
+                                            <label class="block text-xs font-bold text-sky-500 uppercase mb-1">Model
+                                                Used</label>
+                                            <select x-model="itemToView.modelA_name"
+                                                class="w-full bg-white dark:bg-black/20 border border-sky-500/30 rounded-lg p-2 text-sm text-gray-800 dark:text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors appearance-none">
+                                                <template
+                                                    x-if="itemToView.modelA_name && availableModels && !availableModels.find(m => m.id === itemToView.modelA_name) && itemToView.modelA_name !== 'custom_option'">
+                                                    <option :value="itemToView.modelA_name"
+                                                        x-text="itemToView.modelA_name + ' (Original)'"></option>
+                                                </template>
+                                                <option value="">Select Model</option>
+                                                <template x-for="model in availableModels" :key="model.id">
+                                                    <option :value="model.id" x-text="model.name"></option>
+                                                </template>
+                                                <option value="custom_option">Custom...</option>
+                                            </select>
+                                            <input type="text" x-model="itemToView.modelA_name_custom"
+                                                x-show="itemToView.modelA_name === 'custom_option'"
+                                                placeholder="Enter custom model name..."
+                                                class="mt-2 w-full bg-white dark:bg-black/20 border border-sky-500/30 rounded-lg p-2 text-sm text-gray-800 dark:text-gray-200 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors">
+                                        </div>
                                     </div>
                                 </div>
                             </div>

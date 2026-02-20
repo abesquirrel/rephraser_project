@@ -1171,6 +1171,54 @@ function rephraserApp() {
             }
         },
 
+        async approveEditedItem(item) {
+            if (!item || !item.original || !item.rephrased) {
+                this.triggerToast('❌ Error: Missing Data', 'error');
+                return;
+            }
+
+            item.approving = true;
+            this.history = [...this.history]; 
+
+            const finalModel = item.modelA_name === 'custom_option' ? item.modelA_name_custom : (item.modelA_name || item.modelA || 'AI Model');
+
+            try {
+                const res = await fetch('/api/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: item.id || undefined,
+                        original_text: item.original,
+                        rephrased_text: item.rephrased,
+                        keywords: item.keywords,
+                        is_template: item.is_template,
+                        category: item.category,
+                        model_used: finalModel
+                    })
+                });
+
+                if (!res.ok) throw new Error(`HTTP status ${res.status}`);
+                
+                const data = await res.json();
+                if (data.status === 'success') {
+                    item.approved = true;
+                    item.id = data.id; // Save ID
+                    item.modelA_name = finalModel; // Save model mapping visually
+                    this.history = [...this.history]; 
+                    this.triggerToast('✅ Saved to Knowledge Base', 'success');
+                } else {
+                    this.triggerToast('❌ Save Failed: ' + (data.error || 'Unknown'), 'error');
+                }
+            } catch (e) {
+                console.error('Approval error:', e);
+                this.triggerToast('❌ Network Error: ' + e.message, 'error');
+            } finally {
+                item.approving = false;
+                item.isEditing = false;
+                this.history = [...this.history];
+            }
+        },
+
         toggleEdit(idx) {
             this.history[idx].isEditing = !this.history[idx].isEditing;
             this.history = [...this.history];
