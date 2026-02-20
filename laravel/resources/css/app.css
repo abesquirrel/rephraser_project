@@ -16,6 +16,9 @@
         "Noto Color Emoji";
 }
 
+/* Enforce Class-Based Dark Mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Global Themed Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
