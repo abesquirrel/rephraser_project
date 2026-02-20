@@ -422,6 +422,9 @@ def handle_rephrase():
         yield stream_event(f"Resource Profile: {max_tokens} tokens | {kb_count} context hits")
         overall_start = time.time()
         
+        instruction_match = re.search(r'<(.*?)>', input_text)
+        direct_instruction = instruction_match.group(1) if instruction_match else None
+
         # Parallel Task Results
         results = {"web": "", "kb": []}
         
@@ -436,8 +439,9 @@ def handle_rephrase():
             t_start = time.time()
             kw = search_keywords
             if not kw:
-                # Fast path keyword extraction or LLM fallback
-                if len(input_text) < 100:
+                if direct_instruction:
+                    kw = direct_instruction
+                elif len(input_text) < 100:
                     kw = input_text
                 else:
                     kw = extract_keywords(input_text)
@@ -459,9 +463,6 @@ def handle_rephrase():
         web_context = results["web"]
         
         yield stream_event(f"Context Ready: {len(examples_list)} KB hits | {'Web search applied' if web_context else 'Local only'}")
-        
-        instruction_match = re.search(r'<(.*?)>', input_text)
-        direct_instruction = instruction_match.group(1) if instruction_match else None
         
         formatted_examples = ""
         for i, ex in enumerate(examples_list):

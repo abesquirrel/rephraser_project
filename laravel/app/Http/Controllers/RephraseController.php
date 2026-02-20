@@ -217,6 +217,13 @@ class RephraseController extends Controller
                         ]);
                     }
                 }
+
+                // Emit generation_id back to client explicitly
+                echo json_encode(['generation_log_id' => $generationLog->id]) . "\n";
+                if (ob_get_level() > 0)
+                    ob_flush();
+                flush();
+
             } catch (\Exception $e) {
                 Log::error("Stream processing error: " . $e->getMessage());
                 // Silently fail to avoid sending HTML error page into the JSON stream
@@ -300,7 +307,8 @@ class RephraseController extends Controller
             'max_tokens' => 'nullable|integer',
             'top_p' => 'nullable|numeric',
             'frequency_penalty' => 'nullable|numeric',
-            'presence_penalty' => 'nullable|numeric'
+            'presence_penalty' => 'nullable|numeric',
+            'generation_id' => 'nullable|integer'
         ]);
 
         // 1. Save or Update Database (Source of Truth)
@@ -330,24 +338,32 @@ class RephraseController extends Controller
 
         // Calculate Edit Distance
         $editDist = 0;
+        $wasEdited = false;
         if (!empty($validated['original_text']) && !empty($validated['rephrased_text'])) {
             $editDist = levenshtein($validated['original_text'], $validated['rephrased_text']);
+            if ($editDist > 0 || (isset($request['isEditing']) && $request['isEditing'])) {
+                $wasEdited = true;
+            }
         }
 
-        // Try to link back to the ModelGeneration to update metrics
+        // Try to link back to the ModelGeneration exactly using generation_id (or fallback to latest)
         $sessionId = $request->header('X-Session-ID') ?? session()->getId();
+        $targetGen = null;
 
-        if ($sessionId) {
-            $latestGen = \App\Models\ModelGeneration::where('session_id', $sessionId)
+        if (!empty($validated['generation_id'])) {
+            $targetGen = \App\Models\ModelGeneration::find($validated['generation_id']);
+        } elseif ($sessionId) {
+            $targetGen = \App\Models\ModelGeneration::where('session_id', $sessionId)
                 ->orderBy('created_at', 'desc')
                 ->first();
+        }
 
-            if ($latestGen) {
-                $latestGen->update([
-                    'was_approved' => true,
-                    'edit_distance' => $editDist
-                ]);
-            }
+        if ($targetGen) {
+            $targetGen->update([
+                'was_approved' => true,
+                'was_edited' => $wasEdited,
+                'edit_distance' => $editDist
+            ]);
         }
 
         // 2. Notify AI Service to rebuild index
@@ -746,6 +762,7 @@ class RephraseController extends Controller
 
                 echo json_encode([
                     'data' => $accumulatedOutput,
+                    'generation_log_id' => $generationLog->id,
                     'meta' => [
                         'latency' => $duration / 1000,
                         'tokens' => $completionTokens,

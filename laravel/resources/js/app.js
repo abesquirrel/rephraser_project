@@ -694,6 +694,9 @@ function rephraserApp() {
                                 // Final full data (preserve it but still wait for stream end for safety)
                                 accumulated = this.stripMarkdown(parsed.data);
                             }
+                            if (parsed.generation_log_id && historyItem) {
+                                historyItem.generation_id = parsed.generation_log_id;
+                            }
                         } catch (e) {
                             console.warn('JSON Parse error on line:', line, e);
                         }
@@ -1123,6 +1126,7 @@ function rephraserApp() {
                         category: this.currentCategory,
                         role: this.selectedRoleName || 'Tech Support', // Add role
                         model_used: this.modelA || 'AI Model',
+                        generation_id: latest?.generation_id,
                         // Performance Data
                         latency_ms: isNaN(latest?.duration) ? null : Math.round(latest.duration),
                         temperature: latest?.config?.temperature ?? this.temperature,
@@ -1193,7 +1197,9 @@ function rephraserApp() {
                         keywords: item.keywords,
                         is_template: item.is_template,
                         category: item.category,
-                        model_used: finalModel
+                        model_used: finalModel,
+                        generation_id: item.generation_id,
+                        isEditing: true
                     })
                 });
 
@@ -1252,6 +1258,7 @@ function rephraserApp() {
                         category: item.category || '',
                         role: this.selectedRoleName || 'Tech Support', // Add role
                         model_used: item.modelA_name || item.modelA || 'AI Model', // Changed from item.model to item.modelA_name to match original
+                        generation_id: item.generation_id,
                         latency_ms: item.duration ? Math.round(item.duration) : null,
                         temperature: item.config?.temperature ?? null,
                         max_tokens: item.config?.maxTokens ?? null,
