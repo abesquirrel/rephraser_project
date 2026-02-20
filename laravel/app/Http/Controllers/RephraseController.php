@@ -90,12 +90,14 @@ class RephraseController extends Controller
             'session_id' => $sessionId,
             'model_id' => $data['model'] ?? 'unknown',
             'model_display_name' => $this->formatModelName($data['model'] ?? 'unknown'),
+            'original_text' => $data['text'],
             'input_text_length' => $inputLength,
             'temperature' => $data['temperature'] ?? null,
             'max_tokens' => $data['max_tokens'] ?? null,
             'kb_count' => $data['kb_count'] ?? null,
             'web_search_enabled' => $data['web_search_enabled'],
             'template_mode' => $data['template_mode'] ?? false,
+            'category' => $data['category'] ?? null,
             'prompt_tokens' => (int) ($inputLength / 3), // Approx 3-4 chars per token
         ]);
 
@@ -178,6 +180,7 @@ class RephraseController extends Controller
 
                 $generationLog->update([
                     'generation_time_ms' => (int) $duration,
+                    'rephrased_text' => $accumulatedOutput,
                     'output_text_length' => $outputLength,
                     'prompt_tokens' => $promptTokens ?: $generationLog->prompt_tokens,
                     'completion_tokens' => $actualTokens ?: (int) ($outputLength / 4),
@@ -724,6 +727,7 @@ class RephraseController extends Controller
 
                 $generationLog->update([
                     'generation_time_ms' => (int) $duration,
+                    'rephrased_text' => $accumulatedOutput,
                     'output_text_length' => $outputLength,
                     'prompt_tokens' => $promptTokens,
                     'completion_tokens' => $completionTokens,

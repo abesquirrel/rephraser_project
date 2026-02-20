@@ -13,6 +13,8 @@ class ModelGeneration extends Model
         'session_id',
         'model_id',
         'model_display_name',
+        'original_text',
+        'rephrased_text',
         'input_text_length',
         'output_text_length',
         'prompt_tokens',
@@ -27,6 +29,7 @@ class ModelGeneration extends Model
         'kb_count',
         'web_search_enabled',
         'template_mode',
+        'category',
         'error_occurred',
         'error_message',
     ];

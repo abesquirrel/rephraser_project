@@ -23,6 +23,7 @@ Route::post('/rephrase', [RephraseController::class, 'rephrase']);
 Route::post('/approve', [RephraseController::class, 'approve']);
 Route::post('/upload_kb', [RephraseController::class, 'upload_kb']);
 Route::post('/suggest-keywords', [RephraseController::class, 'suggestKeywords']);
+Route::get('/history', [RephraseController::class, 'getHistory']);
 Route::get('/audit-logs', [RephraseController::class, 'getAuditLogs']);
 Route::get('/models', [RephraseController::class, 'getModels']);
 Route::get('/kb-stats', [RephraseController::class, 'getKbStats']);

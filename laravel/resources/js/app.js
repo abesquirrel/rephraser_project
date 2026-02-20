@@ -254,6 +254,7 @@ function rephraserApp() {
             // Check if user is authenticated
             this.checkAuth().then(() => {
                  this.startTracking();
+                 this.loadRemoteHistory();
             });
             this.$watch('modelA', () => {
                 if (!this.modelA) return;
