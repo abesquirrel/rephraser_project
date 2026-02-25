@@ -9,6 +9,8 @@ import threading
 from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 from duckduckgo_search import DDGS
+from google import genai
+from google.genai import types
 
 # --- Configuration ---
 AI_SERVICE_KEY = os.environ.get('AI_SERVICE_KEY', 'default_secret_key')
@@ -77,6 +79,31 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
     default_model = os.environ.get("OLLAMA_MODEL", "llama3:8b-instruct-q3_K_M")
     target_model = model if model else default_model
     
+    if target_model.startswith("gemini"):
+        system_instruction = ""
+        user_content = ""
+        for m in messages:
+            if m.get("role") == "system":
+                system_instruction += m.get("content", "") + "\n"
+            else:
+                user_content += m.get("content", "") + "\n"
+                
+        try:
+            client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+            response = client.models.generate_content(
+                model=target_model,
+                contents=user_content.strip(),
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction.strip(),
+                    temperature=float(temperature),
+                    max_output_tokens=int(max_tokens)
+                )
+            )
+            return response.text
+        except Exception as e:
+            logger.error(f"Gemini Call failed for model {target_model}: {e}")
+            return f"Error with {target_model}: Generate failed."
+
     # Ollama on host
     url = "http://host.docker.internal:11434/api/chat" 
     
@@ -101,6 +128,67 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
 def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None):
     default_model = os.environ.get("OLLAMA_MODEL", "llama3:8b-instruct-q3_K_M")
     target_model = model if model else default_model
+
+    if target_model.startswith("gemini"):
+        system_instruction = ""
+        user_content = ""
+        for m in messages:
+            if m.get("role") == "system":
+                system_instruction += m.get("content", "") + "\n"
+            else:
+                user_content += m.get("content", "") + "\n"
+                
+        try:
+            logger.info(f"DEBUG LLM CALL: temperature={temperature}, max_output_tokens={max_tokens}")
+            
+            # Dump to file for debugging
+            with open("/app/last_payload.json", "w") as f:
+                json.dump({
+                    "system_instruction": system_instruction.strip(),
+                    "contents": user_content.strip()
+                }, f)
+                
+            client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+            response = client.models.generate_content_stream(
+                model=target_model,
+                contents=user_content.strip(),
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction.strip(),
+                    temperature=float(temperature),
+                    max_output_tokens=int(max_tokens)
+                )
+            )
+            
+            prompt_tokens = 0
+            completion_tokens = 0
+            
+            for chunk in response:
+                logger.info(f"DEBUG CHUNK: candites={len(chunk.candidates) if chunk.candidates else 0}, text_val={bool(chunk.text) if hasattr(chunk, 'text') else False}")
+                if chunk.candidates:
+                    logger.info(f"DEBUG FINISH REASON: {chunk.candidates[0].finish_reason}")
+                
+                try:
+                    text = chunk.text
+                    if text:
+                        yield {"token": text}
+                except ValueError as ve:
+                    logger.warning(f"Caught ValueError accessing chunk.text: {ve}")
+                    
+                if hasattr(chunk, 'usage_metadata') and chunk.usage_metadata:
+                    prompt_tokens = getattr(chunk.usage_metadata, 'prompt_token_count', prompt_tokens)
+                    completion_tokens = getattr(chunk.usage_metadata, 'candidates_token_count', completion_tokens)
+            
+            logger.info("DEBUG: stream iterator exhausted")
+            yield {"done_meta": {
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens
+            }}
+            return
+        except Exception as e:
+            logger.error(f"Gemini Stream failed for model {target_model}: {e}")
+            yield {"token": f"\n[Error with {target_model}]"}
+            return
+
     url = "http://host.docker.internal:11434/api/chat"
     
     payload = {
@@ -127,7 +215,7 @@ def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None):
                         break
     except Exception as e:
         logger.error(f"LLM Stream failed for model {target_model}: {e}")
-        yield f"\n[Error with {target_model}]"
+        yield {"token": f"\n[Error with {target_model}]"}
 
 def extract_keywords(text):
     # Fast path: Extract common identifiers via Regex

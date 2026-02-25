@@ -4,14 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Gemini\Laravel\Facades\Gemini;
-use Gemini\Data\Content;
-use Gemini\Enums\Role;
 use App\Models\KnowledgeBase;
 use App\Models\AuditLog;
 use Illuminate\Support\Facades\Log;
-use App\Models\ApiCall;
-use App\Models\KbUsage;
+use App\Models\AiResponseLog;
 
 class RephraseController extends Controller
 {
@@ -86,7 +82,7 @@ class RephraseController extends Controller
         }
 
         // 1. Create Log Record
-        $generationLog = \App\Models\ModelGeneration::create([
+        $generationLog = AiResponseLog::create([
             'session_id' => $sessionId,
             'model_id' => $data['model'] ?? 'unknown',
             'model_display_name' => $this->formatModelName($data['model'] ?? 'unknown'),
@@ -103,37 +99,21 @@ class RephraseController extends Controller
 
         $startTime = microtime(true);
 
-        // 2. Log API Call Start
-        $apiCall = ApiCall::create([
-            'service' => 'inference',
-            'endpoint' => "{$this->inferenceServiceUrl}/rephrase",
-            'method' => 'POST',
-            'request_payload_size' => strlen(json_encode($data)),
-            'tokens_used' => (int) ($inputLength / 3),
-        ]);
-
-        // Stream response
-        if (str_starts_with($data['model'] ?? '', 'gemini')) {
-            return $this->handleGeminiRephrase($request, $data, $sessionId, $generationLog, $apiCall, $inputLength);
-        }
-
         // Stream response from Python service
         try {
             $response = $this->aiCall()
                 ->withOptions(['stream' => true])
                 ->post("{$this->inferenceServiceUrl}/rephrase", $data);
 
-            $apiCall->update(['response_status' => $response->status()]);
         } catch (\Exception $e) {
-            $apiCall->update([
+            $generationLog->update([
                 'is_error' => true,
-                'error_type' => 'Connection Error',
-                'error_message' => $e->getMessage()
+                'error_message' => 'Connection Error: ' . $e->getMessage()
             ]);
             throw $e;
         }
 
-        return response()->stream(function () use ($response, $generationLog, $startTime, $apiCall) {
+        return response()->stream(function () use ($response, $generationLog, $startTime) {
             try {
                 $body = $response->toPsrResponse()->getBody();
                 $accumulatedOutput = '';
@@ -186,40 +166,11 @@ class RephraseController extends Controller
                     'completion_tokens' => $actualTokens ?: (int) ($outputLength / 4),
                     'total_tokens' => ($promptTokens && $actualTokens)
                         ? ($promptTokens + $actualTokens)
-                        : (($actualTokens ?: (int) ($outputLength / 4)) + ($promptTokens ?: ($generationLog->prompt_tokens ?? 0)))
+                        : (($actualTokens ?: (int) ($outputLength / 4)) + ($promptTokens ?: ($generationLog->prompt_tokens ?? 0))),
+                    'meta_data' => [
+                        'kb_usage' => !empty($kbUsageData) ? $kbUsageData : $kbIds
+                    ]
                 ]);
-
-                $apiCall->update([
-                    'response_time_ms' => (int) $duration,
-                    'response_payload_size' => strlen($accumulatedOutput),
-                    'tokens_used' => ($promptTokens + $actualTokens) ?: $apiCall->tokens_used
-                ]);
-
-                // 3. Log KB Usage
-                if (!empty($kbUsageData)) {
-                    foreach ($kbUsageData as $kbInfo) {
-                        try {
-                            KbUsage::create([
-                                'generation_id' => $generationLog->id,
-                                'kb_entry_id' => $kbInfo['id'],
-                                'similarity_score' => $kbInfo['score'] ?? null,
-                                'rank_position' => $kbInfo['rank'] ?? null,
-                                'was_used_in_prompt' => true
-                            ]);
-                        } catch (\Exception $kbEx) {
-                            Log::error("Failed to log KB usage for entry " . ($kbInfo['id'] ?? '?') . ": " . $kbEx->getMessage());
-                        }
-                    }
-                } elseif (!empty($kbIds)) {
-                    // Fallback for older metadata format if needed
-                    foreach ($kbIds as $kbId) {
-                        KbUsage::create([
-                            'generation_id' => $generationLog->id,
-                            'kb_entry_id' => $kbId,
-                            'was_used_in_prompt' => true
-                        ]);
-                    }
-                }
 
                 // Emit generation_id back to client explicitly
                 echo json_encode(['generation_log_id' => $generationLog->id]) . "\n";
@@ -230,7 +181,7 @@ class RephraseController extends Controller
             } catch (\Exception $e) {
                 Log::error("Stream processing error: " . $e->getMessage());
                 // Silently fail to avoid sending HTML error page into the JSON stream
-                $apiCall->update([
+                $generationLog->update([
                     'is_error' => true,
                     'error_message' => 'Stream Interrupted: ' . $e->getMessage()
                 ]);
@@ -349,14 +300,14 @@ class RephraseController extends Controller
             }
         }
 
-        // Try to link back to the ModelGeneration exactly using generation_id (or fallback to latest)
+        // Try to link back to the AiResponseLog exactly using generation_id (or fallback to latest)
         $sessionId = $request->header('X-Session-ID') ?? session()->getId();
         $targetGen = null;
 
         if (!empty($validated['generation_id'])) {
-            $targetGen = \App\Models\ModelGeneration::find($validated['generation_id']);
+            $targetGen = \App\Models\AiResponseLog::find($validated['generation_id']);
         } elseif ($sessionId) {
-            $targetGen = \App\Models\ModelGeneration::where('session_id', $sessionId)
+            $targetGen = \App\Models\AiResponseLog::where('session_id', $sessionId)
                 ->orderBy('created_at', 'desc')
                 ->first();
         }
@@ -380,6 +331,42 @@ class RephraseController extends Controller
         $text = $this->sanitize($request->input('text', ''));
         $response = $this->aiCall()->post("{$this->inferenceServiceUrl}/suggest_keywords", ['text' => $text]);
         return $response->json();
+    }
+
+    public function getHistory(Request $request)
+    {
+        $sessionId = $request->query('session_id') ?? $request->header('X-Session-ID');
+        if (!$sessionId) {
+            return response()->json(['history' => []]);
+        }
+
+        $logs = \App\Models\AiResponseLog::where('session_id', $sessionId)
+            ->orderBy('created_at', 'desc')
+            ->take(50)
+            ->get();
+
+        $history = $logs->map(function ($log) {
+            return [
+                'id' => $log->id,
+                'original' => $log->original_text,
+                'rephrased' => $log->rephrased_text,
+                'keywords' => $log->meta_data['keywords'] ?? '',
+                'is_template' => (bool) $log->template_mode,
+                'category' => $log->category,
+                'approved' => (bool) $log->was_approved,
+                'expanded' => false,
+                'modelA_name' => $log->model_display_name,
+                'isEditing' => false,
+                'timestamp' => $log->created_at->toIso8601String(),
+                'duration' => $log->generation_time_ms,
+                'config' => [
+                    'temperature' => $log->temperature,
+                    'maxTokens' => $log->max_tokens,
+                ]
+            ];
+        });
+
+        return response()->json(['history' => $history]);
     }
 
     public function getAuditLogs()
@@ -652,232 +639,6 @@ class RephraseController extends Controller
         }
     }
 
-    private function handleGeminiRephrase($request, $data, $sessionId, $generationLog, $apiCall, $inputLength)
-    {
-        $startTime = microtime(true);
-        $modelName = $data['model'];
-
-        // 1. Retrieve Context (RAG)
-        $kbCount = $data['kb_count'] ?? 3;
-        $examples = [];
-        $kbIds = [];
-
-        if ($kbCount > 0) {
-            try {
-                $ragResponse = $this->aiCall()->post("{$this->embeddingServiceUrl}/retrieve", [
-                    'text' => $data['text'],
-                    'k' => $kbCount,
-                    'prefer_templates' => $data['template_mode'] ?? false,
-                    'category' => $data['category'] ?? null
-                ]);
-
-                if ($ragResponse->successful()) {
-                    $results = $ragResponse->json()['results'] ?? [];
-                    $examples = $results;
-                    $kbIds = array_column($results, 'id');
-
-                    // Log KB Usage immediately
-                    /* foreach ($results as $i => $res) {
-                         KbUsage::create([
-                             'generation_id' => $generationLog->id,
-                             'kb_entry_id' => $res['id'],
-                             'similarity_score' => $res['score'] ?? 0,
-                             'rank_position' => $i + 1,
-                             'was_used_in_prompt' => true
-                         ]);
-                     } */
-                    // Defer logging to match existing flow or do it here? 
-                    // Existing flow processes it at the end of stream. We'll do the same to keep parity.
-                }
-            } catch (\Exception $e) {
-                Log::error("Gemini RAG failed: " . $e->getMessage());
-            }
-        }
-
-        // 2. Build Prompt
-        $promptConfig = $this->buildGeminiPrompt($data, $examples, $request->input('signature'));
-
-        // 3. Call Gemini
-        try {
-            $stream = Gemini::generativeModel(model: $modelName)
-                ->withSystemInstruction(Content::parse(part: $promptConfig['system']))
-                ->streamGenerateContent($promptConfig['content']);
-
-            return response()->stream(function () use ($stream, $generationLog, $startTime, $apiCall, $examples, $promptConfig) {
-                $accumulatedOutput = '';
-
-                foreach ($stream as $response) {
-                    $text = $response->text();
-                    $accumulatedOutput .= $text;
-
-                    echo json_encode(['token' => $text]) . "\n";
-
-                    if (ob_get_level() > 0)
-                        ob_flush();
-                    flush();
-                }
-
-                // Completion Logic
-                $duration = (microtime(true) - $startTime) * 1000;
-                $outputLength = strlen($accumulatedOutput);
-
-                // Estimate tokens (approx 4 chars/token) as Gemini API usage metadata in stream is tricky
-                $promptTokens = (int) (strlen(json_encode($promptConfig)) / 4);
-                $completionTokens = (int) ($outputLength / 4);
-
-                $generationLog->update([
-                    'generation_time_ms' => (int) $duration,
-                    'rephrased_text' => $accumulatedOutput,
-                    'output_text_length' => $outputLength,
-                    'prompt_tokens' => $promptTokens,
-                    'completion_tokens' => $completionTokens,
-                    'total_tokens' => $promptTokens + $completionTokens
-                ]);
-
-                $apiCall->update([
-                    'response_status' => 200,
-                    'response_time_ms' => (int) $duration,
-                    'response_payload_size' => $outputLength,
-                    'tokens_used' => $promptTokens + $completionTokens
-                ]);
-
-                // Log KB Usage
-                foreach ($examples as $i => $res) {
-                    // Need to ensure ID exists
-                    if (!isset($res['id']))
-                        continue;
-                    try {
-                        KbUsage::create([
-                            'generation_id' => $generationLog->id,
-                            'kb_entry_id' => $res['id'],
-                            'similarity_score' => $res['score'] ?? 0,
-                            'rank_position' => $i + 1,
-                            'was_used_in_prompt' => true
-                        ]);
-                    } catch (\Exception $e) {
-                    }
-                }
-
-                // Send final meta block (important for frontend to stop loading and show stats)
-                // Construct meta similar to Python service
-                $kbInfo = array_map(function ($ex, $i) {
-                    return ['id' => $ex['id'], 'score' => $ex['score'] ?? 0, 'rank' => $i + 1];
-                }, $examples, array_keys($examples));
-
-                echo json_encode([
-                    'data' => $accumulatedOutput,
-                    'generation_log_id' => $generationLog->id,
-                    'meta' => [
-                        'latency' => $duration / 1000,
-                        'tokens' => $completionTokens,
-                        'prompt_tokens' => $promptTokens,
-                        'kb_usage' => $kbInfo,
-                        'kb_ids' => array_column($kbInfo, 'id')
-                    ]
-                ]) . "\n";
-
-            }, 200, [
-                'Content-Type' => 'application/json',
-                'Cache-Control' => 'no-cache',
-                'X-Accel-Buffering' => 'no',
-            ]);
-
-        } catch (\Exception $e) {
-            $apiCall->update([
-                'is_error' => true,
-                'error_type' => 'Gemini API Error',
-                'error_message' => $e->getMessage()
-            ]);
-
-            // Specific handling for Rate Limits (429)
-            if (str_contains($e->getMessage(), '429') || str_contains(strtolower($e->getMessage()), 'quota')) {
-                return response()->stream(function () {
-                    echo json_encode([
-                        'data' => "⚠️ **System Busy**: The AI service is currently experiencing high traffic (Rate Limit Exceeded). Please try again in a few moments.\n\nWe are using a free tier model which has strict usage limits.",
-                        'meta' => ['error' => 'Rate Limit Exceeded']
-                    ]) . "\n";
-                }, 429, ['Content-Type' => 'application/json']);
-            }
-
-            // Return error stream
-            return response()->stream(function () use ($e) {
-                echo json_encode(['status' => 'Error: ' . $e->getMessage()]);
-            }, 200, ['Content-Type' => 'application/json']);
-        }
-    }
-
-    private function buildGeminiPrompt($data, $examples, $signature)
-    {
-        $signature = $signature ?? 'Paul';
-        $roleName = $data['role'] ?? 'Tech Support';
-
-        // Default roles (mirroring app.py)
-        $roles = [
-            'Tech Support' => [
-                'identity' => "You are {$signature}, a Tech Support Analyst Assistant. Technical support assistant specialized in mobile telecom troubleshooting, provisioning, roaming, VoLTE, Wi-Fi Calling, RCS, APNs, CSC/firmware compatibility, and carrier back-end analysis.",
-                'protocol' => "### PROTOCOL\n1. **Audience**: Technical support colleagues. Tone is neutral, professional, and internal-support focused.\n2. **Goal**: Transform raw notes into clean, accurate, and professional support-ready responses.\n3. **Retrieval Guidelines**: Use official sources. Summarize into Observations, Actions Taken, and Recommendations.\n4. **Restrictions**: Do not introduce new facts. Do not mention internal policies.",
-                'format' => "Hello,\n\nObservations:\n<concise factual summary>\n\nActions Taken:\n<only if actions were performed, otherwise state 'None.'>\n\nRecommendations:\n<clear next steps or guidance>\n\nRegards,\n{$signature}"
-            ],
-            // Fallbacks can be simple, usually role lookup from DB handles this
-        ];
-
-        // Use DB role if available (already populated in $data['role_config'] by parent method)
-        if (isset($data['role_config'])) {
-            $roleConfig = $data['role_config'];
-            $identity = str_replace('{signature}', $signature, $roleConfig['identity']);
-            $protocol = $roleConfig['protocol_override'];
-            $format = str_replace('{signature}', $signature, $roleConfig['format_override']);
-        } else {
-            // Fallback to coded defaults or generic
-            $r = $roles[$roleName] ?? $roles['Tech Support']; // Default
-            $identity = $r['identity'];
-            $protocol = $r['protocol'];
-            $format = $r['format'];
-        }
-
-        $systemReq = "{$identity} PLAIN TEXT ONLY.\n\n{$protocol}\n";
-        $systemReq .= "### FORMATTING CONSTRAINTS (CRITICAL)\n1. **NO MARKDOWN**: Do not use bold (**), italics (*), headers (###), or lists (-). Write in clean, plain paragraphs.\n2. **NO PREAMBLE**: Start directly with 'Hello,'.\n3. **PROFESSIONAL TONE**: Concise, polite.\n4. **PRESERVE IDs**: Keep all IMEI, MSISDN, and specific error codes.\n\n";
-
-        if (!empty($data['template_mode'])) {
-            $systemReq .= "### MODE: KNOWLEDGE BASE ADAPTER\nUse 'Reference Examples' as the structure guide.\n\n";
-        } else {
-            $systemReq .= "### MODE: TECHNICAL REPHRASE\nStandard rephrasing mode.\n\n";
-        }
-
-        if (!empty($data['negative_prompt'])) {
-            $systemReq .= "### STYLE EXCLUSIONS (NEGATIVE PROMPT)\nYou MUST AVOID: {$data['negative_prompt']}\n\n";
-        }
-
-        // Extract instruction from text if present <...>
-        if (preg_match('/<(.*?)>/', $data['text'], $matches)) {
-            $systemReq .= "### CRITICAL USER DIRECTIVE\nFOLLOW THIS INSTRUCTION: {$matches[1]}\n\n";
-        }
-
-        $systemReq .= "### REQUIRED OUTPUT FORMAT\nMust follow this exactly. No markdown unless requested.\n{$format}\n\nCRITICAL: Start exactly with 'Hello,'.";
-
-        // Build User Content with Examples
-        $userContent = "Notes (SOURCE DATA):\n{$data['text']}\n\n";
-
-        if (!empty($examples)) {
-            $userContent .= "Reference Examples (STRUCTURE SOURCE):\n";
-            foreach ($examples as $i => $ex) {
-                $cat = isset($ex['category']) ? " [{$ex['category']}]" : "";
-                $body = is_array($ex) ? ($ex['rephrased'] ?? '') : $ex;
-                $userContent .= "Example " . ($i + 1) . "{$cat}:\n{$body}\n\n";
-            }
-        }
-
-        // Gemini PHP Client supports structured history or just content. 
-        // We will return a content array compatible with generateContent([$system, $user])
-        // But wait, Gemini "System Instructions" are separate in newer API versions.
-        // google-gemini-php/laravel supports ->withSystemInstruction($systemReq).
-
-        return [
-            'type' => 'chat',
-            'system' => $systemReq,
-            'content' => Content::parse(part: $userContent) // User message
-        ];
-    }
 
     // End Gemini Helpers
 

@@ -59,6 +59,8 @@ services:
       - "5002:5002"
     volumes:
       - ./ai-service-embedding:/app
+    env_file:
+      - ./laravel/.env
     environment:
       - DB_HOST=db
       - DB_USER=rephraser
@@ -98,6 +100,8 @@ services:
       - "5001:5001"
     volumes:
       - ./ai-service-inference:/app
+    env_file:
+      - ./laravel/.env
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:

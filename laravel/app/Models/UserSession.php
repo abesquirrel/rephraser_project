@@ -37,8 +37,8 @@ class UserSession extends Model
         return $this->hasMany(UserAction::class, 'session_id', 'session_id');
     }
 
-    public function generations()
+    public function aiResponseLogs()
     {
-        return $this->hasMany(ModelGeneration::class, 'session_id', 'session_id');
+        return $this->hasMany(AiResponseLog::class, 'session_id', 'session_id');
     }
 }

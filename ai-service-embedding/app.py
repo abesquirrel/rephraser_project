@@ -9,7 +9,26 @@ import faiss
 import mysql.connector
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from sentence_transformers import SentenceTransformer
+from google import genai
+
+class GeminiEmbeddingModel:
+    def __init__(self):
+        self.client = genai.Client(api_key=os.environ.get('GEMINI_API_KEY'))
+    
+    def encode(self, texts):
+        if not texts:
+            return np.array([], dtype='float32')
+        embeddings = []
+        batch_size = 100
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i:i+batch_size]
+            response = self.client.models.embed_content(
+                model='gemini-embedding-001',
+                contents=batch
+            )
+            for e in response.embeddings:
+                embeddings.append(e.values)
+        return np.array(embeddings, dtype='float32')
 
 # --- Configuration ---
 DB_HOST = os.environ.get('DB_HOST', 'db')
@@ -105,9 +124,11 @@ def load_knowledge_base():
                 try:
                     # decoding bytes to numpy array
                     emb_array = np.frombuffer(emb_blob, dtype='float32')
+                    if emb_array.shape[0] != 768:
+                        raise ValueError("Old embedding dimension found, forcing re-encode")
                     valid_embeddings.append(emb_array)
                 except Exception as e:
-                    logger.error(f"Error decoding blob for ID {row_id}: {e}")
+                    logger.info(f"Invalidating blob for ID {row_id} (will re-encode): {e}")
                     texts_to_encode.append(original)
                     indices_to_encode.append(i)
             else:
@@ -146,7 +167,7 @@ def load_knowledge_base():
             logger.info(f"KB Built in {time.time() - start_time:.2f}s. Entries: {len(knowledge_texts)}. New Encoded: {len(texts_to_encode)}.")
         else:
             with lock:
-                faiss_index = faiss.IndexFlatL2(384)
+                faiss_index = faiss.IndexFlatL2(768)
                 knowledge_texts = []
             logger.info(f"KB Empty.")
 
@@ -261,7 +282,7 @@ def retrieve():
 if __name__ == '__main__':
     logger.info("Starting AI Embedding Service (Port 5002)...")
     # Initialize Model
-    embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+    embedding_model = GeminiEmbeddingModel()
     
     # Initial load
     rebuild_worker()

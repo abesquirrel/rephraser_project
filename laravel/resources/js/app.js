@@ -12,9 +12,11 @@ function rephraserApp() {
         currentCategory: '', // Tier 2
         newCategory: '', 
         categories: ['General', 'Technical', 'Billing', 'Sales', 'Feedback'],
-        modelA: 'llama3:8b-instruct-q3_K_M',
+        modelA: 'gemini-2.5-flash',
         availableModels: Alpine.$persist([
-            {id: 'llama3:8b-instruct-q3_K_M', name: 'Llama3 (Default)'}
+            {id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Primary)'},
+            {id: 'llama3:8b-instruct-q3_K_M', name: 'Llama3 (Local Backup)'},
+            {id: 'mistral:latest', name: 'Mistral (Local Backup)'}
         ]).as('rephraser_enabled_models'),
         ollamaModels: [], // Raw list from API
         isGenerating: false,
@@ -131,6 +133,25 @@ function rephraserApp() {
                  console.error('Session tracking failed', e);
              }
         },
+
+        async loadRemoteHistory() {
+            if (!this.sessionId) return;
+            try {
+                const res = await fetch(`/api/history?session_id=${this.sessionId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.history && data.history.length > 0) {
+                        // Merge or replace history if local is empty
+                        if (this.history.length === 0) {
+                            this.history = data.history;
+                        }
+                    }
+                }
+            } catch(e) {
+                console.warn('Failed to load remote history', e);
+            }
+        },
+
         kbStats: { total_entries: 0, last_updated: null, category_breakdown: [] }, // Added kbStats
         manualOrig: '',
         manualReph: '',
