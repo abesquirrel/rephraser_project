@@ -25,3 +25,5 @@ Thumbs.db
 backup.sql
 output.txt
 *.numbers
+my_kb_export.csv
+ai-service-embedding/test_export.json

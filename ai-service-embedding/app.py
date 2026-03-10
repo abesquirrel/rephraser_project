@@ -279,6 +279,61 @@ def retrieve():
 
     return jsonify({'results': final_results})
 
+@app.route('/export', methods=['GET'])
+def export_kb():
+    format_type = request.args.get('format', 'json').lower()
+    include_embeddings = request.args.get('include_embeddings', 'false').lower() == 'true'
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT id, original_text, rephrased_text, keywords, is_template, category, hits, created_at, embedding FROM knowledge_bases")
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        data = []
+        for row in rows:
+            item = {
+                "id": row['id'],
+                "original_text": row['original_text'],
+                "rephrased_text": row['rephrased_text'],
+                "keywords": row['keywords'],
+                "is_template": bool(row['is_template']),
+                "category": row['category'],
+                "hits": row['hits'],
+                "created_at": str(row['created_at']) if row['created_at'] else None
+            }
+            
+            if include_embeddings and row['embedding']:
+                emb_array = np.frombuffer(row['embedding'], dtype='float32')
+                item['embedding'] = emb_array.tolist()
+            
+            data.append(item)
+            
+        if format_type == 'csv':
+            import csv
+            import io
+            from flask import make_response
+            
+            output = io.StringIO()
+            if data:
+                keys = data[0].keys()
+                dict_writer = csv.DictWriter(output, keys)
+                dict_writer.writeheader()
+                dict_writer.writerows(data)
+            
+            response = make_response(output.getvalue())
+            response.headers["Content-Disposition"] = "attachment; filename=kb_export.csv"
+            response.headers["Content-type"] = "text/csv"
+            return response
+            
+        return jsonify(data)
+        
+    except Exception as e:
+        logger.error(f"Export failed: {e}")
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     logger.info("Starting AI Embedding Service (Port 5002)...")
     # Initialize Model
