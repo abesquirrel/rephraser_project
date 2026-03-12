@@ -56,6 +56,60 @@ def strip_markdown(text):
     text = text.replace("`", "")
     return text.strip()
 
+# --- PII PROTECTION ---
+
+class PIIManager:
+    """
+    Handles redaction and restoration of PII (IMEI, MSISDN, Email).
+    """
+    PII_PATTERNS = {
+        'IMEI': r'\b\d{14,16}\b', # 15 digits usually, sometimes 14 or 16
+        'PHONE': r'\b\d{10,12}\b', # 10-12 digits for MSISDN
+        'EMAIL': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    }
+
+    def __init__(self):
+        self.mapping = {} # Placeholder -> Original value
+        self.reverse_mapping = {} # Original value -> Placeholder
+        self.counts = {'IMEI': 0, 'PHONE': 0, 'EMAIL': 0}
+
+    def redact(self, text):
+        if not text or not isinstance(text, str):
+            return text
+            
+        redacted_text = text
+        for pii_type, pattern in self.PII_PATTERNS.items():
+            matches = list(re.finditer(pattern, redacted_text))
+            # Process in reverse to maintain offsets
+            for match in sorted(matches, key=lambda x: x.start(), reverse=True):
+                val = match.group()
+                
+                # Check mapping for exact match, or check if we already have a placeholder for this value
+                # Using reverse_mapping for value-to-placeholder consistency
+                if val in self.reverse_mapping:
+                    placeholder = self.reverse_mapping[val]
+                else:
+                    self.counts[pii_type] += 1
+                    placeholder = f"[[{pii_type}_{self.counts[pii_type]}]]"
+                    self.mapping[placeholder] = val
+                    self.reverse_mapping[val] = placeholder
+                
+                start, end = match.span()
+                redacted_text = redacted_text[:start] + placeholder + redacted_text[end:]
+        
+        return redacted_text
+
+    def restore(self, text):
+        if not text or not isinstance(text, str):
+            return text
+            
+        restored_text = text
+        # Restore in descending order of placeholder key length to avoid partial replacements
+        for placeholder in sorted(self.mapping.keys(), key=len, reverse=True):
+            restored_text = restored_text.replace(placeholder, self.mapping[placeholder])
+            
+        return restored_text
+
 def retrieve_examples_remote(query_text, k=3, prefer_templates=False, category=None):
     try:
         payload = {
@@ -507,10 +561,14 @@ def handle_rephrase():
     kb_count = max(1, min(10, int(data.get('kb_count', TOP_K_EXAMPLES))))
 
     def thinking_process_stream():
+        pii = PIIManager()
         yield stream_event(f"Resource Profile: {max_tokens} tokens | {kb_count} context hits")
         overall_start = time.time()
         
-        instruction_match = re.search(r'<(.*?)>', input_text)
+        # Redact initial input
+        redacted_text = pii.redact(input_text)
+        
+        instruction_match = re.search(r'<(.*?)>', redacted_text)
         direct_instruction = instruction_match.group(1) if instruction_match else None
 
         # Parallel Task Results
@@ -518,7 +576,17 @@ def handle_rephrase():
         
         def run_kb_search():
             t_start = time.time()
+            # Search using original text for better retrieval accuracy
             res = retrieve_examples_remote(input_text, k=kb_count, prefer_templates=template_mode, category=category)
+            # Redact the retrieved examples
+            for item in res:
+                if isinstance(item, dict):
+                    if 'rephrased' in item:
+                        item['rephrased'] = pii.redact(item['rephrased'])
+                    if 'original' in item:
+                        item['original'] = pii.redact(item['original'])
+                elif isinstance(item, str):
+                    item = pii.redact(item)
             results["kb"] = res
             logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
 
@@ -533,7 +601,11 @@ def handle_rephrase():
                     kw = input_text
                 else:
                     kw = extract_keywords(input_text)
-            results["web"] = web_search_tool(kw, custom_sources=custom_search_sources)
+            
+            # Use original keywords for search accuracy
+            raw_web_context = web_search_tool(kw, custom_sources=custom_search_sources)
+            # Redact the search results
+            results["web"] = pii.redact(raw_web_context)
             logger.info(f"Web Search took {time.time() - t_start:.3f}s")
 
         # Start background threads
@@ -561,7 +633,7 @@ def handle_rephrase():
         yield stream_event("Synthesizing...")
         
         messages = build_structured_prompt(
-            input_text, 
+            redacted_text, 
             formatted_examples, 
             web_context, 
             signature, 
@@ -580,9 +652,11 @@ def handle_rephrase():
         for chunk in call_llm_stream(messages, temperature=temperature, max_tokens=max_tokens, model=target_model):
             if "token" in chunk:
                 token = chunk["token"]
-                full_response += token
+                # RESTORE PII in the token
+                restored_token = pii.restore(token)
+                full_response += restored_token
                 # Yield token for frontend
-                yield json.dumps({"token": token}) + "\n"
+                yield json.dumps({"token": restored_token}) + "\n"
             elif "done_meta" in chunk:
                 actual_metrics = chunk["done_meta"]
         
