@@ -370,12 +370,12 @@ def build_structured_prompt(original_text, examples, web_context=None, signature
         }
     
     # --- BUILD SYSTEM PROMPT ---
-    system = f"{current_role['identity']} PLAIN TEXT ONLY.\n\n"
+    system = f"{current_role['identity']}\n\n"
     system += current_role['protocol'] + "\n"
 
     shared_constraints = (
         "### FORMATTING CONSTRAINTS (CRITICAL)\n"
-        "1. **NO MARKDOWN**: Do not use bold (**), italics (*), headers (###), or lists (-). Write in clean, plain paragraphs within the sections.\n"
+        "1. **STRUCTURE**: Maintain clear separation between sections. Use paragraphs or lists as needed for clarity.\n"
         "2. **NO PREAMBLE**: Do not say 'Here is the response'. Start directly with 'Hello,'.\n"
         "3. **PROFESSIONAL TONE**: Concise, polite, support-oriented.\n"
         "4. **PRESERVE IDs**: Keep all IMEI, MSISDN, and specific error codes exactly as they appear.\n\n"
@@ -405,7 +405,7 @@ def build_structured_prompt(original_text, examples, web_context=None, signature
     
     # --- FINAL FORMATTING ---
     system += "### REQUIRED OUTPUT FORMAT\n"
-    system += "You MUST follow this structure EXACTLY. Do NOT use bullet points or markdown unless requested by a directive. Do NOT add sections not requested.\n"
+    system += "You MUST follow this structure EXACTLY. Use formatting (bolding, lists) only if it improves technical clarity and adheres to the role's protocol. Do NOT add sections not requested.\n"
     system += current_role['format'].format(signature=signature) + "\n\n"
     
     system += "CRITICAL: The output must start exactly with 'Hello,'. Do not include any preamble or conversational filler."
