@@ -245,6 +245,21 @@ def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None):
 
     url = "http://host.docker.internal:11434/api/chat"
     
+    # Dump to file for debugging similar to Gemini
+    system_instruction = ""
+    user_content = ""
+    for m in messages:
+        if m.get("role") == "system":
+            system_instruction += m.get("content", "") + "\n"
+        else:
+            user_content += m.get("content", "") + "\n"
+            
+    with open("/app/last_payload.json", "w") as f:
+        json.dump({
+            "system_instruction": system_instruction.strip(),
+            "contents": user_content.strip()
+        }, f)
+
     payload = {
         "model": target_model,
         "messages": messages,
@@ -302,21 +317,21 @@ def web_search_tool(query, custom_sources=None):
     """
     combined_results = []
     
-    # Base official domains
-    official_domains = [
-        "apple.com", "samsung.com", "t-mobile.com", "verizon.com", 
-        "att.com", "tello.com", "google.com", "motorola.com"
-    ]
-    
-    # Add custom sources if provided
+    # If custom sources are provided, prioritize them.
+    # To prevent query rejections, we limit to max 4 domains per search.
+    search_domains = []
     if custom_sources:
-        # Split by comma and clean up
-        extra = [s.strip() for s in custom_sources.split(",") if s.strip()]
-        official_domains.extend(extra)
+        search_domains = [s.strip() for s in custom_sources.split(",") if s.strip()]
+    else:
+        # Default carrier/manufacturer focus
+        search_domains = ["apple.com", "samsung.com", "t-mobile.com", "tello.com"]
+        
+    # Limit to 4 to avoid Bing/DDG query parsing failures
+    search_domains = search_domains[:4]
     
     # Construct "site:domain.com OR site:..." string
-    official_sites = " OR ".join([f"site:{d}" for d in official_domains])
-    targeted_query = f"{query} ({official_sites})"
+    domain_query = " OR ".join([f"site:{d}" for d in search_domains])
+    targeted_query = f"{query} ({domain_query})"
     
     try:
         logger.info(f"Targeted Research Search: {targeted_query}")
@@ -341,7 +356,7 @@ def web_search_tool(query, custom_sources=None):
 
     if combined_results:
         return "\n\n".join(combined_results[:5])
-    return "No relevant information found online."
+    return None
 
 def build_structured_prompt(original_text, examples, web_context=None, signature="Paul", direct_instruction=None, negative_prompt=None, template_mode=False, role="tech_support", role_config=None):
     """
@@ -578,15 +593,15 @@ def handle_rephrase():
             t_start = time.time()
             # Search using original text for better retrieval accuracy
             res = retrieve_examples_remote(input_text, k=kb_count, prefer_templates=template_mode, category=category)
-            # Redact the retrieved examples
-            for item in res:
+            # Redact and truncate the retrieved examples
+            for i, item in enumerate(res):
                 if isinstance(item, dict):
-                    if 'rephrased' in item:
-                        item['rephrased'] = pii.redact(item['rephrased'])
-                    if 'original' in item:
-                        item['original'] = pii.redact(item['original'])
+                    if 'rephrased' in item and item['rephrased']:
+                        item['rephrased'] = pii.redact(str(item['rephrased'])[:500])
+                    if 'original' in item and item['original']:
+                        item['original'] = pii.redact(str(item['original'])[:500])
                 elif isinstance(item, str):
-                    item = pii.redact(item)
+                    res[i] = pii.redact(item[:500])
             results["kb"] = res
             logger.info(f"KB Retrieval took {time.time() - t_start:.3f}s")
 
@@ -604,8 +619,8 @@ def handle_rephrase():
             
             # Use original keywords for search accuracy
             raw_web_context = web_search_tool(kw, custom_sources=custom_search_sources)
-            # Redact the search results
-            results["web"] = pii.redact(raw_web_context)
+            # Redact and truncate the search results
+            results["web"] = pii.redact(raw_web_context[:1500]) if raw_web_context else None
             logger.info(f"Web Search took {time.time() - t_start:.3f}s")
 
         # Start background threads
