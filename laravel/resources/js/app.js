@@ -1149,7 +1149,7 @@ function rephraserApp() {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
                     },
                     body: JSON.stringify({
-                        id: this.itemToView?.id || undefined, // Allow updating existing item via View Modal context
+                        id: (this.viewModal && this.itemToView) ? this.itemToView.id : undefined, // ONLY pass ID if we are viewing an EXACT history item (mapped to KB if approved)
                         original_text: original,
                         rephrased_text: content,
                         keywords: keywords,
@@ -1318,7 +1318,7 @@ function rephraserApp() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        id: item.id || undefined,
+                        id: item.id || undefined, // KB ID if it exists
                         original_text: item.original,
                         rephrased_text: item.rephrased,
                         keywords: item.keywords || '',
@@ -1326,7 +1326,7 @@ function rephraserApp() {
                         category: item.category || '',
                         role: this.selectedRoleName || 'Tech Support', // Add role
                         model_used: item.modelA_name || item.modelA || 'AI Model', // Changed from item.model to item.modelA_name to match original
-                        generation_id: item.generation_id,
+                        generation_id: item.generation_id, // AiResponseLog ID
                         latency_ms: item.duration ? Math.round(item.duration) : null,
                         temperature: item.config?.temperature ?? null,
                         max_tokens: item.config?.maxTokens ?? null,

@@ -314,6 +314,7 @@ class RephraseController extends Controller
 
         if ($targetGen) {
             $targetGen->update([
+                'knowledge_base_id' => $entry->id,
                 'was_approved' => true,
                 'was_rejected' => false, // Ensure it's not rejected if being approved
                 'was_edited' => $wasEdited,
@@ -363,7 +364,8 @@ class RephraseController extends Controller
 
         $history = $logs->map(function ($log) {
             return [
-                'id' => $log->id,
+                'id' => $log->knowledge_base_id,
+                'generation_id' => $log->id,
                 'original' => $log->original_text,
                 'rephrased' => $log->rephrased_text,
                 'keywords' => $log->meta_data['keywords'] ?? '',
