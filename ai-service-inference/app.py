@@ -65,13 +65,14 @@ class PIIManager:
     PII_PATTERNS = {
         'IMEI': r'\b\d{14,16}\b', # 15 digits usually, sometimes 14 or 16
         'PHONE': r'\b\d{10,12}\b', # 10-12 digits for MSISDN
-        'EMAIL': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        'EMAIL': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+        'ICCID': r'\b\d{19,20}\b' # 19-20 digits for SIM cards
     }
 
     def __init__(self):
         self.mapping = {} # Placeholder -> Original value
         self.reverse_mapping = {} # Original value -> Placeholder
-        self.counts = {'IMEI': 0, 'PHONE': 0, 'EMAIL': 0}
+        self.counts = {'IMEI': 0, 'PHONE': 0, 'EMAIL': 0, 'ICCID': 0}
 
     def redact(self, text):
         if not text or not isinstance(text, str):

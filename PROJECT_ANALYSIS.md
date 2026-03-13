@@ -10,6 +10,7 @@ Before any text reaches an external LLM or is stored in logs, it passes through 
   - `IMEI`: `\b\d{14,16}\b`
   - `PHONE`: `\b\d{10,12}\b`
   - `EMAIL`: `\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b`
+  - `ICCID`: `\b\d{19,20}\b`
 - **Mapping Strategy**: Each detected PII is replaced with a unique placeholder (e.g., `[[IMEI_1]]`). The mapping is stored in memory during the request lifecycle and restored in the final token stream.
 
 ### Step 2: Context Gathering (Parallel Processing)
