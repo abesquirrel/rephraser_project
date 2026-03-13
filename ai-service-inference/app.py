@@ -130,7 +130,7 @@ def retrieve_examples_remote(query_text, k=3, prefer_templates=False, category=N
         return []
 
 def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
-    default_model = os.environ.get("OLLAMA_MODEL", "llama3:8b-instruct-q3_K_M")
+    default_model = os.environ.get("OLLAMA_MODEL", "mistral")
     target_model = model if model else default_model
     
     if target_model.startswith("gemini"):
@@ -180,7 +180,7 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
         return f"Error with {target_model}: Generate failed."
 
 def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None, frequency_penalty=0.0, presence_penalty=0.0):
-    default_model = os.environ.get("OLLAMA_MODEL", "llama3:8b-instruct-q3_K_M")
+    default_model = os.environ.get("OLLAMA_MODEL", "mistral")
     target_model = model if model else default_model
 
     if target_model.startswith("gemini"):

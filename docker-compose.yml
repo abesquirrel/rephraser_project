@@ -107,7 +107,7 @@ services:
     environment:
       - AI_EMBEDDING_HOST=ai-embedding
       - AI_SERVICE_KEY=${AI_SERVICE_KEY:-default_secret_key}
-      - OLLAMA_MODEL=${OLLAMA_MODEL:-gemma2:9b}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral}
     healthcheck:
       test:
         [
