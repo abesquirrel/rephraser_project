@@ -179,7 +179,7 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
         logger.error(f"LLM Call failed for model {target_model}: {e}")
         return f"Error with {target_model}: Generate failed."
 
-def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None):
+def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None, frequency_penalty=0.0, presence_penalty=0.0):
     default_model = os.environ.get("OLLAMA_MODEL", "llama3:8b-instruct-q3_K_M")
     target_model = model if model else default_model
 
@@ -193,13 +193,15 @@ def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None):
                 user_content += m.get("content", "") + "\n"
                 
         try:
-            logger.info(f"DEBUG LLM CALL: temperature={temperature}, max_output_tokens={max_tokens}")
+            logger.info(f"DEBUG LLM CALL: temperature={temperature}, max_output_tokens={max_tokens}, fp={frequency_penalty}, pp={presence_penalty}")
             
             # Dump to file for debugging
             with open("/app/last_payload.json", "w") as f:
                 json.dump({
                     "system_instruction": system_instruction.strip(),
-                    "contents": user_content.strip()
+                    "contents": user_content.strip(),
+                    "frequency_penalty": frequency_penalty,
+                    "presence_penalty": presence_penalty
                 }, f)
                 
             client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
@@ -209,7 +211,9 @@ def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None):
                 config=types.GenerateContentConfig(
                     system_instruction=system_instruction.strip(),
                     temperature=float(temperature),
-                    max_output_tokens=int(max_tokens)
+                    max_output_tokens=int(max_tokens),
+                    presence_penalty=float(presence_penalty),
+                    frequency_penalty=float(frequency_penalty)
                 )
             )
             
@@ -257,7 +261,9 @@ def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None):
     with open("/app/last_payload.json", "w") as f:
         json.dump({
             "system_instruction": system_instruction.strip(),
-            "contents": user_content.strip()
+            "contents": user_content.strip(),
+            "frequency_penalty": frequency_penalty,
+            "presence_penalty": presence_penalty
         }, f)
 
     payload = {
@@ -265,7 +271,12 @@ def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None):
         "messages": messages,
         "stream": True,
         "keep_alive": "5m",
-        "options": {"temperature": float(temperature), "num_predict": int(max_tokens)}
+        "options": {
+            "temperature": float(temperature), 
+            "num_predict": int(max_tokens),
+            "frequency_penalty": float(frequency_penalty),
+            "presence_penalty": float(presence_penalty)
+        }
     }
     
     try:
@@ -574,6 +585,8 @@ def handle_rephrase():
     temperature = max(0.0, min(1.0, float(data.get('temperature', 0.5))))
     max_tokens = max(50, min(2000, int(data.get('max_tokens', 600))))
     kb_count = max(1, min(10, int(data.get('kb_count', TOP_K_EXAMPLES))))
+    frequency_penalty = max(-2.0, min(2.0, float(data.get('frequency_penalty', 0.0))))
+    presence_penalty = max(-2.0, min(2.0, float(data.get('presence_penalty', 0.0))))
 
     def thinking_process_stream():
         pii = PIIManager()
@@ -664,7 +677,7 @@ def handle_rephrase():
         
         # Stream the tokens
         actual_metrics = {"prompt_tokens": 0, "completion_tokens": 0}
-        for chunk in call_llm_stream(messages, temperature=temperature, max_tokens=max_tokens, model=target_model):
+        for chunk in call_llm_stream(messages, temperature=temperature, max_tokens=max_tokens, model=target_model, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty):
             if "token" in chunk:
                 token = chunk["token"]
                 # RESTORE PII in the token

@@ -13,6 +13,7 @@ class AiResponseLog extends Model
         'web_search_enabled' => 'boolean',
         'template_mode' => 'boolean',
         'was_approved' => 'boolean',
+        'was_rejected' => 'boolean',
         'was_edited' => 'boolean',
         'is_error' => 'boolean',
     ];

@@ -1123,7 +1123,17 @@ function rephraserApp() {
 
         // This is the new approve method for the main generator output
         async approveEntry() {
-            const content = this.rephrasedContent;
+            // Determine context: Modal or Main Area
+            const latest = (this.viewModal && this.itemToView) ? this.itemToView : this.history[0];
+            
+            const content = (this.viewModal && this.itemToView) ? this.itemToView.rephrased : this.rephrasedContent;
+            const original = (this.viewModal && this.itemToView) ? this.itemToView.original : this.inputText;
+            const keywords = (this.viewModal && this.itemToView) ? this.itemToView.keywords : this.searchKeywords;
+            
+            const isTemplate = (this.viewModal && this.itemToView) ? !!this.itemToView.is_template : this.templateMode;
+            const category = (this.viewModal && this.itemToView) ? (this.itemToView.category || this.currentCategory) : this.currentCategory;
+            const role = (this.viewModal && this.itemToView) ? (this.itemToView.role || this.selectedRoleName) : (this.selectedRoleName || 'Tech Support');
+
             if (!content) {
                 this.triggerToast('❌ No content to approve!', 'error');
                 return;
@@ -1131,22 +1141,21 @@ function rephraserApp() {
 
             this.isGenerating = true; // Use isGenerating as a general processing indicator
             
-            // Fix: Define latest to avoid ReferenceError
-            // Use itemToView if we are in the modal (viewing/editing context), otherwise default to the latest history item
-            const latest = (this.viewModal && this.itemToView) ? this.itemToView : this.history[0];
-            
             try {
                 const res = await fetch('/api/approve', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
+                    },
                     body: JSON.stringify({
                         id: this.itemToView?.id || undefined, // Allow updating existing item via View Modal context
-                        original_text: this.inputText,
+                        original_text: original,
                         rephrased_text: content,
-                        keywords: this.searchKeywords,
-                        is_template: this.templateMode,
-                        category: this.currentCategory,
-                        role: this.selectedRoleName || 'Tech Support', // Add role
+                        keywords: keywords,
+                        is_template: isTemplate,
+                        category: category,
+                        role: role,
                         model_used: this.modelA || 'AI Model',
                         generation_id: latest?.generation_id,
                         // Performance Data
@@ -1166,17 +1175,17 @@ function rephraserApp() {
                 const data = await res.json();
                 if (data.status === 'success') {
                     // Update the history item if it exists, or add a new one
-                    const existingEntry = this.history.find(item => item.original === this.inputText && item.rephrased === content);
+                    const existingEntry = this.history.find(item => item.original === original && item.rephrased === content);
                     if (existingEntry) {
                         existingEntry.approved = true;
                         existingEntry.id = data.id; // Save ID for future updates
                     } else {
                         this.history.unshift({
-                            original: this.inputText,
+                            original: original,
                             rephrased: content,
-                            keywords: this.searchKeywords,
-                            is_template: this.templateMode,
-                            category: this.currentCategory,
+                            keywords: keywords,
+                            is_template: isTemplate,
+                            category: category,
                             approved: true,
                             id: data.id,
                             expanded: true,
@@ -1192,6 +1201,43 @@ function rephraserApp() {
             } catch (e) {
                 console.error('Approval error:', e);
                 this.triggerToast('❌ Network Error: ' + e.message);
+            } finally {
+                this.isGenerating = false;
+            }
+        },
+
+        async rejectEntry() {
+            const latest = (this.viewModal && this.itemToView) ? this.itemToView : this.history[0];
+            if (!latest || !latest.generation_id) {
+                this.triggerToast('❌ Cannot reject: No generation record found', 'error');
+                return;
+            }
+
+            this.isGenerating = true;
+            try {
+                const res = await fetch('/api/reject', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
+                    },
+                    body: JSON.stringify({
+                        generation_id: latest.generation_id
+                    })
+                });
+
+                if (res.ok) {
+                    latest.approved = false;
+                    latest.rejected = true;
+                    this.history = [...this.history];
+                    this.triggerToast('🚫 Response marked as Rejected', 'info');
+                    this.viewModal = false;
+                } else {
+                    this.triggerToast('❌ Rejection failed', 'error');
+                }
+            } catch (e) {
+                console.error('Rejection error:', e);
+                this.triggerToast('❌ Network Error', 'error');
             } finally {
                 this.isGenerating = false;
             }

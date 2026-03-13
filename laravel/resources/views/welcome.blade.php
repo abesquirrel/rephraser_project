@@ -526,17 +526,48 @@
                         </div>
 
                         <div
-                            class="p-6 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-end gap-3">
-                            <button class="btn btn-ghost text-sm"
-                                @click="copyText(itemToView.rephrased || itemToView.response || itemToView.text)">Copy
-                                Text</button>
-                            <button class="btn btn-ghost text-sm" @click="itemToView.isEditing = !itemToView.isEditing"
-                                x-text="itemToView.isEditing ? 'Cancel Edit' : 'Edit'">
-                            </button>
-                            <button class="btn btn-primary text-sm px-6" x-show="!itemToView.isEditing"
-                                @click="viewModal = false">Close</button>
-                            <button class="btn btn-success text-sm px-6" x-show="itemToView.isEditing"
-                                @click="approveEditedItem(itemToView)">Save Changes</button>
+                            class="p-6 border-t border-gray-200/10 bg-gray-50/50 dark:bg-black/20 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <template x-if="itemToView.approved">
+                                    <span class="flex items-center gap-1 text-xs font-bold text-emerald-500 uppercase">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                        </svg>
+                                        Approved
+                                    </span>
+                                </template>
+                                <template x-if="itemToView.rejected">
+                                    <span class="flex items-center gap-1 text-xs font-bold text-rose-500 uppercase">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                        </svg>
+                                        Rejected
+                                    </span>
+                                </template>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <button class="btn btn-ghost text-sm"
+                                    @click="copyText(itemToView.rephrased || itemToView.response || itemToView.text)">Copy</button>
+                                
+                                <template x-if="!itemToView.isEditing && !itemToView.approved && !itemToView.rejected">
+                                    <div class="flex gap-2">
+                                        <button class="btn bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white border-rose-500/20 text-sm px-4"
+                                            @click="rejectEntry()">Reject</button>
+                                        <button class="btn btn-success text-sm px-4"
+                                            @click="approveEntry()">Approve</button>
+                                    </div>
+                                </template>
+
+                                <button class="btn btn-ghost text-sm" @click="itemToView.isEditing = !itemToView.isEditing"
+                                    x-text="itemToView.isEditing ? 'Cancel' : 'Edit'">
+                                </button>
+                                
+                                <button class="btn btn-primary text-sm px-6" x-show="!itemToView.isEditing"
+                                    @click="viewModal = false">Close</button>
+                                <button class="btn btn-success text-sm px-6" x-show="itemToView.isEditing"
+                                    @click="approveEditedItem(itemToView)">Save Changes</button>
+                            </div>
                         </div>
                     </div>
                 </template>

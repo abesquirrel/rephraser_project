@@ -315,6 +315,7 @@ class RephraseController extends Controller
         if ($targetGen) {
             $targetGen->update([
                 'was_approved' => true,
+                'was_rejected' => false, // Ensure it's not rejected if being approved
                 'was_edited' => $wasEdited,
                 'edit_distance' => $editDist
             ]);
@@ -324,6 +325,21 @@ class RephraseController extends Controller
         $this->notifyAiRebuild();
 
         return response()->json(['status' => 'success', 'id' => $entry->id]);
+    }
+
+    public function reject(Request $request)
+    {
+        $validated = $request->validate([
+            'generation_id' => 'required|integer|exists:ai_response_logs,id'
+        ]);
+
+        $log = AiResponseLog::find($validated['generation_id']);
+        $log->update([
+            'was_rejected' => true,
+            'was_approved' => false
+        ]);
+
+        return response()->json(['status' => 'success']);
     }
 
     public function suggestKeywords(Request $request)
