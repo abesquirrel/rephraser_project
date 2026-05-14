@@ -398,18 +398,27 @@ class RephraseController extends Controller
             $response = $this->aiCall()->get("{$this->inferenceServiceUrl}/list_models");
             $models = $response->json()['models'] ?? [];
 
-            // Append Gemini Models
-            // Only append models that actually have free quotas
-            // $models[] = 'gemini-2.0-flash';
+            // Gemini free-tier models
             $models[] = 'gemini-2.5-flash';
-            $models[] = 'gemini-2.5-flash-lite'; // Very high free limit (1,000 RPD)
-            // $models[] = 'gemini-3-flash-preview';
-            // $models[] = 'gemini-3-pro-preview';
+            $models[] = 'gemini-2.5-flash-lite';
+
+            // Mistral free-tier API models
+            $models[] = 'open-mistral-nemo';
+            $models[] = 'mistral-small-latest';
 
             return ['models' => $models];
         } catch (\Exception $e) {
             Log::error("Failed to fetch models: " . $e->getMessage());
-            return response()->json(['models' => [], 'error' => 'Service Unavailable']);
+            // Return cloud models even if Ollama is down
+            return response()->json([
+                'models' => [
+                    'gemini-2.5-flash',
+                    'gemini-2.5-flash-lite',
+                    'open-mistral-nemo',
+                    'mistral-small-latest',
+                ],
+                'error' => 'Ollama service unavailable — cloud models still available'
+            ]);
         }
     }
 

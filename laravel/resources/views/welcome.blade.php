@@ -169,6 +169,35 @@
                                 </label>
                             </div>
                         </div>
+                        
+                        <!-- Main Model Selector -->
+                        <div class="mb-6 flex gap-4 items-center animate-fade delay-[100ms]">
+                            <div class="flex-1">
+                                <label class="label-text flex justify-between mb-2 text-xs text-gray-500 font-medium">
+                                    <span>AI Model</span>
+                                    <button @click="fetchOllamaModels()"
+                                        class="text-xs text-sky-500 hover:underline flex items-center gap-1 transition-opacity"
+                                        :class="isRefreshingModels ? 'opacity-50 cursor-wait' : ''"
+                                        :disabled="isRefreshingModels">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
+                                            :class="isRefreshingModels ? 'animate-spin' : ''" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        <span x-text="isRefreshingModels ? 'Refreshing...' : 'Refresh models'"></span>
+                                    </button>
+                                </label>
+                                <select x-model="modelA"
+                                    class="form-select w-full p-3 text-sm rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all font-medium text-gray-700 dark:text-gray-200">
+                                    <option value="">Select Model...</option>
+                                    <template x-for="m in availableModels" :key="m.id">
+                                        <option :value="m.id" x-text="m.name" :selected="m.id === modelA"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
 
                         <div class="flex gap-4 items-center">
                             <button

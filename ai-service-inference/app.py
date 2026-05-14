@@ -159,6 +159,28 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
             logger.error(f"Gemini Call failed for model {target_model}: {e}")
             return f"Error with {target_model}: Generate failed."
 
+    # Mistral API (open-mistral-nemo, mistral-small-latest, etc.)
+    mistral_key = os.environ.get("MISTRAL_API_KEY")
+    if mistral_key and (target_model.startswith("open-mistral") or target_model.startswith("mistral-")):
+        try:
+            resp = requests.post(
+                "https://api.mistral.ai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"},
+                json={
+                    "model": target_model,
+                    "messages": messages,
+                    "temperature": float(temperature),
+                    "max_tokens": int(max_tokens),
+                    "stream": False
+                },
+                timeout=120
+            )
+            resp.raise_for_status()
+            return resp.json()["choices"][0]["message"]["content"]
+        except Exception as e:
+            logger.error(f"Mistral Call failed for model {target_model}: {e}")
+            return f"Error with {target_model}: Generate failed."
+
     # Ollama on host
     url = "http://host.docker.internal:11434/api/chat" 
     
@@ -247,6 +269,53 @@ def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None, frequ
             logger.error(f"Gemini Stream failed for model {target_model}: {e}")
             yield {"token": f"\n[Error with {target_model}]"}
             return
+
+    # Mistral API streaming (open-mistral-nemo, mistral-small-latest, etc.)
+    mistral_key = os.environ.get("MISTRAL_API_KEY")
+    if mistral_key and (target_model.startswith("open-mistral") or target_model.startswith("mistral-")):
+        logger.info(f"Routing to Mistral API: {target_model}")
+        try:
+            with requests.post(
+                "https://api.mistral.ai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"},
+                json={
+                    "model": target_model,
+                    "messages": messages,
+                    "temperature": float(temperature),
+                    "max_tokens": int(max_tokens),
+                    "top_p": 1,
+                    "stream": True
+                },
+                stream=True,
+                timeout=120
+            ) as r:
+                r.raise_for_status()
+                prompt_tokens = 0
+                completion_tokens = 0
+                for line in r.iter_lines():
+                    if not line:
+                        continue
+                    decoded = line.decode("utf-8") if isinstance(line, bytes) else line
+                    if not decoded.startswith("data: "):
+                        continue
+                    data_str = decoded[6:]
+                    if data_str.strip() == "[DONE]":
+                        break
+                    try:
+                        data = json.loads(data_str)
+                        if data.get("usage"):
+                            prompt_tokens = data["usage"].get("prompt_tokens", 0)
+                            completion_tokens = data["usage"].get("completion_tokens", 0)
+                        content = data.get("choices", [{}])[0].get("delta", {}).get("content")
+                        if content:
+                            yield {"token": content}
+                    except Exception:
+                        pass
+                yield {"done_meta": {"prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens}}
+        except Exception as e:
+            logger.error(f"Mistral Stream failed for model {target_model}: {e}")
+            yield {"token": f"\n[Error with {target_model}: {str(e)}]"}
+        return
 
     url = "http://host.docker.internal:11434/api/chat"
     
@@ -681,15 +750,17 @@ def handle_rephrase():
         for chunk in call_llm_stream(messages, temperature=temperature, max_tokens=max_tokens, model=target_model, frequency_penalty=frequency_penalty, presence_penalty=presence_penalty):
             if "token" in chunk:
                 token = chunk["token"]
-                # RESTORE PII in the token
-                restored_token = pii.restore(token)
-                full_response += restored_token
-                # Yield token for frontend
-                yield json.dumps({"token": restored_token}) + "\n"
+                # Accumulate the raw token with placeholders
+                full_response += token
+                # Yield token for frontend (may contain placeholders during stream)
+                yield json.dumps({"token": token}) + "\n"
             elif "done_meta" in chunk:
                 actual_metrics = chunk["done_meta"]
         
         logger.info(f"LLM Synthesis took {time.time() - l_start:.3f}s")
+        
+        # Restore PII on the full string to avoid token-split bugs
+        final_response = pii.restore(full_response)
         
         total_latency = time.time() - overall_start
         kb_info = []
@@ -702,7 +773,7 @@ def handle_rephrase():
                 })
         
         yield json.dumps({
-            "data": full_response, # Final full text for consistency
+            "data": final_response, # Final full text with PII restored
             "meta": {
                 "latency": total_latency, 
                 "tokens": actual_metrics.get("completion_tokens", 0),

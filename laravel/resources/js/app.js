@@ -14,9 +14,10 @@ function rephraserApp() {
         categories: ['General', 'Technical', 'Billing', 'Sales', 'Feedback'],
         modelA: 'gemini-2.5-flash',
         availableModels: Alpine.$persist([
-            {id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Primary)'},
-            {id: 'llama3:8b-instruct-q3_K_M', name: 'Llama3 (Local Backup)'},
-            {id: 'mistral:latest', name: 'Mistral (Local Backup)'}
+            {id: 'gemini-2.5-flash',      name: 'Gemini 2.5 Flash (Primary)'},
+            {id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite'},
+            {id: 'open-mistral-nemo',     name: 'Mistral Nemo (Free API)'},
+            {id: 'mistral-small-latest',  name: 'Mistral Small (Free API)'},
         ]).as('rephraser_enabled_models'),
         ollamaModels: [], // Raw list from API
         isGenerating: false,
@@ -1471,17 +1472,38 @@ function rephraserApp() {
                 const data = await res.json();
                 if (data.models) {
                     this.ollamaModels = data.models;
-                    // Auto-add any available models if roster is empty (fallback)
-                    if (this.availableModels.length === 0 && this.ollamaModels.length > 0) {
-                        this.ollamaModels.forEach(m => this.toggleModelImport(m));
-                    }
-                    if (this.ollamaModels.length === 0) {
-                        this.triggerToast('No models found in Ollama', 'info');
+
+                    // Pretty-name map for well-known models
+                    const knownNames = {
+                        'gemini-2.5-flash':      'Gemini 2.5 Flash (Primary)',
+                        'gemini-2.5-flash-lite': 'Gemini 2.5 Flash Lite',
+                        'open-mistral-nemo':     'Mistral Nemo (Free API)',
+                        'mistral-small-latest':  'Mistral Small (Free API)',
+                    };
+
+                    // Merge: add any model from the API that isn't already in the persisted list
+                    let added = 0;
+                    this.ollamaModels.forEach(modelId => {
+                        if (!this.availableModels.find(m => m.id === modelId)) {
+                            this.availableModels.push({
+                                id: modelId,
+                                name: knownNames[modelId] || modelId
+                            });
+                            added++;
+                        }
+                    });
+
+                    if (added > 0) {
+                        this.triggerToast(`${added} new model(s) added to roster`, 'success');
                     } else {
                         this.triggerToast('Model Roster Synchronized', 'success');
                     }
+
+                    if (this.ollamaModels.length === 0) {
+                        this.triggerToast('No models returned from server', 'info');
+                    }
                 } else if (data.error) {
-                     this.triggerToast('Ollama Error: ' + data.error, 'error');
+                     this.triggerToast('Model sync: ' + data.error, 'info');
                 }
             } catch (e) {
                 console.error('Failed to fetch models:', e);
