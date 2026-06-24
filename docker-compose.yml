@@ -23,9 +23,9 @@ services:
       - DB_PORT=3306
       - DB_DATABASE=rephraser_db
       - DB_USERNAME=rephraser
-      - DB_PASSWORD=secret
+      - DB_PASSWORD=${DB_PASSWORD:-secret}
       - REDIS_HOST=redis
-      - AI_SERVICE_KEY=${AI_SERVICE_KEY:-default_secret_key}
+      - AI_SERVICE_KEY=${AI_SERVICE_KEY}
     deploy:
       resources:
         limits:
@@ -62,9 +62,9 @@ services:
     environment:
       - DB_HOST=db
       - DB_USER=rephraser
-      - DB_PASSWORD=secret
+      - DB_PASSWORD=${DB_PASSWORD:-secret}
       - DB_NAME=rephraser_db
-      - AI_SERVICE_KEY=${AI_SERVICE_KEY:-default_secret_key}
+      - AI_SERVICE_KEY=${AI_SERVICE_KEY}
     healthcheck:
       test:
         [
@@ -102,7 +102,7 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - AI_EMBEDDING_HOST=ai-embedding
-      - AI_SERVICE_KEY=${AI_SERVICE_KEY:-default_secret_key}
+      - AI_SERVICE_KEY=${AI_SERVICE_KEY}
       - OLLAMA_MODEL=${OLLAMA_MODEL:-gemma2:9b}
     healthcheck:
       test:
@@ -133,8 +133,8 @@ services:
     environment:
       MARIADB_DATABASE: rephraser_db
       MARIADB_USER: rephraser
-      MARIADB_PASSWORD: secret
-      MARIADB_ROOT_PASSWORD: root
+      MARIADB_PASSWORD: ${DB_PASSWORD:-secret}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
     ports:
       - "3310:3306"
     volumes:

@@ -14,9 +14,14 @@ from sentence_transformers import SentenceTransformer
 # --- Configuration ---
 DB_HOST = os.environ.get('DB_HOST', 'db')
 DB_USER = os.environ.get('DB_USER', 'rephraser')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'secret')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DB_NAME = os.environ.get('DB_NAME', 'rephraser_db')
-AI_SERVICE_KEY = os.environ.get('AI_SERVICE_KEY', 'default_secret_key')
+AI_SERVICE_KEY = os.environ.get('AI_SERVICE_KEY')
+
+if not AI_SERVICE_KEY:
+    raise RuntimeError("AI_SERVICE_KEY environment variable is not set")
+if not DB_PASSWORD:
+    raise RuntimeError("DB_PASSWORD environment variable is not set")
 
 # Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(name)s] - %(message)s')

@@ -1,62 +1,56 @@
-# Masha AI 🐈‍⬛
+# Project Masha 🐈‍⬛
 
-**Masha** is an AI-powered rephrasing system designed to transform technical support notes into professional, customer-ready responses. It leverages a local RAG (Retrieval-Augmented Generation) workflow to maintain consistency and empathy at scale.
+> **STRICTLY CONFIDENTIAL // EYES ONLY // SKUNKWORKS DIVISION**
+
+Masha is a high-performance, AI-driven rephrasing engine engineered for the rapid transformation of technical field notes into boardroom-ready intelligence. By leveraging a localized RAG (Retrieval-Augmented Generation) architecture, Masha ensures data sovereignty while maintaining elite-level linguistic consistency.
 
 ---
 
-## 🛠️ Architecture
+## ⚡ Core Operational Capabilities
 
-Masha uses a microservice architecture to coordinate between the web interface, the knowledge base, and local AI inference.
+- **Neural Stream Synthesis**: Real-time token generation for zero-latency drafting.
+- **Localized Vector Intelligence**: Deep semantic search against private technical corpora using FAISS.
+- **Multi-Role Persona Engine**: Context-aware switching between high-level executive summaries and deep-dive technical diagnostics.
+- **Autonomous Research Mode**: Real-time validation of technical claims via secure targeted web crawling.
+
+---
+
+## 🛠️ System Architecture
+
+Masha operates on a decoupled microservice framework, optimized for horizontal scalability and low-latency inference.
 
 ```mermaid
 graph TD
-    User([User]) -->|Interaction| Frontend[Alpine.js / Tailwind]
-    Frontend -->|Streaming API| Laravel[Laravel 11]
+    User([Node]) -->|Secure Handshake| Frontend[Vortex UI / Alpine.js]
+    Frontend -->|Control Stream| Laravel[Orchestrator]
 
-    subgraph "Orchestration"
-        Laravel -->|Data| DB[(MariaDB)]
-        Laravel -->|RAG Search| PyEmbed[Embedding Service]
-        Laravel -->|Synthesis| PyInfer[Inference Service]
+    subgraph "Core Intelligence Loop"
+        Laravel -->|Persistence| DB[(Secure Ledger)]
+        Laravel -->|Semantic Retrieval| PyEmbed[Vector Service]
+        Laravel -->|Inference| PyInfer[Cognitive Service]
     end
 
-    subgraph "AI Layer"
+    subgraph "AI Substrate"
         PyEmbed -->|Faiss| KB[(Vector Store)]
-        PyInfer -->|API| Ollama[[Ollama LLM]]
-        PyInfer -->|Tools| Web[Search Tools]
+        PyInfer -->|LLM| Ollama[[Neural Engine]]
+        PyInfer -->|Verified Search| Web[Search Core]
     end
 ```
 
 ---
 
-## 🧩 Components
+## 🚀 Rapid Deployment
 
-| Component        | Role         | How it Works                                                         |
-| :--------------- | :----------- | :------------------------------------------------------------------- |
-| **Laravel 11**   | Orchestrator | Manages routing, authentication, and service coordination.           |
-| **Alpine.js**    | Pulse        | Handles real-time UI updates and token streaming.                    |
-| **AI Embedding** | Search       | Uses Python + SentenceTransformers to find relevant KB entries.      |
-| **AI Inference** | Brain        | Aggregates input + context to generate the final response.           |
-| **Ollama**       | Engine       | Hosts local LLMs (Llama-3, etc.) for private, high-speed processing. |
-| **FAISS**        | Memory       | Provides ultra-fast vector similarity search for the RAG pipeline.   |
-
----
-
-## 🚀 Quick Start
-
-1. **Requirements**: [Docker](https://www.docker.com/) & [Ollama](https://ollama.com/) (running locally).
-2. **Setup**:
+1. **Prerequisites**: Docker Engine & Local Ollama Node.
+2. **Initialization**:
    ```bash
    git clone <repository-url>
-   cd rephraser_project
-   docker-compose up -d --build
+   ./start_docker.sh
    ```
-3. **Launch**: Access at [http://localhost:8000](http://localhost:8000).
+3. **Access**: Secure portal established at `http://localhost:8000`.
 
 ---
 
-## ✨ Key Features
+## 📂 Technical Manifest
 
-- **Real-Time Streaming**: Watch responses appear as they are thought out.
-- **RAG Workflow**: Automatically pulls relevant past solutions to guide the AI.
-- **Role Engine**: Technical vs. Empathetic personals for different audiences.
-- **KB Management**: Tools to approve, edit, and prune institutional knowledge.
+For detailed specifications, security protocols, and the development roadmap, refer to the [SKUNKWORKS.md](./SKUNKWORKS.md) manifest.
