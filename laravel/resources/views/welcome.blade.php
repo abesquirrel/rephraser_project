@@ -171,7 +171,7 @@
                         </div>
 
                         <div class="flex gap-4 items-center">
-                            <button class="btn btn-primary w-full py-3 flex items-center justify-center gap-2"
+                            <button class="btn btn-primary w-full py-3 flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20"
                                 @click="generateRephrase()" :disabled="isGenerating || !inputText.trim()">
                                 <span x-show="!isGenerating" class="flex items-center gap-2">
                                     Generate Response

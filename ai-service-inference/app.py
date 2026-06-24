@@ -11,7 +11,10 @@ from flask_cors import CORS
 from duckduckgo_search import DDGS
 
 # --- Configuration ---
-AI_SERVICE_KEY = os.environ.get('AI_SERVICE_KEY', 'default_secret_key')
+AI_SERVICE_KEY = os.environ.get('AI_SERVICE_KEY')
+if not AI_SERVICE_KEY:
+    raise RuntimeError("AI_SERVICE_KEY environment variable is not set")
+
 # Embedding service URL (internal docker network)
 AI_EMBEDDING_HOST = os.environ.get('AI_EMBEDDING_HOST', 'ai-embedding')
 AI_EMBEDDING_URL = f"http://{AI_EMBEDDING_HOST}:5002"
@@ -74,7 +77,7 @@ def retrieve_examples_remote(query_text, k=3, prefer_templates=False, category=N
         return []
 
 def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
-    default_model = os.environ.get("OLLAMA_MODEL", "llama3:8b-instruct-q3_K_M")
+    default_model = os.environ.get("OLLAMA_MODEL", "llama3:8b")
     target_model = model if model else default_model
     
     # Ollama on host
@@ -99,7 +102,7 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
         return f"Error with {target_model}: Generate failed."
 
 def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None):
-    default_model = os.environ.get("OLLAMA_MODEL", "llama3:8b-instruct-q3_K_M")
+    default_model = os.environ.get("OLLAMA_MODEL", "llama3:8b")
     target_model = model if model else default_model
     url = "http://host.docker.internal:11434/api/chat"
     
@@ -376,7 +379,8 @@ def handle_rephrase():
     
     role_config = data.get('role_config', None)
     
-    logger.info(f"DEBUG: Input Text: '{input_text}'")
+    # Redact input in production logs
+    logger.info(f"Inference request received (len: {len(input_text)})")
     
     temperature = max(0.0, min(1.0, float(data.get('temperature', 0.5))))
     max_tokens = max(50, min(2000, int(data.get('max_tokens', 600))))
