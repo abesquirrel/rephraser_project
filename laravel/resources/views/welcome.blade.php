@@ -175,8 +175,8 @@
     </script>
 </head>
 
-<body class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <div x-data="rephraserApp()" class="max-w-6xl mx-auto px-4 py-8" :class="currentTheme">
+<body x-data="rephraserApp" class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-6xl mx-auto px-4 py-8" :class="currentTheme">
         
         <!-- Header -->
         <header class="flex items-center justify-between mb-8">
