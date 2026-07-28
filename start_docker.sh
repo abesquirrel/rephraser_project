@@ -9,4 +9,4 @@ echo "📦 Running Database Migrations..."
 docker-compose exec -T app php artisan migrate
 
 echo "✅ Environment Ready!"
-echo "📱 Access App at: http://localhost:8000"
+echo "📱 Access App at: http://localhost:8123"
