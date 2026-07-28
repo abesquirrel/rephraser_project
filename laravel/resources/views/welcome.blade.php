@@ -6,12 +6,177 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Masha: AI Rephraser</title>
     @vite(['resources/css/app.css'])
-    <script defer src="https://unpkg.com/alpinejs@3.x/dist/cdn.min.js"></script>
-    <script defer src="https://unpkg.com/@alpinejs/persist@3.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/@alpinejs/persist@3.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x/dist/cdn.min.js" defer></script>
+    <script>
+        // Initialize Alpine.js data before DOM loads
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('rephraserApp', () => ({
+                // State
+                inputText: '',
+                history: Alpine.$persist([]).as('rephraser_history'),
+                currentTheme: Alpine.$persist('light').as('rephraser_theme'),
+                modelA: Alpine.$persist('gemini-2.5-flash').as('rephraser_model'),
+                selectedRoleName: '',
+                
+                // Settings
+                signature: Alpine.$persist('Paul').as('rephraser_sig'),
+                temperature: Alpine.$persist(0.5).as('rephraser_temp'),
+                maxTokens: Alpine.$persist(600).as('rephraser_tokens'),
+                enableWebSearch: Alpine.$persist(true).as('rephraser_web_search'),
+                templateMode: Alpine.$persist(false).as('rephraser_template_mode'),
+                
+                // UI State
+                isGenerating: false,
+                status: '',
+                showConfigModal: false,
+                toast: { active: false, msg: '', type: 'info' },
+                
+                // Data
+                availableModels: Alpine.$persist([
+                    {id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash'},
+                    {id: 'gemini-2.5-flash-lite', name: 'Gemini Lite'},
+                    {id: 'open-mistral-nemo', name: 'Mistral Nemo'},
+                    {id: 'mistral-small-latest', name: 'Mistral Small'},
+                    {id: 'mistral-tiny', name: 'Mistral Tiny'},
+                    {id: 'nemo', name: 'Nemo'},
+                    {id: 'mini', name: 'Mini'}
+                ]).as('rephraser_models'),
+                promptRoles: [],
+                kbStats: {},
+                
+                // Initialize
+                async init() {
+                    await this.fetchRoles();
+                    await this.fetchKbStats();
+                    document.documentElement.classList.toggle('dark', this.currentTheme === 'dark');
+                },
+                
+                toggleTheme() {
+                    this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+                    document.documentElement.classList.toggle('dark', this.currentTheme === 'dark');
+                },
+                
+                formatOutput(text) {
+                    if (!text) return text;
+                    return text.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>').replace(/^/, '<p>').replace(/$/, '</p>');
+                },
+                
+                showToast(msg, type = 'info') {
+                    this.toast = { active: true, msg, type };
+                    setTimeout(() => this.toast.active = false, 3000);
+                },
+                
+                async copyToClipboard(text) {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        this.showToast('Copied!', 'success');
+                    } catch (e) {
+                        this.showToast('Failed to copy', 'error');
+                    }
+                },
+                
+                async fetchRoles() {
+                    try {
+                        const res = await fetch('/api/roles');
+                        this.promptRoles = await res.json();
+                        if (this.promptRoles.length > 0 && !this.selectedRoleName) {
+                            const defaultRole = this.promptRoles.find(r => r.is_default);
+                            this.selectedRoleName = defaultRole ? defaultRole.name : this.promptRoles[0].name;
+                        }
+                    } catch (e) {
+                        console.error('Failed to fetch roles:', e);
+                    }
+                },
+                
+                async fetchKbStats() {
+                    try {
+                        const res = await fetch('/api/kb-stats');
+                        this.kbStats = await res.json();
+                    } catch (e) {
+                        console.error('Failed to fetch KB stats:', e);
+                    }
+                },
+                
+                async generateRephrase() {
+                    if (!this.inputText.trim()) {
+                        this.showToast('Please enter text', 'error');
+                        return;
+                    }
+                    
+                    this.isGenerating = true;
+                    this.status = 'Starting...';
+                    
+                    try {
+                        const res = await fetch('/api/rephrase', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                text: this.inputText,
+                                model: this.modelA,
+                                signature: this.signature,
+                                temperature: this.temperature,
+                                max_tokens: this.maxTokens,
+                                enable_web_search: this.enableWebSearch,
+                                template_mode: this.templateMode,
+                                role: this.selectedRoleName || null
+                            })
+                        });
+                        
+                        if (!res.ok) throw new Error('Generation failed');
+                        
+                        const data = await res.json();
+                        
+                        this.history.unshift({
+                            original: this.inputText,
+                            rephrased: data.data || 'No response',
+                            model: this.modelA,
+                            timestamp: new Date().toISOString()
+                        });
+                        
+                        if (this.history.length > 20) this.history = this.history.slice(0, 20);
+                        
+                        this.showToast('Generated!', 'success');
+                        
+                    } catch (e) {
+                        console.error('Generation error:', e);
+                        this.showToast('Failed: ' + e.message, 'error');
+                    } finally {
+                        this.isGenerating = false;
+                    }
+                },
+                
+                clearHistory() {
+                    if (confirm('Clear all history?')) {
+                        this.history = [];
+                        this.showToast('History cleared', 'success');
+                    }
+                },
+                
+                async approveEntry(item) {
+                    try {
+                        await fetch('/api/approve', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                original: item.original,
+                                rephrased: item.rephrased,
+                                model: item.model,
+                                role: this.selectedRoleName
+                            })
+                        });
+                        this.showToast('Saved to KB!', 'success');
+                    } catch (e) {
+                        this.showToast('Failed to save', 'error');
+                    }
+                }
+            }));
+        });
+    </script>
 </head>
 
-<body x-data="rephraserApp()" class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <div class="max-w-6xl mx-auto px-4 py-8" :class="currentTheme">
+<body class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div x-data="rephraserApp()" class="max-w-6xl mx-auto px-4 py-8" :class="currentTheme">
         
         <!-- Header -->
         <header class="flex items-center justify-between mb-8">
@@ -270,10 +435,10 @@
             </div>
         </div>
     </div>
-
+    
     <script>
-        function rephraserApp() {
-            return {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('rephraserApp', () => ({
                 // State
                 inputText: '',
                 history: Alpine.$persist([]).as('rephraser_history'),
@@ -432,16 +597,7 @@
                         this.showToast('Failed to save', 'error');
                     }
                 }
-            };
-        }
-        
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('rephraserApp', rephraserApp);
-        });
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            const app = rephraserApp();
-            app.init();
+            }));
         });
     </script>
 </body>
