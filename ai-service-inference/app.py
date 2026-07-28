@@ -131,7 +131,9 @@ def retrieve_examples_remote(query_text, k=3, prefer_templates=False, category=N
         return []
 
 def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
-    default_model = os.environ.get("OLLAMA_MODEL", "mistral")
+    # Default model priority: Mistral API models first, then Ollama
+    # Try open-mistral-nemo (free tier), mistral-small-latest, then fall back to mistral (Ollama)
+    default_model = os.environ.get("OLLAMA_MODEL", "open-mistral-nemo")
     target_model = model if model else default_model
     
     if target_model.startswith("gemini"):
@@ -159,15 +161,25 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
             logger.error(f"Gemini Call failed for model {target_model}: {e}")
             return f"Error with {target_model}: Generate failed."
 
-    # Mistral API (open-mistral-nemo, mistral-small-latest, etc.)
+    # Mistral API (open-mistral-nemo, mistral-small-latest, mistral-tiny, etc.)
     mistral_key = os.environ.get("MISTRAL_API_KEY")
-    if mistral_key and (target_model.startswith("open-mistral") or target_model.startswith("mistral-")):
+    
+    # Map common names to actual Mistral API model names
+    model_mapping = {
+        "mistral": "mistral-tiny",  # Map "mistral" to a valid Mistral API model
+        "nemo": "open-mistral-nemo",
+        "mini": "mistral-small-latest",
+    }
+    
+    actual_mistral_model = model_mapping.get(target_model, target_model)
+    
+    if mistral_key and (target_model.startswith("open-mistral") or target_model.startswith("mistral-") or target_model in model_mapping):
         try:
             resp = requests.post(
                 "https://api.mistral.ai/v1/chat/completions",
                 headers={"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"},
                 json={
-                    "model": target_model,
+                    "model": actual_mistral_model,
                     "messages": messages,
                     "temperature": float(temperature),
                     "max_tokens": int(max_tokens),
@@ -178,8 +190,8 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
             resp.raise_for_status()
             return resp.json()["choices"][0]["message"]["content"]
         except Exception as e:
-            logger.error(f"Mistral Call failed for model {target_model}: {e}")
-            return f"Error with {target_model}: Generate failed."
+            logger.error(f"Mistral Call failed for model {actual_mistral_model}: {e}")
+            return f"Error with {actual_mistral_model}: Generate failed."
 
     # Ollama on host
     url = "http://host.docker.internal:11434/api/chat" 
@@ -203,7 +215,9 @@ def call_llm(messages, temperature=0.5, max_tokens=600, model=None):
         return f"Error with {target_model}: Generate failed."
 
 def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None, frequency_penalty=0.0, presence_penalty=0.0):
-    default_model = os.environ.get("OLLAMA_MODEL", "mistral")
+    # Default model priority: Mistral API models first, then Ollama
+    # Try open-mistral-nemo (free tier), mistral-small-latest, then fall back to mistral (Ollama)
+    default_model = os.environ.get("OLLAMA_MODEL", "open-mistral-nemo")
     target_model = model if model else default_model
 
     if target_model.startswith("gemini"):
@@ -270,16 +284,26 @@ def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None, frequ
             yield {"token": f"\n[Error with {target_model}]"}
             return
 
-    # Mistral API streaming (open-mistral-nemo, mistral-small-latest, etc.)
+    # Mistral API streaming (open-mistral-nemo, mistral-small-latest, mistral-tiny, etc.)
     mistral_key = os.environ.get("MISTRAL_API_KEY")
-    if mistral_key and (target_model.startswith("open-mistral") or target_model.startswith("mistral-")):
-        logger.info(f"Routing to Mistral API: {target_model}")
+    
+    # Map common names to actual Mistral API model names
+    model_mapping = {
+        "mistral": "mistral-tiny",  # Map "mistral" to a valid Mistral API model
+        "nemo": "open-mistral-nemo",
+        "mini": "mistral-small-latest",
+    }
+    
+    actual_mistral_model = model_mapping.get(target_model, target_model)
+    
+    if mistral_key and (target_model.startswith("open-mistral") or target_model.startswith("mistral-") or target_model in model_mapping):
+        logger.info(f"Routing to Mistral API: {actual_mistral_model}")
         try:
             with requests.post(
                 "https://api.mistral.ai/v1/chat/completions",
                 headers={"Authorization": f"Bearer {mistral_key}", "Content-Type": "application/json"},
                 json={
-                    "model": target_model,
+                    "model": actual_mistral_model,
                     "messages": messages,
                     "temperature": float(temperature),
                     "max_tokens": int(max_tokens),
@@ -313,8 +337,8 @@ def call_llm_stream(messages, temperature=0.5, max_tokens=600, model=None, frequ
                         pass
                 yield {"done_meta": {"prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens}}
         except Exception as e:
-            logger.error(f"Mistral Stream failed for model {target_model}: {e}")
-            yield {"token": f"\n[Error with {target_model}: {str(e)}]"}
+            logger.error(f"Mistral Stream failed for model {actual_mistral_model}: {e}")
+            yield {"token": f"\n[Error with {actual_mistral_model}: {str(e)}]"}
         return
 
     url = "http://host.docker.internal:11434/api/chat"

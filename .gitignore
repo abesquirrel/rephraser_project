@@ -27,3 +27,7 @@ output.txt
 *.numbers
 my_kb_export.csv
 ai-service-embedding/test_export.json
+
+# Debug payload files (generated at runtime)
+last_payload.json
+ai-service-inference/last_payload.json

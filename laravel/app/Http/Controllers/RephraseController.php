@@ -405,6 +405,9 @@ class RephraseController extends Controller
             // Mistral free-tier API models
             $models[] = 'open-mistral-nemo';
             $models[] = 'mistral-small-latest';
+            $models[] = 'mistral-tiny';
+            $models[] = 'nemo';
+            $models[] = 'mini';
 
             return ['models' => $models];
         } catch (\Exception $e) {
@@ -416,6 +419,9 @@ class RephraseController extends Controller
                     'gemini-2.5-flash-lite',
                     'open-mistral-nemo',
                     'mistral-small-latest',
+                    'mistral-tiny',
+                    'nemo',
+                    'mini',
                 ],
                 'error' => 'Ollama service unavailable — cloud models still available'
             ]);

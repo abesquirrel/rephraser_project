@@ -18,6 +18,9 @@ function rephraserApp() {
             {id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite'},
             {id: 'open-mistral-nemo',     name: 'Mistral Nemo (Free API)'},
             {id: 'mistral-small-latest',  name: 'Mistral Small (Free API)'},
+            {id: 'mistral-tiny',          name: 'Mistral Tiny (Free API)'},
+            {id: 'nemo',                  name: 'Nemo (Alias)'},
+            {id: 'mini',                  name: 'Mini (Alias)'},
         ]).as('rephraser_enabled_models'),
         ollamaModels: [], // Raw list from API
         isGenerating: false,
@@ -1479,6 +1482,9 @@ function rephraserApp() {
                         'gemini-2.5-flash-lite': 'Gemini 2.5 Flash Lite',
                         'open-mistral-nemo':     'Mistral Nemo (Free API)',
                         'mistral-small-latest':  'Mistral Small (Free API)',
+                        'mistral-tiny':          'Mistral Tiny (Free API)',
+                        'nemo':                  'Nemo (Alias)',
+                        'mini':                  'Mini (Alias)',
                     };
 
                     // Merge: add any model from the API that isn't already in the persisted list
