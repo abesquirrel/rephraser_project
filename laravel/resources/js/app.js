@@ -12,13 +12,11 @@ function rephraserApp() {
         currentCategory: '', // Tier 2
         newCategory: '', 
         categories: ['General', 'Technical', 'Billing', 'Sales', 'Feedback'],
-        modelA: 'gemini-2.5-flash',
+        modelA: 'open-mistral-nemo',
         availableModels: Alpine.$persist([
-            {id: 'gemini-2.5-flash',      name: 'Gemini 2.5 Flash (Primary)'},
-            {id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite'},
-            {id: 'open-mistral-nemo',     name: 'Mistral Nemo (Free API)'},
-            {id: 'mistral-small-latest',  name: 'Mistral Small (Free API)'},
-            {id: 'mistral-tiny',          name: 'Mistral Tiny (Free API)'},
+            {id: 'open-mistral-nemo',     name: 'Mistral Nemo (Free)'},
+            {id: 'mistral-small-latest',  name: 'Mistral Small (Free)'},
+            {id: 'mistral-tiny',          name: 'Mistral Tiny (Free)'},
             {id: 'nemo',                  name: 'Nemo (Alias)'},
             {id: 'mini',                  name: 'Mini (Alias)'},
         ]).as('rephraser_enabled_models'),
@@ -1478,13 +1476,13 @@ function rephraserApp() {
 
                     // Pretty-name map for well-known models
                     const knownNames = {
-                        'gemini-2.5-flash':      'Gemini 2.5 Flash (Primary)',
-                        'gemini-2.5-flash-lite': 'Gemini 2.5 Flash Lite',
-                        'open-mistral-nemo':     'Mistral Nemo (Free API)',
-                        'mistral-small-latest':  'Mistral Small (Free API)',
-                        'mistral-tiny':          'Mistral Tiny (Free API)',
-                        'nemo':                  'Nemo (Alias)',
-                        'mini':                  'Mini (Alias)',
+                        'gemini-2.5-flash':      'Gemini 2.5 Flash',
+                        'gemini-2.5-flash-lite': 'Gemini Lite',
+                        'open-mistral-nemo':     'Mistral Nemo',
+                        'mistral-small-latest':  'Mistral Small',
+                        'mistral-tiny':          'Mistral Tiny',
+                        'nemo':                  'Nemo',
+                        'mini':                  'Mini',
                     };
 
                     // Merge: add any model from the API that isn't already in the persisted list
@@ -1543,3 +1541,7 @@ function rephraserApp() {
 }
 
 window.rephraserApp = rephraserApp;
+
+document.addEventListener('alpine:init', () => {
+    Alpine.data('rephraserApp', rephraserApp);
+});
