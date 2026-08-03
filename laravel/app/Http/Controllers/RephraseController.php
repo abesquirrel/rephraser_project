@@ -394,38 +394,13 @@ class RephraseController extends Controller
 
     public function getModels()
     {
-        try {
-            $response = $this->aiCall()->get("{$this->inferenceServiceUrl}/list_models");
-            $models = $response->json()['models'] ?? [];
-
-            // Gemini free-tier models
-            $models[] = 'gemini-2.5-flash';
-            $models[] = 'gemini-2.5-flash-lite';
-
-            // Mistral free-tier API models
-            $models[] = 'open-mistral-nemo';
-            $models[] = 'mistral-small-latest';
-            $models[] = 'mistral-tiny';
-            $models[] = 'nemo';
-            $models[] = 'mini';
-
-            return ['models' => $models];
-        } catch (\Exception $e) {
-            Log::error("Failed to fetch models: " . $e->getMessage());
-            // Return cloud models even if Ollama is down
-            return response()->json([
-                'models' => [
-                    'gemini-2.5-flash',
-                    'gemini-2.5-flash-lite',
-                    'open-mistral-nemo',
-                    'mistral-small-latest',
-                    'mistral-tiny',
-                    'nemo',
-                    'mini',
-                ],
-                'error' => 'Ollama service unavailable — cloud models still available'
-            ]);
-        }
+        return response()->json([
+            'models' => [
+                'open-mistral-nemo',
+                'mistral-small-latest',
+                'mistral-tiny',
+            ]
+        ]);
     }
 
     public function upload_kb(Request $request)

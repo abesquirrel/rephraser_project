@@ -27,7 +27,7 @@ graph TD
     subgraph "AI Inference Layer"
         Laravel -->|Context + Prompt| PyInfer[Inference Service: Port 5001]
         PyInfer -->|Fact Check| DDG[DuckDuckGo Search]
-        PyInfer -->|Synthesis| Ollama[[Local Ollama Engine]]
+        PyInfer -->|Synthesis| MistralAPI[[Mistral AI API]]
         PyInfer -->|PII Redaction| Regex[PII Protection Engine]
     end
 ```
@@ -40,10 +40,10 @@ graph TD
 | :--- | :--- | :--- |
 | **Laravel Gateway** | Orchestration & Auth | PHP 8.3, Laravel 11, Sanctum |
 | **AI Embedding** | Vector Search (RAG) | Python, FAISS, SentenceTransformers |
-| **AI Inference** | Prompt Engineering | Python, Flask, GenAI SDK |
-| **Ollama** | Local LLM Engine | Llama-3, Mistral, etc. |
+| **AI Inference** | Prompt Engineering | Python, Flask, Requests |
+| **Mistral Engine** | Cloud LLM Provider | Mistral API (`open-mistral-nemo`, `mistral-small-latest`, `mistral-tiny`) |
 | **Storage** | Persistence & Cache | MariaDB 10.11, Redis 7 |
-| **Frontend** | Reactive Interface | Alpine.js, Tailwind CSS |
+| **Frontend** | Reactive Interface | Alpine.js, Tailwind CSS, Vite |
 
 ---
 
@@ -51,8 +51,7 @@ graph TD
 
 ### 1. Prerequisites
 - **Docker & Docker Compose**
-- **Ollama** (Running on host machine)
-- **API Keys**: Google Gemini API Key (required for high-tier models)
+- **API Keys**: Mistral API Key (`MISTRAL_API_KEY`)
 
 ### 2. Setup & Execution
 ```bash
@@ -61,21 +60,22 @@ git clone <repository-url>
 cd rephraser_project
 
 # Configure Environment
-cp .env.example .env # Ensure DB_PASSWORD and GEMINI_API_KEY are set
+cp laravel/.env.example laravel/.env # Set MISTRAL_API_KEY in laravel/.env
 
 # Launch Services
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ### 3. Access
-The application will be available at [http://localhost:8000](http://localhost:8000).
+The application will be available at [http://localhost:8123](http://localhost:8123).
 The AI Inference service runs on `:5001` and the Embedding service on `:5002`.
 
 ---
 
 ## ✨ Key Features
 
-- **Real-Time Streaming**: Watch responses appear as they are thought out.
-- **RAG Workflow**: Automatically pulls relevant past solutions to guide the AI.
-- **Role Engine**: Technical vs. Empathetic personals for different audiences.
+- **Real-Time Streaming**: Watch responses appear as they are generated.
+- **RAG Workflow**: Automatically pulls relevant past solutions using FAISS vector search.
+- **Role Engine**: Technical vs. Empathetic personas for different audiences.
+- **Mistral Free Tier Integration**: Optimized for `open-mistral-nemo`, `mistral-small-latest`, and `mistral-tiny`.
 - **KB Management**: Tools to approve, edit, and prune institutional knowledge.

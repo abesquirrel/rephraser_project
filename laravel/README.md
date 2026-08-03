@@ -11,4 +11,4 @@ For full project documentation and architecture, please see the [Root README](..
 - **AI Backend**: Python (FastAPI/Flask)
 - **Vector DB**: FAISS
 - **Database**: MariaDB
-- **LLM Host**: Ollama
+- **LLM Engine**: Mistral AI API (`open-mistral-nemo`, `mistral-small-latest`, `mistral-tiny`)

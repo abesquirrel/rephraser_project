@@ -33,7 +33,7 @@ The `build_structured_prompt` function compiles a system prompt that includes:
 - `POST /api/upload_kb`: Ingests CSV/JSON data into the MariaDB `knowledge_bases` table and triggers a background FAISS rebuild.
 
 ### AI Inference (Flask)
-- `POST /rephrase`: Accepts redacted text, configuration (temperature, max_tokens), and role settings. Proxies to Ollama or Gemini.
+- `POST /rephrase`: Accepts redacted text, configuration (temperature, max_tokens), and role settings. Proxies to Mistral API (`open-mistral-nemo`, `mistral-small-latest`, `mistral-tiny`).
 - `POST /suggest_keywords`: Analyzes input text to generate optimized search/indexing tags.
 
 ### AI Embedding (Flask)

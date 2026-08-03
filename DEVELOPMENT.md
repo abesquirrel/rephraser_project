@@ -8,14 +8,13 @@ This guide covers the technical setup and maintenance procedures for the Masha A
 The project uses a shared `.env` file in the `laravel/` directory and environment variables in `docker-compose.yml`.
 
 **Critical Variables:**
-- `GEMINI_API_KEY`: Required for Google GenAI models.
+- `MISTRAL_API_KEY`: Required for Mistral cloud models (`open-mistral-nemo`, `mistral-small-latest`, `mistral-tiny`).
 - `AI_SERVICE_KEY`: Shared secret between Laravel and Python microservices (default: `default_secret_key`).
-- `OLLAMA_MODEL`: Default local model (e.g., `llama3:8b-instruct-q3_K_M`).
 
 ### 2. Service Ports
 | Service | External Port | Internal Port |
 | :--- | :--- | :--- |
-| Laravel Gateway | 8000 | 80 |
+| Laravel Gateway (Web) | 8123 | 80 |
 | AI Inference | 5001 | 5001 |
 | AI Embedding | 5002 | 5002 |
 | MariaDB | 3310 | 3306 |

@@ -637,18 +637,7 @@ def suggest_keywords():
 
 @app.route('/list_models', methods=['GET'])
 def list_models():
-    try:
-        url = "http://host.docker.internal:11434/api/tags"
-        r = requests.get(url, timeout=5)
-        if r.status_code == 200:
-            data = r.json()
-            models = [m.get('name') for m in data.get('models', [])]
-            return jsonify({'models': models})
-        else:
-            return jsonify({'models': [], 'error': f"Ollama Error: {r.status_code}"})
-    except Exception as e:
-        logger.error(f"Failed to list models: {e}")
-        return jsonify({'models': [], 'error': str(e)})
+    return jsonify({'models': ['open-mistral-nemo', 'mistral-small-latest', 'mistral-tiny']})
 
 @app.route('/rephrase', methods=['POST'])
 def handle_rephrase():

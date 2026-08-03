@@ -35,43 +35,35 @@
     <div class="px-4 py-4 md:px-8 lg:px-12 w-full">
 
         <!-- Header -->
-        <header class="header animate-fade mb-8 flex flex-col items-center text-center gap-4 px-2">
+        <header class="header animate-fade mb-6 flex items-center justify-between px-2">
             <div>
                 <h1
-                    class="text-4xl font-bold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
+                    class="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
                     Masha: The Cat
                 </h1>
-                <p class="text-base text-gray-500 dark:text-gray-400">
-                    The lazy cat with the best ideas.<br>
-                    <i>In training — furballs may occur.</i>
-                </p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">AI-powered response assistant &mdash; <em>still in training.</em></p>
             </div>
-
-            <div class="flex items-center gap-4">
-
-
-                <button @click="showGuide = true"
-                    class="inline-flex items-center gap-2 text-sm text-sky-500 hover:text-sky-600 hover:underline focus:outline-none focus:ring-2 focus:ring-sky-500 rounded px-2 py-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor"
-                        fill="none" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                    </svg>
-                    How to Use
-                </button>
-            </div>
+            <button @click="showGuide = true"
+                class="inline-flex items-center gap-2 text-sm text-sky-500 hover:text-sky-600 hover:underline focus:outline-none focus:ring-2 focus:ring-sky-500 rounded px-2 py-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor"
+                    fill="none" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                </svg>
+                Help
+            </button>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-stretch">
 
             <!-- LEFT COLUMN: Input & Config -->
-            <section class="flex flex-col gap-8" aria-label="Input Configuration">
+            <section class="flex flex-col gap-6" aria-label="Input Configuration">
                 <!-- Main Input -->
                 <div class="glass-card animate-fade p-0 overflow-hidden delay-[100ms] flex flex-col h-full">
-                    <div class="p-8">
+                    <div class="p-6">
                         <h2
-                            class="section-title mb-6 text-xl font-bold font-display text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-sky-500" viewBox="0 0 24 24"
+                            class="section-title mb-4 text-lg font-bold font-display text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-sky-500" viewBox="0 0 24 24"
                                 stroke="currentColor" fill="none" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -79,23 +71,23 @@
                             <span>Compose</span>
                         </h2>
 
-                        <div class="mb-6">
+                        <div class="mb-5">
                             <label for="rawInputArea" class="sr-only">Input text to rephrase</label>
-                            <textarea id="rawInputArea" x-model="inputText" placeholder="Input notes..."
-                                class="w-full min-h-[200px] p-4 text-lg leading-chill rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"
-                                style="height: 411px;" spellcheck="false" data-gramm="false"></textarea>
+                            <textarea id="rawInputArea" x-model="inputText" placeholder="Paste or type your raw notes here…"
+                                class="w-full min-h-[180px] p-4 text-sm leading-relaxed rounded-xl bg-black/5 dark:bg-white/5 border border-transparent focus:border-sky-500 focus:ring-0 transition-colors resize-y placeholder-gray-400 font-mono"
+                                spellcheck="false" data-gramm="false"></textarea>
                         </div>
 
                         <!-- Input Configuration Controls -->
-                        <div class="mb-8 flex flex-wrap gap-4 items-end animate-fade delay-[100ms]">
+                        <div class="mb-5 flex flex-wrap gap-3 items-end animate-fade delay-[100ms]">
                             <!-- Keywords Input -->
-                            <div class="flex-1 min-w-[300px]">
-                                <label class="label-text flex justify-between mb-2 text-xs text-gray-500 font-medium">
-                                    <span>Keywords & Context</span>
+                            <div class="flex-1 min-w-[220px]">
+                                <label class="label-text flex justify-between mb-1.5 text-xs text-gray-500 font-medium">
+                                    <span>Keywords &amp; Context</span>
                                     <button @click="predictKeywords()"
-                                        class="text-sky-500 hover:text-sky-600 hover:underline text-xs flex items-center gap-1.5 transition-all"
+                                        class="text-sky-500 hover:text-sky-600 hover:underline text-xs flex items-center gap-1 transition-all"
                                         :disabled="!inputText || isPredictingKeywords">
-                                        <svg x-show="isPredictingKeywords" class="animate-spin h-3 w-3 text-sky-500"
+                                        <svg x-show="isPredictingKeywords" class="animate-spin h-3 w-3"
                                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                                                 stroke-width="4"></circle>
@@ -103,77 +95,65 @@
                                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                                             </path>
                                         </svg>
-                                        <span
-                                            x-text="isPredictingKeywords ? 'Analyzing...' : 'Auto-Predict Tags'"></span>
+                                        <span x-text="isPredictingKeywords ? 'Analyzing…' : 'Auto-Predict'"></span>
                                     </button>
                                 </label>
-                                <div class="relative group">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400"
-                                            viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <input type="text" x-model="searchKeywords"
-                                        placeholder="e.g. professional, email response..."
-                                        class="form-input w-full pl-9 p-3 text-sm rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all placeholder-gray-400">
-                                </div>
+                                <input type="text" x-model="searchKeywords"
+                                    placeholder="e.g. professional, email response…"
+                                    class="form-input w-full p-2.5 text-sm rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all placeholder-gray-400">
                             </div>
 
                             <!-- Role Selector -->
-                            <div class="flex-1 min-w-[200px]">
-                                <label class="label-text flex justify-between mb-2 text-xs text-gray-500 font-medium">
+                            <div class="flex-1 min-w-[160px]">
+                                <label class="label-text flex justify-between mb-1.5 text-xs text-gray-500 font-medium">
                                     <span>Target Role</span>
                                     <button @click="showConfigModal = true; configTab = 'roles'"
                                         class="text-xs text-sky-500 hover:underline">Manage</button>
                                 </label>
                                 <select x-model="selectedRoleName"
-                                    class="form-select w-full p-3 text-sm rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all font-medium text-gray-700 dark:text-gray-200">
+                                    class="form-select w-full p-2.5 text-sm rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all font-medium text-gray-700 dark:text-gray-200">
                                     <template x-for="role in promptRoles" :key="role.id">
                                         <option :value="role.name"
-                                            x-text="role.name + (role.is_default ? ' (Default)' : '')"></option>
+                                            x-text="role.name + (role.is_default ? ' ★' : '')"></option>
                                     </template>
                                 </select>
                             </div>
 
                             <!-- Toggles Group -->
-                            <div class="flex gap-3 pb-0.5">
+                            <div class="flex gap-2 pb-0.5">
                                 <!-- Template Mode -->
                                 <label
-                                    class="flex items-center gap-2.5 cursor-pointer px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
-                                    :class="templateMode ? 'bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-500/30' : ''">
+                                    class="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
+                                    :class="templateMode ? 'bg-sky-50 dark:bg-sky-900/20 border-sky-300 dark:border-sky-500/40' : ''">
                                     <div class="relative flex items-center">
                                         <input type="checkbox" x-model="templateMode" class="peer sr-only">
                                         <div
-                                            class="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-sky-500 shadow-inner">
+                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-sky-500">
                                         </div>
                                     </div>
-                                    <span class="text-xs font-bold uppercase tracking-wider"
-                                        :class="templateMode ? 'text-sky-600 dark:text-sky-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'">Template</span>
+                                    <span class="text-[11px] font-bold uppercase tracking-wider"
+                                        :class="templateMode ? 'text-sky-600 dark:text-sky-400' : 'text-gray-500 dark:text-gray-400'">Template</span>
                                 </label>
 
                                 <!-- Online Research -->
                                 <label
-                                    class="flex items-center gap-2.5 cursor-pointer px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
-                                    :class="enableWebSearch ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-500/30' : ''">
+                                    class="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-white/5 transition-all select-none group"
+                                    :class="enableWebSearch ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-500/40' : ''">
                                     <div class="relative flex items-center">
                                         <input type="checkbox" x-model="enableWebSearch" class="peer sr-only">
                                         <div
-                                            class="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-500 shadow-inner">
+                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-500">
                                         </div>
                                     </div>
-                                    <span class="text-xs font-bold uppercase tracking-wider"
-                                        :class="enableWebSearch ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'">Research</span>
+                                    <span class="text-[11px] font-bold uppercase tracking-wider"
+                                        :class="enableWebSearch ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'">Research</span>
                                 </label>
                             </div>
                         </div>
-                        
-                        <!-- Main Model Selector -->
-                        <div class="mb-6 flex gap-4 items-center animate-fade delay-[100ms]">
+                                               <!-- Model + Action Row -->
+                        <div class="flex gap-3 items-end animate-fade delay-[100ms]">
                             <div class="flex-1">
-                                <label class="label-text flex justify-between mb-2 text-xs text-gray-500 font-medium">
+                                <label class="label-text flex justify-between mb-1.5 text-xs text-gray-500 font-medium">
                                     <span>AI Model</span>
                                     <button @click="fetchOllamaModels()"
                                         class="text-xs text-sky-500 hover:underline flex items-center gap-1 transition-opacity"
@@ -182,16 +162,15 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3"
                                             :class="isRefreshingModels ? 'animate-spin' : ''" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="2"
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                         </svg>
-                                        <span x-text="isRefreshingModels ? 'Refreshing...' : 'Refresh models'"></span>
+                                        <span x-text="isRefreshingModels ? 'Refreshing…' : 'Refresh'"></span>
                                     </button>
                                 </label>
                                 <select x-model="modelA"
-                                    class="form-select w-full p-3 text-sm rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all font-medium text-gray-700 dark:text-gray-200">
-                                    <option value="">Select Model...</option>
+                                    class="form-select w-full p-2.5 text-sm rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-gray-700/50 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all font-medium text-gray-700 dark:text-gray-200">
+                                    <option value="">Select model…</option>
                                     <template x-for="m in availableModels" :key="m.id">
                                         <option :value="m.id" x-text="m.name" :selected="m.id === modelA"></option>
                                     </template>
@@ -199,30 +178,37 @@
                             </div>
                         </div>
 
-                        <div class="flex gap-4 items-center">
+                        <div class="mt-4">
                             <button
-                                class="btn btn-primary w-full py-4 text-lg flex items-center justify-center gap-3 shadow-xl"
+                                class="btn btn-primary w-full py-3.5 text-base flex items-center justify-center gap-3 shadow-lg shadow-sky-500/20"
                                 @click="generateRephrase()" :disabled="isGenerating || !inputText.trim()">
                                 <span x-show="!isGenerating" class="flex items-center gap-2">
-                                    Generate Rephrased Response
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    Generate Response
                                 </span>
                                 <span x-show="isGenerating" class="flex items-center gap-2 animate-pulse" x-cloak>
-                                    Generating Response...
+                                    <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Generating…
                                 </span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Configuration Toggle inside card as footer -->
+                    <!-- Card Footer: Settings shortcut -->
                     <div class="border-t border-gray-200/50 dark:border-gray-700/50 bg-black/5 dark:bg-white/5">
                         <button @click="showConfigModal = true"
-                            class="w-full flex items-center justify-center gap-2 py-4 text-sm text-gray-500 hover:text-sky-500 transition-colors focus:outline-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24"
+                            class="w-full flex items-center justify-center gap-2 py-3 text-xs text-gray-500 hover:text-sky-500 transition-colors focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
                                 stroke="currentColor" fill="none">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
                             </svg>
-                            <span>Configure Model & Settings</span>
+                            <span>Model &amp; Settings</span>
                         </button>
                     </div>
                 </div>
@@ -254,11 +240,11 @@
             <section class="flex flex-col gap-4 h-full" aria-label="Output">
                 <template x-if="history.length > 0">
                     <div
-                        class="animate-fade delay-[200ms] glass-card p-8 shadow-xl shadow-sky-500/5 h-full flex flex-col">
-                        <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200/10">
+                        class="animate-fade delay-[200ms] glass-card p-6 shadow-xl shadow-sky-500/5 h-full flex flex-col">
+                        <div class="flex items-center justify-between mb-5 pb-4 border-b border-gray-200/10">
                             <h2
-                                class="section-title m-0 text-xl font-bold font-display text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-sky-500" viewBox="0 0 24 24"
+                                class="section-title m-0 text-lg font-bold font-display text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-sky-500" viewBox="0 0 24 24"
                                     stroke="currentColor" fill="none" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -345,10 +331,10 @@
                 <div x-data="{ openArchive: false }"
                     class="lg:col-span-2 glass-card p-0 overflow-hidden opacity-90 hover:opacity-100 transition-opacity">
                     <button
-                        class="w-full p-8 cursor-pointer flex justify-between items-center focus:outline-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        class="w-full px-6 py-4 cursor-pointer flex justify-between items-center focus:outline-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                         @click="openArchive = !openArchive">
-                        <h3 class="section-title m-0 text-lg font-bold flex items-center gap-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-sky-500" viewBox="0 0 24 24"
+                        <h3 class="section-title m-0 text-base font-bold flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-sky-500" viewBox="0 0 24 24"
                                 stroke="currentColor" fill="none" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
@@ -368,9 +354,9 @@
                         </div>
                     </button>
 
-                    <div x-show="openArchive" x-collapse class="mt-6">
+                    <div x-show="openArchive" x-collapse class="mt-4">
                         <!-- Archive Controls -->
-                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 px-8">
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4 px-6">
                             <div class="flex p-1 bg-black/5 dark:bg-white/5 rounded-lg">
                                 <button @click="archiveFilter = 'all'; currentPage = 1"
                                     :class="{'bg-white dark:bg-white/10 shadow-sm text-sky-500': archiveFilter === 'all', 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200': archiveFilter !== 'all'}"
@@ -607,26 +593,30 @@
             <div x-data="{ expanded: false }"
                 class="lg:col-span-2 glass-card animate-fade p-0 overflow-hidden delay-[300ms]">
                 <button @click="expanded = !expanded"
-                    class="w-full flex justify-between items-center p-8 hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none">
-                    <div class="section-title m-0 flex items-center gap-3 text-sky-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24"
+                    class="w-full flex justify-between items-center px-6 py-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none">
+                    <div class="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-sky-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
                             stroke="currentColor" fill="none">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                         </svg>
-                        Knowledge Base Settings
+                        Knowledge Base
                     </div>
-                    <span x-text="expanded ? 'Hide' : 'Expand'"
-                        class="btn-ghost text-xs px-3 py-1.5 rounded-full border border-current"></span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-gray-500" x-text="kbStats.total_entries ? kbStats.total_entries + ' entries' : ''"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 transition-transform duration-300"
+                            :class="expanded ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
                 </button>
 
                 <div x-show="expanded" x-cloak x-collapse
                     class="border-t border-gray-200/50 dark:border-gray-700/50 bg-black/5 dark:bg-white/5">
-                    <div class="p-8">
+                    <div class="p-6">
                         <!-- Manual Data Entry -->
-                        <div class="mb-10">
-                            <h3 class="text-sm font-semibold mb-4 text-gray-900 dark:text-gray-100">Add Training Data
-                                Manually</h3>
+                        <div class="mb-8">
+                            <h3 class="text-xs font-bold uppercase tracking-wider mb-4 text-gray-500">Add Training Data Manually</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <textarea x-model="manualOrig" placeholder="Original input (e.g. rough notes)..."
                                     rows="4"
@@ -1541,33 +1531,23 @@
             </div>
 
             <!-- Footer -->
-            <div class="flex items-center gap-4 text-xs">
-                <div
-                    class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-emerald-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <div class="p-5 border-t border-gray-700/30 bg-[#1a1b26]/50 flex justify-between items-center z-10 gap-4">
+                <div class="flex items-center gap-2 text-xs text-emerald-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    <span>Tip: Use <b>Optimize Index</b> after large prunes to rebuild the search cache.</span>
+                    <span class="hidden sm:inline">Run <b>Optimize Index</b> after pruning.</span>
                     <button @click="optimizeIndex()" :disabled="isOptimizing"
-                        class="ml-2 text-emerald-400 hover:text-emerald-300 underline font-bold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2">
-                        <span x-show="isOptimizing"
-                            class="animate-spin h-3 w-3 border-2 border-emerald-400 border-t-transparent rounded-full"></span>
-                        <span x-text="isOptimizing ? 'Optimizing...' : 'Optimize Now'"></span>
+                        class="underline font-bold disabled:opacity-50 inline-flex items-center gap-1">
+                        <span x-show="isOptimizing" class="animate-spin h-3 w-3 border-2 border-emerald-400 border-t-transparent rounded-full"></span>
+                        <span x-text="isOptimizing ? 'Optimizing…' : 'Optimize'"></span>
                     </button>
                 </div>
-            </div>
-
-            <div class="p-5 border-t border-gray-700/30 bg-[#1a1b26]/50 flex justify-between items-center z-10">
-                <div class="text-xs text-gray-500">
-                    <span x-text="selectedPruneIds.length"></span> selected <span class="mx-1 opacity-50">|</span> <span
-                        x-text="pruneCandidates.length"></span> candidates found
-                </div>
-                <div class="flex gap-3">
-                    <button class="btn btn-ghost px-6 py-2" @click="showPruneModal = false">Cancel</button>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-gray-500"><span x-text="selectedPruneIds.length"></span> selected</span>
+                    <button class="btn btn-ghost px-4 py-2 text-sm" @click="showPruneModal = false">Cancel</button>
                     <button
-                        class="btn bg-red-500 hover:bg-red-600 text-white font-bold px-8 py-2 shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="btn bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-2 shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         @click="confirmPrune()" :disabled="selectedPruneIds.length === 0">
                         Delete Selected
                     </button>
@@ -1816,7 +1796,7 @@
                                             class="border border-gray-200/50 dark:border-gray-700/50 rounded-lg overflow-hidden flex flex-col h-auto max-h-96">
                                             <div
                                                 class="bg-gray-50 dark:bg-white/5 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 items-center flex justify-between">
-                                                <span>Detected in Ollama</span>
+                                                <span>Available Mistral API Models</span>
                                                 <span class="text-xs" x-show="ollamaModels.length > 0"
                                                     x-text="ollamaModels.length"></span>
                                             </div>

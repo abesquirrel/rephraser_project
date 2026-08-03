@@ -17,9 +17,7 @@ function rephraserApp() {
             {id: 'open-mistral-nemo',     name: 'Mistral Nemo (Free)'},
             {id: 'mistral-small-latest',  name: 'Mistral Small (Free)'},
             {id: 'mistral-tiny',          name: 'Mistral Tiny (Free)'},
-            {id: 'nemo',                  name: 'Nemo (Alias)'},
-            {id: 'mini',                  name: 'Mini (Alias)'},
-        ]).as('rephraser_enabled_models'),
+        ]).as('rephraser_enabled_models_v2'),
         ollamaModels: [], // Raw list from API
         isGenerating: false,
         auditLogs: [],
@@ -1471,40 +1469,22 @@ function rephraserApp() {
             try {
                 const res = await fetch('/api/models');
                 const data = await res.json();
-                if (data.models) {
+                if (data.models && Array.isArray(data.models)) {
                     this.ollamaModels = data.models;
 
-                    // Pretty-name map for well-known models
                     const knownNames = {
-                        'gemini-2.5-flash':      'Gemini 2.5 Flash',
-                        'gemini-2.5-flash-lite': 'Gemini Lite',
-                        'open-mistral-nemo':     'Mistral Nemo',
-                        'mistral-small-latest':  'Mistral Small',
-                        'mistral-tiny':          'Mistral Tiny',
-                        'nemo':                  'Nemo',
-                        'mini':                  'Mini',
+                        'open-mistral-nemo':     'Mistral Nemo (Free)',
+                        'mistral-small-latest':  'Mistral Small (Free)',
+                        'mistral-tiny':          'Mistral Tiny (Free)',
                     };
 
-                    // Merge: add any model from the API that isn't already in the persisted list
-                    let added = 0;
-                    this.ollamaModels.forEach(modelId => {
-                        if (!this.availableModels.find(m => m.id === modelId)) {
-                            this.availableModels.push({
-                                id: modelId,
-                                name: knownNames[modelId] || modelId
-                            });
-                            added++;
-                        }
-                    });
+                    this.availableModels = data.models.map(modelId => ({
+                        id: modelId,
+                        name: knownNames[modelId] || modelId
+                    }));
 
-                    if (added > 0) {
-                        this.triggerToast(`${added} new model(s) added to roster`, 'success');
-                    } else {
-                        this.triggerToast('Model Roster Synchronized', 'success');
-                    }
-
-                    if (this.ollamaModels.length === 0) {
-                        this.triggerToast('No models returned from server', 'info');
+                    if (!this.availableModels.some(m => m.id === this.modelA)) {
+                        this.modelA = this.availableModels[0]?.id || 'open-mistral-nemo';
                     }
                 } else if (data.error) {
                      this.triggerToast('Model sync: ' + data.error, 'info');
