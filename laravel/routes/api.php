@@ -40,4 +40,6 @@ Route::post('/trigger-rebuild', [RephraseController::class, 'triggerRebuild']);
 Route::get('/prune-candidates', [RephraseController::class, 'getPruneCandidates']);
 Route::post('/keep-entry', [RephraseController::class, 'keepEntry']);
 Route::post('/cleanup-kb', [RephraseController::class, 'cleanupKb']);
+// KB Export
+Route::get('/export-kb', [RephraseController::class, 'exportKb']);
 

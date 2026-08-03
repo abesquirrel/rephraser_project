@@ -648,7 +648,87 @@ class RephraseController extends Controller
     }
 
 
-    // End Gemini Helpers
+
+    // --- KB Export ---
+
+    public function exportKb(Request $request)
+    {
+        $format = strtolower($request->input('format', 'csv'));
+
+        $entries = KnowledgeBase::select([
+            'id',
+            'original_text',
+            'rephrased_text',
+            'keywords',
+            'is_template',
+            'category',
+            'role',
+            'model_used',
+            'hits',
+            'created_at',
+            'updated_at',
+        ])->orderBy('id')->get();
+
+        $timestamp = now()->format('Ymd_His');
+
+        if ($format === 'json') {
+            return response()->json($entries)
+                ->header('Content-Disposition', "attachment; filename=\"kb_export_{$timestamp}.json\"")
+                ->header('Content-Type', 'application/json');
+        }
+
+        // Default: CSV
+        $filename = "kb_export_{$timestamp}.csv";
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Cache-Control'       => 'no-cache, no-store, must-revalidate',
+            'Pragma'              => 'no-cache',
+            'Expires'             => '0',
+        ];
+
+        $callback = function () use ($entries) {
+            $handle = fopen('php://output', 'w');
+
+            // Header row
+            fputcsv($handle, [
+                'id',
+                'original_text',
+                'rephrased_text',
+                'keywords',
+                'is_template',
+                'category',
+                'role',
+                'model_used',
+                'hits',
+                'created_at',
+                'updated_at',
+            ]);
+
+            foreach ($entries as $entry) {
+                fputcsv($handle, [
+                    $entry->id,
+                    $entry->original_text,
+                    $entry->rephrased_text,
+                    $entry->keywords,
+                    $entry->is_template ? '1' : '0',
+                    $entry->category,
+                    $entry->role,
+                    $entry->model_used,
+                    $entry->hits,
+                    $entry->created_at,
+                    $entry->updated_at,
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+
 
     private function formatModelName($name)
     {

@@ -35,8 +35,8 @@
     <div class="px-4 py-4 md:px-8 lg:px-12 w-full">
 
         <!-- Header -->
-        <header class="header animate-fade mb-6 flex items-center justify-between px-2">
-            <div>
+        <header class="header animate-fade mb-6 relative flex items-center justify-center px-2">
+            <div class="text-center">
                 <h1
                     class="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-500 font-display">
                     Masha: The Cat
@@ -44,7 +44,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">AI-powered response assistant &mdash; <em>still in training.</em></p>
             </div>
             <button @click="showGuide = true"
-                class="inline-flex items-center gap-2 text-sm text-sky-500 hover:text-sky-600 hover:underline focus:outline-none focus:ring-2 focus:ring-sky-500 rounded px-2 py-1">
+                class="absolute right-2 inline-flex items-center gap-2 text-sm text-sky-500 hover:text-sky-600 hover:underline focus:outline-none focus:ring-2 focus:ring-sky-500 rounded px-2 py-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor"
                     fill="none" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -772,7 +772,33 @@
                                 </button>
                             </div>
 
-
+                            <!-- Export KB -->
+                            <div class="mt-4 flex flex-wrap gap-3 items-center">
+                                <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Export Knowledge Base:</span>
+                                <button
+                                    class="btn btn-ghost flex items-center gap-2 text-sm px-4 py-2 h-[38px]"
+                                    @click="exportKb('csv')"
+                                    :disabled="isExporting"
+                                    title="Download all KB entries as CSV">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    <span x-text="isExporting ? 'Exporting...' : 'Export CSV'"></span>
+                                </button>
+                                <button
+                                    class="btn btn-ghost flex items-center gap-2 text-sm px-4 py-2 h-[38px]"
+                                    @click="exportKb('json')"
+                                    :disabled="isExporting"
+                                    title="Download all KB entries as JSON">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    <span x-text="isExporting ? 'Exporting...' : 'Export JSON'"></span>
+                                </button>
+                                <template x-if="kbStats.total_entries">
+                                    <span class="text-[11px] text-gray-400" x-text="`(${kbStats.total_entries} entries)`"></span>
+                                </template>
+                            </div>
 
                         </div>
                     </div>
